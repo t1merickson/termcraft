@@ -3,540 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>256 ANSI Colors</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #1a1a2e;
-            color: #eee;
-            min-height: 100vh;
-            display: flex;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            width: 200px;
-            background: #0a0a15;
-            border-right: 1px solid #333;
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-        }
-
-        .sidebar-header {
-            padding: 20px;
-            border-bottom: 1px solid #333;
-        }
-
-        .sidebar-header h1 {
-            font-size: 18px;
-            font-weight: 500;
-            margin-bottom: 4px;
-        }
-
-        .sidebar-header .subtitle {
-            font-size: 11px;
-            color: #666;
-        }
-
-        .sidebar-nav {
-            flex: 1;
-            padding: 10px 0;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 20px;
-            color: #888;
-            cursor: pointer;
-            transition: all 0.2s;
-            border-left: 3px solid transparent;
-        }
-
-        .nav-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: #ccc;
-        }
-
-        .nav-item.active {
-            background: rgba(74, 144, 217, 0.15);
-            color: #fff;
-            border-left-color: #4a90d9;
-        }
-
-        .nav-item .icon {
-            font-size: 16px;
-            width: 20px;
-            text-align: center;
-        }
-
-        .sidebar-footer {
-            padding: 15px 20px;
-            border-top: 1px solid #333;
-            font-size: 10px;
-            color: #555;
-        }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px 30px;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Mode Selector */
-        .mode-selector {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        .mode-btn {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            padding: 8px 16px;
-            border-radius: 6px;
-            border: 2px solid transparent;
-            transition: all 0.2s ease;
-            background: #0a0a15;
-            color: #888;
-            font-size: 13px;
-        }
-
-        .mode-btn:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: #ccc;
-        }
-
-        .mode-btn.active {
-            border-color: #4a90d9;
-            background: rgba(74, 144, 217, 0.15);
-            color: #fff;
-        }
-
-        .mode-swatch {
-            width: 12px;
-            height: 12px;
-            border-radius: 2px;
-            border: 1px solid #444;
-        }
-
-        /* Grayscale Strip */
-        .grayscale-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-
-        .grayscale-label {
-            font-size: 12px;
-            color: #666;
-        }
-
-        .grayscale-strip {
-            display: flex;
-            gap: 2px;
-            background: #0a0a15;
-            padding: 8px;
-            border-radius: 6px;
-        }
-
-        .grayscale-cell {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            border-radius: 2px;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 6px;
-            font-weight: 600;
-        }
-
-        .grayscale-cell:hover {
-            transform: scale(1.5);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.6);
-            z-index: 100;
-        }
-
-        .grayscale-cell .code {
-            background: rgba(0,0,0,0.5);
-            padding: 1px 2px;
-            border-radius: 2px;
-            color: white;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-        }
-
-        /* Color Wheel */
-        .wheel-wrapper {
-            display: flex;
-            justify-content: center;
-        }
-
-        .wheel-container {
-            position: relative;
-            width: 600px;
-            height: 600px;
-        }
-
-        .color-cell {
-            position: absolute;
-            width: 22px;
-            height: 22px;
-            cursor: pointer;
-            border-radius: 3px;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 8px;
-            font-weight: 600;
-            transform: translate(-50%, -50%);
-        }
-
-        .color-cell:hover {
-            transform: translate(-50%, -50%) scale(1.8);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.6);
-            z-index: 100;
-        }
-
-        .color-cell .code {
-            background: rgba(0,0,0,0.5);
-            padding: 1px 2px;
-            border-radius: 2px;
-            color: white;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-        }
-
-        /* Mode visibility */
-        .color-cell.hidden,
-        .grayscale-cell.hidden {
-            display: none !important;
-        }
-
-        /* Tooltip */
-        .tooltip {
-            position: fixed;
-            background: #2a2a4a;
-            border: 1px solid #444;
-            border-radius: 8px;
-            padding: 12px 16px;
-            font-size: 13px;
-            pointer-events: none;
-            z-index: 1000;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            opacity: 0;
-            transition: opacity 0.15s ease;
-            min-width: 200px;
-        }
-
-        .tooltip.visible {
-            opacity: 1;
-        }
-
-        .tooltip-color {
-            width: 100%;
-            height: 40px;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-
-        .tooltip-row {
-            display: flex;
-            justify-content: space-between;
-            margin: 4px 0;
-        }
-
-        .tooltip-label {
-            color: #888;
-        }
-
-        .tooltip-value {
-            font-family: 'Monaco', 'Consolas', monospace;
-            color: #fff;
-        }
-
-        /* Toast */
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: #4a90d9;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            box-shadow: 0 4px 20px rgba(74, 144, 217, 0.4);
-            transition: transform 0.3s ease;
-            z-index: 2000;
-        }
-
-        .toast.visible {
-            transform: translateX(-50%) translateY(0);
-        }
-
-        /* Highlight animation */
-        .color-cell.highlighted {
-            animation: pulse 1s ease-in-out 3;
-            z-index: 200 !important;
-        }
-
-        .grayscale-cell.highlighted {
-            animation: pulse-grayscale 1s ease-in-out 3;
-            z-index: 200 !important;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 0 0 rgba(74, 144, 217, 0.7); }
-            50% { transform: translate(-50%, -50%) scale(1.8); box-shadow: 0 0 20px 10px rgba(74, 144, 217, 0.4); }
-        }
-
-        @keyframes pulse-grayscale {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(74, 144, 217, 0.7); }
-            50% { transform: scale(1.8); box-shadow: 0 0 20px 10px rgba(74, 144, 217, 0.4); }
-        }
-
-        /* ==================== */
-        /* Lookup Tab Styles    */
-        /* ==================== */
-        .lookup-container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .lookup-container h2 {
-            text-align: center;
-            font-weight: 400;
-            margin-bottom: 8px;
-        }
-
-        .lookup-subtitle {
-            text-align: center;
-            color: #666;
-            font-size: 13px;
-            margin-bottom: 30px;
-        }
-
-        .input-section {
-            background: #0a0a15;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .input-section h3 {
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 15px;
-            color: #aaa;
-        }
-
-        .input-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            align-items: center;
-        }
-
-        .input-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .input-row label {
-            width: 50px;
-            color: #888;
-            font-size: 13px;
-        }
-
-        .input-row input {
-            flex: 1;
-            background: #2a2a4a;
-            border: 1px solid #444;
-            border-radius: 4px;
-            padding: 10px 12px;
-            color: #fff;
-            font-family: 'Monaco', 'Consolas', monospace;
-            font-size: 14px;
-        }
-
-        .input-row input:focus {
-            outline: none;
-            border-color: #4a90d9;
-        }
-
-        .input-row input::placeholder {
-            color: #555;
-        }
-
-        .input-row .color-preview {
-            width: 44px;
-            height: 44px;
-            border-radius: 6px;
-            border: 2px solid #444;
-            flex-shrink: 0;
-        }
-
-        .lookup-btn {
-            width: 100%;
-            background: #4a90d9;
-            border: none;
-            border-radius: 6px;
-            padding: 12px;
-            color: white;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-top: 10px;
-        }
-
-        .lookup-btn:hover {
-            background: #5a9fe9;
-        }
-
-        .lookup-result {
-            background: #0a0a15;
-            border-radius: 8px;
-            padding: 25px;
-            display: none;
-        }
-
-        .lookup-result.visible {
-            display: block;
-        }
-
-        .lookup-result-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .lookup-result-swatches {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .lookup-swatch {
-            width: 80px;
-            height: 80px;
-            border-radius: 8px;
-            border: 2px solid #444;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-end;
-            padding-bottom: 8px;
-        }
-
-        .lookup-swatch-label {
-            font-size: 10px;
-            color: rgba(255,255,255,0.8);
-            background: rgba(0,0,0,0.5);
-            padding: 2px 6px;
-            border-radius: 3px;
-        }
-
-        .lookup-arrow {
-            font-size: 24px;
-            color: #666;
-        }
-
-        .lookup-result-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .lookup-info-item {
-            background: #1a1a2e;
-            padding: 12px;
-            border-radius: 6px;
-        }
-
-        .lookup-info-label {
-            font-size: 11px;
-            color: #666;
-            margin-bottom: 4px;
-        }
-
-        .lookup-info-value {
-            font-family: 'Monaco', 'Consolas', monospace;
-            font-size: 14px;
-            color: #fff;
-        }
-
-        .lookup-info-item.full-width {
-            grid-column: 1 / -1;
-        }
-
-        /* ==================== */
-        /* Image Tab Styles     */
-        /* ==================== */
-        .image-container {
-            max-width: 600px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .image-container h2 {
-            font-weight: 400;
-            margin-bottom: 8px;
-        }
-
-        .image-subtitle {
-            color: #666;
-            font-size: 13px;
-            margin-bottom: 30px;
-        }
-
-        .coming-soon {
-            background: #0a0a15;
-            border-radius: 8px;
-            padding: 60px 40px;
-            color: #555;
-        }
-
-        .coming-soon-icon {
-            font-size: 48px;
-            margin-bottom: 20px;
-        }
-
-        .coming-soon h3 {
-            font-weight: 400;
-            margin-bottom: 10px;
-            color: #888;
-        }
-
-        .coming-soon p {
-            font-size: 13px;
-        }
-    </style>
+    <title>ANSI 256 Color Tools</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <!-- Sidebar -->
@@ -610,7 +78,7 @@
                         <input type="text" id="lookup-hex" placeholder="#FF5733 or FF5733" maxlength="7">
                         <div class="color-preview" id="preview-hex"></div>
                     </div>
-                    <button class="lookup-btn" id="lookup-hex-btn">Find Nearest ANSI Color</button>
+                    <button class="btn btn-full" id="lookup-hex-btn">Find Nearest ANSI Color</button>
                 </div>
 
                 <!-- RGB Input -->
@@ -625,7 +93,7 @@
                         <input type="number" id="lookup-b" placeholder="0-255" min="0" max="255">
                         <div class="color-preview" id="preview-rgb"></div>
                     </div>
-                    <button class="lookup-btn" id="lookup-rgb-btn">Find Nearest ANSI Color</button>
+                    <button class="btn btn-full" id="lookup-rgb-btn">Find Nearest ANSI Color</button>
                 </div>
 
                 <!-- HSL Input -->
@@ -640,7 +108,7 @@
                         <input type="number" id="lookup-l" placeholder="0-100" min="0" max="100">
                         <div class="color-preview" id="preview-hsl"></div>
                     </div>
-                    <button class="lookup-btn" id="lookup-hsl-btn">Find Nearest ANSI Color</button>
+                    <button class="btn btn-full" id="lookup-hsl-btn">Find Nearest ANSI Color</button>
                 </div>
 
                 <!-- Result -->
@@ -694,11 +162,75 @@
         <div class="tab-content" id="tab-image">
             <div class="image-container">
                 <h2>Image to ANSI</h2>
-                <p class="image-subtitle">Convert images to ANSI 256 color art</p>
-                <div class="coming-soon">
-                    <div class="coming-soon-icon">🖼️</div>
-                    <h3>Coming Soon</h3>
-                    <p>Upload an image and convert it to ANSI 256 color terminal art.</p>
+                <p class="image-subtitle">Convert images to ANSI 256 color terminal art</p>
+
+                <!-- Upload Area -->
+                <div class="upload-area" id="upload-area">
+                    <div class="icon">▣</div>
+                    <p>Drop an image here or click to upload</p>
+                    <p class="hint">Supports PNG, JPG, GIF, WebP</p>
+                    <input type="file" id="file-input" accept="image/*">
+                </div>
+
+                <!-- Options Panel -->
+                <div class="options-panel">
+                    <h3>Options</h3>
+                    <div class="options-grid">
+                        <div class="option-group">
+                            <label for="opt-width">Max Width</label>
+                            <input type="number" id="opt-width" value="80" min="10" max="300">
+                        </div>
+                        <div class="option-group">
+                            <label for="opt-height">Max Height</label>
+                            <input type="number" id="opt-height" value="40" min="10" max="150">
+                        </div>
+                        <div class="option-group">
+                            <label for="opt-mode">Color Mode</label>
+                            <select id="opt-mode">
+                                <option value="256">ANSI 256</option>
+                                <option value="true">True Color (24-bit)</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="opt-unicode" checked>
+                                <span>Use Unicode blocks</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Processing Indicator -->
+                <div class="processing" id="processing">
+                    <div class="spinner"></div>
+                    <p>Processing image...</p>
+                </div>
+
+                <!-- Preview Area -->
+                <div class="preview-area" id="preview-area">
+                    <div class="source-preview">
+                        <h4>Source</h4>
+                        <img id="source-image" alt="Source image">
+                        <div class="source-info" id="source-info"></div>
+                    </div>
+                    <div class="ansi-output">
+                        <div class="ansi-output-header">
+                            <h4>ANSI Output</h4>
+                            <div class="ansi-output-actions">
+                                <button class="btn btn-secondary" id="copy-ansi">Copy ANSI</button>
+                                <button class="btn btn-secondary" id="copy-printf">Copy printf</button>
+                            </div>
+                        </div>
+                        <div class="ansi-terminal" id="ansi-terminal"></div>
+                    </div>
+                </div>
+
+                <!-- Escape Code Output -->
+                <div class="escape-output" id="escape-output">
+                    <div class="escape-output-header">
+                        <h4>Shell Command (printf)</h4>
+                    </div>
+                    <pre class="escape-code" id="escape-code"></pre>
                 </div>
             </div>
         </div>
@@ -736,349 +268,8 @@
     <!-- Toast -->
     <div class="toast" id="toast">Copied to clipboard!</div>
 
-    <script>
-        // ============================================================
-        // ANSI 256 Color Generation - Computed from First Principles
-        // ============================================================
-
-        const standard16 = [
-            { colorId: 0,  rgb: { r: 0,   g: 0,   b: 0   }, name: 'Black' },
-            { colorId: 1,  rgb: { r: 128, g: 0,   b: 0   }, name: 'Maroon' },
-            { colorId: 2,  rgb: { r: 0,   g: 128, b: 0   }, name: 'Green' },
-            { colorId: 3,  rgb: { r: 128, g: 128, b: 0   }, name: 'Olive' },
-            { colorId: 4,  rgb: { r: 0,   g: 0,   b: 128 }, name: 'Navy' },
-            { colorId: 5,  rgb: { r: 128, g: 0,   b: 128 }, name: 'Purple' },
-            { colorId: 6,  rgb: { r: 0,   g: 128, b: 128 }, name: 'Teal' },
-            { colorId: 7,  rgb: { r: 192, g: 192, b: 192 }, name: 'Silver' },
-            { colorId: 8,  rgb: { r: 128, g: 128, b: 128 }, name: 'Grey' },
-            { colorId: 9,  rgb: { r: 255, g: 0,   b: 0   }, name: 'Red' },
-            { colorId: 10, rgb: { r: 0,   g: 255, b: 0   }, name: 'Lime' },
-            { colorId: 11, rgb: { r: 255, g: 255, b: 0   }, name: 'Yellow' },
-            { colorId: 12, rgb: { r: 0,   g: 0,   b: 255 }, name: 'Blue' },
-            { colorId: 13, rgb: { r: 255, g: 0,   b: 255 }, name: 'Fuchsia' },
-            { colorId: 14, rgb: { r: 0,   g: 255, b: 255 }, name: 'Aqua' },
-            { colorId: 15, rgb: { r: 255, g: 255, b: 255 }, name: 'White' },
-        ];
-
-        const cubeValues = [0, 95, 135, 175, 215, 255];
-
-        function generateCubeColors() {
-            const colors = [];
-            for (let r = 0; r < 6; r++) {
-                for (let g = 0; g < 6; g++) {
-                    for (let b = 0; b < 6; b++) {
-                        const colorId = 16 + (r * 36) + (g * 6) + b;
-                        colors.push({
-                            colorId,
-                            rgb: { r: cubeValues[r], g: cubeValues[g], b: cubeValues[b] },
-                            name: `Color${colorId}`
-                        });
-                    }
-                }
-            }
-            return colors;
-        }
-
-        function generateGrayscaleColors() {
-            const colors = [];
-            for (let i = 0; i < 24; i++) {
-                const gray = 8 + 10 * i;
-                const colorId = 232 + i;
-                colors.push({
-                    colorId,
-                    rgb: { r: gray, g: gray, b: gray },
-                    name: `Grey${Math.round(gray / 255 * 100)}`
-                });
-            }
-            return colors;
-        }
-
-        function rgbToHsl(r, g, b) {
-            r /= 255; g /= 255; b /= 255;
-            const max = Math.max(r, g, b);
-            const min = Math.min(r, g, b);
-            const l = (max + min) / 2;
-            if (max === min) return { h: 0, s: 0, l: Math.round(l * 100) };
-            const d = max - min;
-            const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-            let h;
-            switch (max) {
-                case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
-                case g: h = ((b - r) / d + 2) / 6; break;
-                case b: h = ((r - g) / d + 4) / 6; break;
-            }
-            return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
-        }
-
-        function hslToRgb(h, s, l) {
-            h /= 360; s /= 100; l /= 100;
-            let r, g, b;
-            if (s === 0) {
-                r = g = b = l;
-            } else {
-                const hue2rgb = (p, q, t) => {
-                    if (t < 0) t += 1;
-                    if (t > 1) t -= 1;
-                    if (t < 1/6) return p + (q - p) * 6 * t;
-                    if (t < 1/2) return q;
-                    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-                    return p;
-                };
-                const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-                const p = 2 * l - q;
-                r = hue2rgb(p, q, h + 1/3);
-                g = hue2rgb(p, q, h);
-                b = hue2rgb(p, q, h - 1/3);
-            }
-            return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
-        }
-
-        function generateAllColors() {
-            const allColors = [...standard16, ...generateCubeColors(), ...generateGrayscaleColors()];
-            return allColors.map(color => ({
-                ...color,
-                hsl: rgbToHsl(color.rgb.r, color.rgb.g, color.rgb.b)
-            }));
-        }
-
-        const colorData = generateAllColors();
-        const colorMap = {};
-        colorData.forEach(c => { colorMap[c.colorId] = c; });
-
-        function rgbToHex(r, g, b) {
-            return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
-        }
-
-        function hexToRgb(hex) {
-            hex = hex.replace(/^#/, '');
-            if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
-            const num = parseInt(hex, 16);
-            return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
-        }
-
-        function colorDistance(r1, g1, b1, r2, g2, b2) {
-            return Math.sqrt(Math.pow(r2 - r1, 2) + Math.pow(g2 - g1, 2) + Math.pow(b2 - b1, 2));
-        }
-
-        function findNearestColor(r, g, b) {
-            let nearest = null;
-            let minDistance = Infinity;
-            colorData.forEach(color => {
-                const dist = colorDistance(r, g, b, color.rgb.r, color.rgb.g, color.rgb.b);
-                if (dist < minDistance) { minDistance = dist; nearest = color; }
-            });
-            return { color: nearest, distance: minDistance };
-        }
-
-        function isGrayscale(color) {
-            return color.hsl.s === 0 || color.hsl.s < 5;
-        }
-
-        const chromaticColors = colorData.filter(c => !isGrayscale(c));
-        const grayscaleColorsAll = colorData.filter(c => isGrayscale(c));
-        grayscaleColorsAll.sort((a, b) => a.hsl.l - b.hsl.l);
-
-        // ============================================================
-        // Tab Navigation
-        // ============================================================
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', () => {
-                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-                item.classList.add('active');
-                document.getElementById('tab-' + item.dataset.tab).classList.add('active');
-            });
-        });
-
-        // ============================================================
-        // Color Wheel Tab
-        // ============================================================
-        const wheelContainer = document.getElementById('wheel-container');
-        const containerSize = 600;
-        const centerX = containerSize / 2;
-        const centerY = containerSize / 2;
-        const minRadius = 40;
-        const maxRadius = 280;
-
-        chromaticColors.forEach(color => {
-            const angle = color.hsl.h * (Math.PI / 180);
-            const radius = minRadius + (color.hsl.l / 100) * (maxRadius - minRadius);
-            const x = centerX + radius * Math.cos(angle);
-            const y = centerY - radius * Math.sin(angle);
-            const div = document.createElement('div');
-            div.className = 'color-cell';
-            div.style.backgroundColor = `hsl(${color.hsl.h}, ${color.hsl.s}%, ${color.hsl.l}%)`;
-            div.style.color = color.hsl.l > 50 ? '#000' : '#fff';
-            div.style.left = x + 'px';
-            div.style.top = y + 'px';
-            div.innerHTML = `<span class="code">${color.colorId}</span>`;
-            div.dataset.code = color.colorId;
-            wheelContainer.appendChild(div);
-        });
-
-        const grayscaleStrip = document.getElementById('grayscale-strip');
-        grayscaleColorsAll.forEach(color => {
-            const div = document.createElement('div');
-            div.className = 'grayscale-cell';
-            div.style.backgroundColor = `hsl(${color.hsl.h}, ${color.hsl.s}%, ${color.hsl.l}%)`;
-            div.style.color = color.hsl.l > 50 ? '#000' : '#fff';
-            div.innerHTML = `<span class="code">${color.colorId}</span>`;
-            div.dataset.code = color.colorId;
-            grayscaleStrip.appendChild(div);
-        });
-
-        // Tooltip
-        const tooltip = document.getElementById('tooltip');
-        const toast = document.getElementById('toast');
-
-        function setupTooltip(cell) {
-            cell.addEventListener('mouseenter', () => {
-                const color = colorMap[cell.dataset.code];
-                if (!color) return;
-                const hex = rgbToHex(color.rgb.r, color.rgb.g, color.rgb.b);
-                document.getElementById('tooltip-color').style.backgroundColor = hex;
-                document.getElementById('tooltip-ansi').textContent = color.colorId;
-                document.getElementById('tooltip-name').textContent = color.name;
-                document.getElementById('tooltip-hex').textContent = hex;
-                document.getElementById('tooltip-rgb').textContent = `${color.rgb.r}, ${color.rgb.g}, ${color.rgb.b}`;
-                document.getElementById('tooltip-hsl').textContent = `${color.hsl.h}°, ${color.hsl.s}%, ${color.hsl.l}%`;
-                document.getElementById('tooltip-escape').textContent = `\\e[38;5;${color.colorId}m`;
-                tooltip.classList.add('visible');
-            });
-            cell.addEventListener('mousemove', (e) => {
-                const x = e.clientX + 15;
-                const y = e.clientY + 15;
-                const rect = tooltip.getBoundingClientRect();
-                tooltip.style.left = Math.min(x, window.innerWidth - rect.width - 10) + 'px';
-                tooltip.style.top = Math.min(y, window.innerHeight - rect.height - 10) + 'px';
-            });
-            cell.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
-            cell.addEventListener('click', async () => {
-                const escapeCode = `\\e[38;5;${cell.dataset.code}m`;
-                try {
-                    await navigator.clipboard.writeText(escapeCode);
-                } catch {
-                    const ta = document.createElement('textarea');
-                    ta.value = escapeCode;
-                    document.body.appendChild(ta);
-                    ta.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(ta);
-                }
-                toast.textContent = `Copied: ${escapeCode}`;
-                toast.classList.add('visible');
-                setTimeout(() => toast.classList.remove('visible'), 2000);
-            });
-        }
-
-        document.querySelectorAll('.color-cell').forEach(setupTooltip);
-        document.querySelectorAll('.grayscale-cell').forEach(setupTooltip);
-
-        // Mode Selector
-        // Grayscale IDs include all colors that isGrayscale() returns true for
-        const grayscaleIds = new Set(grayscaleColorsAll.map(c => c.colorId));
-        const ansi16Ids = new Set(Array.from({length: 16}, (_, i) => i));
-
-        document.getElementById('mode-swatch-grayscale').style.backgroundColor = rgbToHex(colorMap[0].rgb.r, colorMap[0].rgb.g, colorMap[0].rgb.b);
-        document.getElementById('mode-swatch-ansi16').style.backgroundColor = rgbToHex(colorMap[1].rgb.r, colorMap[1].rgb.g, colorMap[1].rgb.b);
-        document.getElementById('mode-swatch-ansi256').style.backgroundColor = rgbToHex(colorMap[17].rgb.r, colorMap[17].rgb.g, colorMap[17].rgb.b);
-
-        function setMode(mode) {
-            document.querySelectorAll('.mode-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.mode === mode);
-            });
-            document.querySelectorAll('.color-cell, .grayscale-cell').forEach(cell => {
-                const id = parseInt(cell.dataset.code);
-                let visible = mode === 'ansi256' || (mode === 'grayscale' && grayscaleIds.has(id)) || (mode === 'ansi16' && ansi16Ids.has(id));
-                cell.classList.toggle('hidden', !visible);
-            });
-        }
-
-        document.querySelectorAll('.mode-btn').forEach(btn => {
-            btn.addEventListener('click', () => setMode(btn.dataset.mode));
-        });
-
-        // ============================================================
-        // Lookup Tab
-        // ============================================================
-        const lookupResult = document.getElementById('lookup-result');
-
-        function showLookupResult(inputR, inputG, inputB) {
-            const result = findNearestColor(inputR, inputG, inputB);
-            const ansi = result.color;
-            const inputHex = rgbToHex(inputR, inputG, inputB);
-            const ansiHex = rgbToHex(ansi.rgb.r, ansi.rgb.g, ansi.rgb.b);
-
-            document.getElementById('result-input-swatch').style.backgroundColor = inputHex;
-            document.getElementById('result-ansi-swatch').style.backgroundColor = ansiHex;
-            document.getElementById('result-ansi-label').textContent = `ANSI ${ansi.colorId}`;
-            document.getElementById('result-code').textContent = ansi.colorId;
-            document.getElementById('result-name').textContent = ansi.name;
-            document.getElementById('result-hex').textContent = ansiHex;
-            document.getElementById('result-rgb').textContent = `${ansi.rgb.r}, ${ansi.rgb.g}, ${ansi.rgb.b}`;
-            document.getElementById('result-hsl').textContent = `${ansi.hsl.h}°, ${ansi.hsl.s}%, ${ansi.hsl.l}%`;
-            document.getElementById('result-distance').textContent = result.distance.toFixed(2);
-            document.getElementById('result-escape').textContent = `\\e[38;5;${ansi.colorId}m`;
-
-            lookupResult.classList.add('visible');
-        }
-
-        // HEX input
-        const hexInput = document.getElementById('lookup-hex');
-        const hexPreview = document.getElementById('preview-hex');
-        hexInput.addEventListener('input', () => {
-            let val = hexInput.value.trim();
-            if (!val.startsWith('#')) val = '#' + val;
-            if (/^#[0-9A-Fa-f]{3}$/.test(val) || /^#[0-9A-Fa-f]{6}$/.test(val)) {
-                hexPreview.style.backgroundColor = val;
-            }
-        });
-        document.getElementById('lookup-hex-btn').addEventListener('click', () => {
-            let val = hexInput.value.trim();
-            if (!val.startsWith('#')) val = '#' + val;
-            if (!/^#[0-9A-Fa-f]{6}$/.test(val) && !/^#[0-9A-Fa-f]{3}$/.test(val)) return;
-            const rgb = hexToRgb(val);
-            showLookupResult(rgb.r, rgb.g, rgb.b);
-        });
-
-        // RGB input
-        const rInput = document.getElementById('lookup-r');
-        const gInput = document.getElementById('lookup-g');
-        const bInput = document.getElementById('lookup-b');
-        const rgbPreview = document.getElementById('preview-rgb');
-        function updateRgbPreview() {
-            const r = parseInt(rInput.value) || 0;
-            const g = parseInt(gInput.value) || 0;
-            const b = parseInt(bInput.value) || 0;
-            rgbPreview.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
-        }
-        [rInput, gInput, bInput].forEach(inp => inp.addEventListener('input', updateRgbPreview));
-        document.getElementById('lookup-rgb-btn').addEventListener('click', () => {
-            const r = Math.min(255, Math.max(0, parseInt(rInput.value) || 0));
-            const g = Math.min(255, Math.max(0, parseInt(gInput.value) || 0));
-            const b = Math.min(255, Math.max(0, parseInt(bInput.value) || 0));
-            showLookupResult(r, g, b);
-        });
-
-        // HSL input
-        const hInput = document.getElementById('lookup-h');
-        const sInput = document.getElementById('lookup-s');
-        const lInput = document.getElementById('lookup-l');
-        const hslPreview = document.getElementById('preview-hsl');
-        function updateHslPreview() {
-            const h = parseInt(hInput.value) || 0;
-            const s = parseInt(sInput.value) || 0;
-            const l = parseInt(lInput.value) || 0;
-            hslPreview.style.backgroundColor = `hsl(${h}, ${s}%, ${l}%)`;
-        }
-        [hInput, sInput, lInput].forEach(inp => inp.addEventListener('input', updateHslPreview));
-        document.getElementById('lookup-hsl-btn').addEventListener('click', () => {
-            const h = Math.min(360, Math.max(0, parseInt(hInput.value) || 0));
-            const s = Math.min(100, Math.max(0, parseInt(sInput.value) || 0));
-            const l = Math.min(100, Math.max(0, parseInt(lInput.value) || 0));
-            const rgb = hslToRgb(h, s, l);
-            showLookupResult(rgb.r, rgb.g, rgb.b);
-        });
-    </script>
+    <!-- Scripts -->
+    <script src="image-to-ansi.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
