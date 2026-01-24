@@ -26,6 +26,10 @@
                 <span class="icon">▣</span>
                 <span>Image to ANSI</span>
             </div>
+            <div class="nav-item" data-tab="font">
+                <span class="icon">▦</span>
+                <span>Pixel Font</span>
+            </div>
         </nav>
         <div class="sidebar-footer">
             Colors computed from ANSI 256 specification
@@ -185,17 +189,31 @@
                             <input type="number" id="opt-height" value="40" min="10" max="150">
                         </div>
                         <div class="option-group">
-                            <label for="opt-mode">Color Mode</label>
-                            <select id="opt-mode">
-                                <option value="256">ANSI 256</option>
-                                <option value="true">True Color (24-bit)</option>
+                            <label>Scale</label>
+                            <div class="preset-buttons">
+                                <button class="btn btn-small" id="btn-half" disabled>½×</button>
+                                <button class="btn btn-small" id="btn-full" disabled>1×</button>
+                                <button class="btn btn-small" id="btn-double" disabled>2×</button>
+                                <button class="btn btn-small" id="btn-1to1" disabled>1:1</button>
+                            </div>
+                        </div>
+                        <div class="option-group">
+                            <label for="opt-render">Render Mode</label>
+                            <select id="opt-render">
+                                <option value="half">▀▄ Half Blocks (fg+bg)</option>
+                                <option value="halffg">▀▄ Half Blocks (fg only)</option>
+                                <option value="quad">▚ Quadrant (fg only)</option>
+                                <option value="block">█ Full Block (fg only)</option>
+                                <option value="full">██ Spaces (bg only)</option>
+                                <option value="binary">Binary (no color)</option>
                             </select>
                         </div>
                         <div class="option-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="opt-unicode" checked>
-                                <span>Use Unicode blocks</span>
-                            </label>
+                            <label for="opt-color">Color Depth</label>
+                            <select id="opt-color">
+                                <option value="24bit">24-bit True Color</option>
+                                <option value="256">256 Color</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -221,6 +239,12 @@
                                 <button class="btn btn-secondary" id="copy-printf">Copy printf</button>
                             </div>
                         </div>
+                        <div class="preview-controls">
+                            <label>Font Size <input type="range" id="ctrl-font-size" min="4" max="24" value="12"><span id="ctrl-font-size-val">12px</span></label>
+                            <label>Line Height <input type="range" id="ctrl-line-height" min="50" max="150" value="100"><span id="ctrl-line-height-val">1.0</span></label>
+                            <label>Letter Spacing <input type="range" id="ctrl-letter-spacing" min="-5" max="5" value="0"><span id="ctrl-letter-spacing-val">0px</span></label>
+                            <label><input type="checkbox" id="ctrl-no-wrap" checked> No Wrap</label>
+                        </div>
                         <div class="ansi-terminal" id="ansi-terminal"></div>
                     </div>
                 </div>
@@ -231,6 +255,39 @@
                         <h4>Shell Command (printf)</h4>
                     </div>
                     <pre class="escape-code" id="escape-code"></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 4: Pixel Font -->
+        <div class="tab-content" id="tab-font">
+            <div class="font-container">
+                <h2>Pixel Font</h2>
+                <p class="font-subtitle">Render text using ANSI half-block pixel art</p>
+
+                <!-- Font Preview (shows all 26 letters) -->
+                <div class="font-preview" id="font-preview">
+                    <div class="font-loading">Loading font...</div>
+                </div>
+
+                <!-- Text Input -->
+                <div class="input-section" id="font-input-section">
+                    <h3>Enter Text</h3>
+                    <div class="input-row">
+                        <input type="text" id="font-text" placeholder="HELLO WORLD" maxlength="50">
+                    </div>
+                </div>
+
+                <!-- Rendered Output -->
+                <div class="font-output" id="font-output">
+                    <div class="font-output-header">
+                        <h4>Output</h4>
+                        <div class="font-output-actions">
+                            <button class="btn btn-secondary" id="copy-font-ansi">Copy ANSI</button>
+                            <button class="btn btn-secondary" id="copy-font-printf">Copy printf</button>
+                        </div>
+                    </div>
+                    <div class="ansi-terminal" id="font-terminal"></div>
                 </div>
             </div>
         </div>
@@ -271,6 +328,7 @@
     <!-- Scripts -->
     <script src="ansi256.js"></script>
     <script src="image-to-ansi.js"></script>
+    <script src="pixel-font.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

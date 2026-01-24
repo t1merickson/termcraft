@@ -269,7 +269,7 @@ body {
 }
 
 .tooltip-value {
-    font-family: 'Monaco', 'Consolas', monospace;
+    font-family: 'SF Mono', monospace;
     color: #fff;
 }
 
@@ -375,7 +375,7 @@ body {
     border-radius: 4px;
     padding: 10px 12px;
     color: #fff;
-    font-family: 'Monaco', 'Consolas', monospace;
+    font-family: 'SF Mono', monospace;
     font-size: 14px;
 }
 
@@ -432,6 +432,21 @@ body {
 
 .btn-secondary:hover {
     background: #444;
+}
+
+.btn-small {
+    padding: 8px 12px;
+    font-size: 13px;
+}
+
+.btn-small.active {
+    background: #0af;
+    color: #000;
+}
+
+.preset-buttons {
+    display: flex;
+    gap: 6px;
 }
 
 .lookup-result {
@@ -503,7 +518,7 @@ body {
 }
 
 .lookup-info-value {
-    font-family: 'Monaco', 'Consolas', monospace;
+    font-family: 'SF Mono', monospace;
     font-size: 14px;
     color: #fff;
 }
@@ -705,16 +720,58 @@ body {
     font-size: 12px;
 }
 
+.preview-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+    padding: 10px 15px;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    font-size: 11px;
+    color: #999;
+}
+
+.preview-controls label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.preview-controls input[type="range"] {
+    width: 80px;
+    height: 4px;
+    cursor: pointer;
+}
+
+.preview-controls input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.preview-controls span {
+    min-width: 35px;
+    color: #666;
+}
+
 .ansi-terminal {
     padding: 15px;
-    font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
-    font-size: 10px;
-    line-height: 1.2;
     overflow-x: auto;
-    white-space: pre;
     min-height: 200px;
     max-height: 500px;
     overflow-y: auto;
+}
+
+.ansi-terminal code {
+    font-family: 'SF Mono', monospace;
+    font-size: var(--preview-font-size, 12px);
+    line-height: var(--preview-line-height, 1);
+    letter-spacing: var(--preview-letter-spacing, 0px);
+    white-space: pre;
+    display: block;
+}
+
+.ansi-terminal.no-wrap code {
+    white-space: pre;
+    overflow-x: visible;
 }
 
 /* Processing indicator */
@@ -774,7 +831,7 @@ body {
 
 .escape-code {
     padding: 15px;
-    font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+    font-family: 'SF Mono', monospace;
     font-size: 11px;
     line-height: 1.4;
     overflow-x: auto;
@@ -783,4 +840,122 @@ body {
     max-height: 200px;
     overflow-y: auto;
     color: #888;
+}
+
+/* ==================== */
+/* Pixel Font Tab       */
+/* ==================== */
+.font-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.font-container h2 {
+    text-align: center;
+    font-weight: 400;
+    margin-bottom: 8px;
+}
+
+.font-subtitle {
+    text-align: center;
+    color: #666;
+    font-size: 13px;
+    margin-bottom: 30px;
+}
+
+.font-preview {
+    margin-bottom: 30px;
+}
+
+.font-letter-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+}
+
+.font-letter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #333;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.font-letter:hover {
+    border-color: #666;
+}
+
+.font-letter-ansi {
+    font-size: 10px;
+    margin: 0;
+}
+
+.font-letter-label {
+    margin-top: 5px;
+    font-size: 12px;
+    color: #888;
+}
+
+.font-loading, .font-error {
+    text-align: center;
+    color: #888;
+    padding: 40px;
+}
+
+.font-error {
+    color: #ff6b6b;
+}
+
+.font-output {
+    display: none;
+    margin-top: 20px;
+}
+
+.font-output.visible {
+    display: block;
+}
+
+.font-output-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.font-output-header h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: #aaa;
+}
+
+.font-output-actions {
+    display: flex;
+    gap: 10px;
+}
+
+#font-terminal {
+    background: #111;
+    padding: 20px;
+    border-radius: 4px;
+    border: 1px solid #333;
+    overflow-x: auto;
+}
+
+#font-terminal code,
+.font-letter-ansi {
+    font-family: 'SF Mono', monospace;
+    font-size: 12px;
+    line-height: 1;
+    white-space: pre;
+    display: block;
+}
+
+#font-text {
+    width: 100%;
+    font-size: 16px;
 }

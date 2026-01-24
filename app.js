@@ -280,11 +280,38 @@
 
     const optWidth = document.getElementById('opt-width');
     const optHeight = document.getElementById('opt-height');
-    const optMode = document.getElementById('opt-mode');
-    const optUnicode = document.getElementById('opt-unicode');
+    const optRender = document.getElementById('opt-render');
+    const optColor = document.getElementById('opt-color');
+    const btnHalf = document.getElementById('btn-half');
+    const btnFull = document.getElementById('btn-full');
+    const btnDouble = document.getElementById('btn-double');
+    const btn1to1 = document.getElementById('btn-1to1');
 
     let currentAnsiOutput = '';
     let currentPrintfOutput = '';
+    let sourceWidth = 0;
+    let sourceHeight = 0;
+    let is1to1Mode = false;
+
+    // Build the full render mode string from UI state
+    function getRenderMode() {
+        const base = optRender.value;
+        if (base === 'binary') return 'binary';
+        const color = optColor.value;
+        const suffix = is1to1Mode ? '-1x' : '';
+        return `${base}-${color}${suffix}`;
+    }
+
+    // Update UI state for 1:1 mode
+    function set1to1Mode(enabled) {
+        is1to1Mode = enabled;
+        optWidth.disabled = enabled;
+        optHeight.disabled = enabled;
+        btn1to1.classList.toggle('active', enabled);
+        // Grey out appearance
+        optWidth.style.opacity = enabled ? '0.5' : '1';
+        optHeight.style.opacity = enabled ? '0.5' : '1';
+    }
 
     // File upload
     uploadArea.addEventListener('click', () => fileInput.click());
@@ -322,19 +349,26 @@
             const img = await ImageToAnsi.loadImage(dataUrl);
 
             sourceImage.src = dataUrl;
+            sourceWidth = img.width;
+            sourceHeight = img.height;
             sourceInfo.textContent = `${img.width} × ${img.height} pixels`;
+
+            // Enable preset buttons
+            btnHalf.disabled = false;
+            btnFull.disabled = false;
+            btnDouble.disabled = false;
+            btn1to1.disabled = false;
 
             const result = ImageToAnsi.processImage(img, {
                 maxWidth: parseInt(optWidth.value) || 80,
                 maxHeight: parseInt(optHeight.value) || 40,
-                useUnicode: optUnicode.checked,
-                useTrue24bit: optMode.value === 'true'
+                renderMode: getRenderMode()
             });
 
             currentAnsiOutput = result.ansi;
             currentPrintfOutput = `printf "${ImageToAnsi.escapeForPrintf(result.ansi)}"`;
 
-            ansiTerminal.innerHTML = result.html;
+            ansiTerminal.innerHTML = `<code>${result.html}</code>`;
             escapeCode.textContent = currentPrintfOutput;
 
             processing.classList.remove('visible');
@@ -349,24 +383,60 @@
     }
 
     // Re-process on option change
-    [optWidth, optHeight, optMode, optUnicode].forEach(opt => {
-        opt.addEventListener('change', () => {
-            if (sourceImage.src && sourceImage.src !== window.location.href) {
-                ImageToAnsi.loadImage(sourceImage.src).then(img => {
-                    const result = ImageToAnsi.processImage(img, {
-                        maxWidth: parseInt(optWidth.value) || 80,
-                        maxHeight: parseInt(optHeight.value) || 40,
-                        useUnicode: optUnicode.checked,
-                        useTrue24bit: optMode.value === 'true'
-                    });
-
-                    currentAnsiOutput = result.ansi;
-                    currentPrintfOutput = `printf "${ImageToAnsi.escapeForPrintf(result.ansi)}"`;
-                    ansiTerminal.innerHTML = result.html;
-                    escapeCode.textContent = currentPrintfOutput;
+    function reprocessImage() {
+        if (sourceImage.src && sourceImage.src !== window.location.href) {
+            ImageToAnsi.loadImage(sourceImage.src).then(img => {
+                const result = ImageToAnsi.processImage(img, {
+                    maxWidth: parseInt(optWidth.value) || 80,
+                    maxHeight: parseInt(optHeight.value) || 40,
+                    renderMode: getRenderMode()
                 });
-            }
-        });
+
+                currentAnsiOutput = result.ansi;
+                currentPrintfOutput = `printf "${ImageToAnsi.escapeForPrintf(result.ansi)}"`;
+                ansiTerminal.innerHTML = `<code>${result.html}</code>`;
+                escapeCode.textContent = currentPrintfOutput;
+            });
+        }
+    }
+
+    [optWidth, optHeight, optRender, optColor].forEach(opt => {
+        opt.addEventListener('change', reprocessImage);
+    });
+
+    // Preset buttons
+    btnHalf.addEventListener('click', () => {
+        if (sourceWidth && sourceHeight) {
+            set1to1Mode(false);
+            optWidth.value = Math.floor(sourceWidth / 2);
+            optHeight.value = Math.floor(sourceHeight / 2);
+            reprocessImage();
+        }
+    });
+
+    btnFull.addEventListener('click', () => {
+        if (sourceWidth && sourceHeight) {
+            set1to1Mode(false);
+            optWidth.value = sourceWidth;
+            optHeight.value = sourceHeight;
+            reprocessImage();
+        }
+    });
+
+    btnDouble.addEventListener('click', () => {
+        if (sourceWidth && sourceHeight) {
+            set1to1Mode(false);
+            optWidth.value = sourceWidth * 2;
+            optHeight.value = sourceHeight * 2;
+            reprocessImage();
+        }
+    });
+
+    btn1to1.addEventListener('click', () => {
+        if (sourceWidth && sourceHeight) {
+            set1to1Mode(!is1to1Mode);
+            reprocessImage();
+        }
     });
 
     // Copy buttons
@@ -380,6 +450,124 @@
     document.getElementById('copy-printf').addEventListener('click', async () => {
         if (currentPrintfOutput) {
             await copyToClipboard(currentPrintfOutput);
+            showToast('printf command copied!');
+        }
+    });
+
+    // Preview controls
+    const ctrlFontSize = document.getElementById('ctrl-font-size');
+    const ctrlFontSizeVal = document.getElementById('ctrl-font-size-val');
+    const ctrlLineHeight = document.getElementById('ctrl-line-height');
+    const ctrlLineHeightVal = document.getElementById('ctrl-line-height-val');
+    const ctrlLetterSpacing = document.getElementById('ctrl-letter-spacing');
+    const ctrlLetterSpacingVal = document.getElementById('ctrl-letter-spacing-val');
+    const ctrlNoWrap = document.getElementById('ctrl-no-wrap');
+
+    function updatePreviewStyles() {
+        const fontSize = ctrlFontSize.value;
+        const lineHeight = ctrlLineHeight.value / 100;
+        const letterSpacing = ctrlLetterSpacing.value;
+
+        ansiTerminal.style.setProperty('--preview-font-size', fontSize + 'px');
+        ansiTerminal.style.setProperty('--preview-line-height', lineHeight);
+        ansiTerminal.style.setProperty('--preview-letter-spacing', letterSpacing + 'px');
+
+        ctrlFontSizeVal.textContent = fontSize + 'px';
+        ctrlLineHeightVal.textContent = lineHeight.toFixed(2);
+        ctrlLetterSpacingVal.textContent = letterSpacing + 'px';
+
+        ansiTerminal.classList.toggle('no-wrap', ctrlNoWrap.checked);
+    }
+
+    ctrlFontSize.addEventListener('input', updatePreviewStyles);
+    ctrlLineHeight.addEventListener('input', updatePreviewStyles);
+    ctrlLetterSpacing.addEventListener('input', updatePreviewStyles);
+    ctrlNoWrap.addEventListener('change', updatePreviewStyles);
+
+    // Initialize
+    updatePreviewStyles();
+
+    // ============================================================
+    // Pixel Font Tab
+    // ============================================================
+
+    const fontPreview = document.getElementById('font-preview');
+    const fontText = document.getElementById('font-text');
+    const fontTerminal = document.getElementById('font-terminal');
+    const fontOutput = document.getElementById('font-output');
+
+    let currentFontAnsi = '';
+    let currentFontPrintf = '';
+
+    // Auto-load font on page load
+    PixelFont.loadFont('pixel-font.json').then(() => {
+        // Show letter preview
+        const letters = PixelFont.getLetters();
+        let previewHtml = '<div class="font-letter-grid">';
+        for (let i = 0; i < 26; i++) {
+            const char = String.fromCharCode(65 + i);
+            previewHtml += `<div class="font-letter" data-letter="${char}">
+                <code class="font-letter-ansi">${letters[char].html}</code>
+                <span class="font-letter-label">${char}</span>
+            </div>`;
+        }
+        previewHtml += '</div>';
+        fontPreview.innerHTML = previewHtml;
+
+        // Setup letter click to copy
+        fontPreview.querySelectorAll('.font-letter').forEach(el => {
+            el.addEventListener('click', async () => {
+                const char = el.dataset.letter;
+                const escape = letters[char].ansi;
+                await copyToClipboard(escape);
+                showToast(`Copied letter ${char}`);
+            });
+        });
+    }).catch(err => {
+        fontPreview.innerHTML = '<div class="font-error">Failed to load font</div>';
+        console.error('Font load error:', err);
+    });
+
+    // Render text helper
+    function renderFontText() {
+        if (!PixelFont.isLoaded()) return;
+
+        const text = fontText.value;
+        if (!text) {
+            fontTerminal.innerHTML = '';
+            fontOutput.classList.remove('visible');
+            return;
+        }
+
+        const result = PixelFont.renderText(text);
+        currentFontAnsi = result.ansi;
+        currentFontPrintf = `printf "${escapeForPrintf(result.ansi)}"`;
+
+        fontTerminal.innerHTML = `<code>${result.html}</code>`;
+        fontOutput.classList.add('visible');
+    }
+
+    // Render text on input or toggle change
+    fontText.addEventListener('input', renderFontText);
+
+    function escapeForPrintf(ansi) {
+        return ansi
+            .replace(/\\/g, '\\\\')
+            .replace(/"/g, '\\"')
+            .replace(/\x1b/g, '\\033');
+    }
+
+    // Copy buttons for font tab
+    document.getElementById('copy-font-ansi').addEventListener('click', async () => {
+        if (currentFontAnsi) {
+            await copyToClipboard(currentFontAnsi);
+            showToast('ANSI copied!');
+        }
+    });
+
+    document.getElementById('copy-font-printf').addEventListener('click', async () => {
+        if (currentFontPrintf) {
+            await copyToClipboard(currentFontPrintf);
             showToast('printf command copied!');
         }
     });
