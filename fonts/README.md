@@ -46,6 +46,13 @@ node scripts/import-png-sprite.js \
   --glyph-width 8 \
   --glyph-height 12 \
   --charset "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+# If your sprite sheet has spacing between glyphs:
+#   --x-gap 1 --y-gap 1
+# If your sheet has margins:
+#   --margin-x 1 --margin-y 1
+# If glyphs are dark on a light background:
+#   --luma-threshold 128
 ```
 
 4. Add `fonts/my-font/LICENSE` and `fonts/my-font/README.md` with attribution.
@@ -56,4 +63,17 @@ node scripts/import-png-sprite.js \
   { "id": "pixel-alpha", "name": "Pixel Alpha", "path": "fonts/pixel-alpha/font.json" },
   { "id": "my-font", "name": "My Font", "path": "fonts/my-font/font.json" }
 ]
+```
+
+## BMFont XML Import
+
+For BMFont XML+PNG pairs (like the frostyfreeze pack), use:
+
+```
+node scripts/import-bmfont-xml.js \
+  --xml assets/font-sources/myfont.xml \
+  --png assets/font-sources/myfont.png \
+  --output fonts/myfont/font.json \
+  --name "My Font" \
+  --id myfont
 ```

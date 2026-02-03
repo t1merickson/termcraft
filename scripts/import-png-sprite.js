@@ -63,6 +63,12 @@ const spaceWidth = args['space-width'] ? Number(args['space-width']) : Math.floo
 const letterGap = args['letter-gap'] ? Number(args['letter-gap']) : 1;
 const fallback = args['fallback'] || '?';
 const threshold = args['threshold'] ? Number(args['threshold']) : 32;
+const lumaThreshold = args['luma-threshold'] ? Number(args['luma-threshold']) : null;
+const lumaInvert = args['luma-invert'] ? true : false;
+const xGap = args['x-gap'] ? Number(args['x-gap']) : 0;
+const yGap = args['y-gap'] ? Number(args['y-gap']) : 0;
+const marginX = args['margin-x'] ? Number(args['margin-x']) : 0;
+const marginY = args['margin-y'] ? Number(args['margin-y']) : 0;
 
 if (!Number.isFinite(spaceWidth) || spaceWidth < 0) {
   console.error(`Invalid --space-width: ${args['space-width']}`);
@@ -72,12 +78,34 @@ if (!Number.isFinite(letterGap) || letterGap < 0) {
   console.error(`Invalid --letter-gap: ${args['letter-gap']}`);
   process.exit(1);
 }
+if (!Number.isFinite(xGap) || xGap < 0) {
+  console.error(`Invalid --x-gap: ${args['x-gap']}`);
+  process.exit(1);
+}
+if (!Number.isFinite(yGap) || yGap < 0) {
+  console.error(`Invalid --y-gap: ${args['y-gap']}`);
+  process.exit(1);
+}
+if (!Number.isFinite(marginX) || marginX < 0) {
+  console.error(`Invalid --margin-x: ${args['margin-x']}`);
+  process.exit(1);
+}
+if (!Number.isFinite(marginY) || marginY < 0) {
+  console.error(`Invalid --margin-y: ${args['margin-y']}`);
+  process.exit(1);
+}
+if (lumaThreshold !== null && (!Number.isFinite(lumaThreshold) || lumaThreshold < 0 || lumaThreshold > 255)) {
+  console.error(`Invalid --luma-threshold: ${args['luma-threshold']}`);
+  process.exit(1);
+}
 
 const buffer = fs.readFileSync(input);
 const png = PNG.sync.read(buffer);
 
-const cols = Math.floor(png.width / glyphWidth);
-const rows = Math.floor(png.height / glyphHeight);
+const usableWidth = png.width - (marginX * 2);
+const usableHeight = png.height - (marginY * 2);
+const cols = Math.floor((usableWidth + xGap) / (glyphWidth + xGap));
+const rows = Math.floor((usableHeight + yGap) / (glyphHeight + yGap));
 const capacity = cols * rows;
 
 if (charset.length > capacity) {
@@ -102,15 +130,21 @@ for (let i = 0; i < charset.length; i++) {
   const col = i % cols;
   const row = Math.floor(i / cols);
 
-  const originX = col * glyphWidth;
-  const originY = row * glyphHeight;
+  const originX = marginX + col * (glyphWidth + xGap);
+  const originY = marginY + row * (glyphHeight + yGap);
 
   const rowsOut = [];
   for (let y = 0; y < glyphHeight; y++) {
     let line = '';
     for (let x = 0; x < glyphWidth; x++) {
       const px = getPixel(originX + x, originY + y);
-      const on = px.a >= threshold;
+      let on = false;
+      if (lumaThreshold !== null) {
+        const luma = 0.299 * px.r + 0.587 * px.g + 0.114 * px.b;
+        on = lumaInvert ? luma >= lumaThreshold : luma <= lumaThreshold;
+      } else {
+        on = px.a >= threshold;
+      }
       line += on ? '█' : ' ';
     }
     rowsOut.push(line);
@@ -131,7 +165,8 @@ const font = {
     spaceWidth,
     letterGap,
     fallback,
-    charset
+    charset,
+    source: path.basename(input)
   },
   glyphs
 };
