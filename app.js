@@ -495,17 +495,23 @@
     const fontText = document.getElementById('font-text');
     const fontTerminal = document.getElementById('font-terminal');
     const fontOutput = document.getElementById('font-output');
+    const fontSelect = document.getElementById('font-select');
 
     let currentFontAnsi = '';
     let currentFontPrintf = '';
+    let fontIndex = [];
 
-    // Auto-load font on page load
-    PixelFont.loadFont('pixel-font.json').then(() => {
-        // Show letter preview
+    function renderFontPreview() {
         const letters = PixelFont.getLetters();
+        const meta = PixelFont.getMeta();
+        const glyphKeys = Object.keys(PixelFont.getFontData());
+        const charset = (meta && meta.charset)
+            ? meta.charset.split('')
+            : glyphKeys.sort((a, b) => a.localeCompare(b));
+
         let previewHtml = '<div class="font-letter-grid">';
-        for (let i = 0; i < 26; i++) {
-            const char = String.fromCharCode(65 + i);
+        for (const char of charset) {
+            if (!letters[char]) continue;
             previewHtml += `<div class="font-letter" data-letter="${char}">
                 <code class="font-letter-ansi">${letters[char].html}</code>
                 <span class="font-letter-label">${char}</span>
@@ -523,9 +529,55 @@
                 showToast(`Copied letter ${char}`);
             });
         });
+    }
+
+    async function loadFontByPath(path) {
+        await PixelFont.loadFont(path);
+        renderFontPreview();
+        renderFontText();
+    }
+
+    async function loadFontIndex() {
+        const response = await fetch('fonts/index.json');
+        if (!response.ok) {
+            throw new Error('Failed to load fonts index');
+        }
+        return response.json();
+    }
+
+    function populateFontSelect() {
+        fontSelect.innerHTML = '';
+        fontIndex.forEach((font, idx) => {
+            const option = document.createElement('option');
+            option.value = font.id;
+            option.textContent = font.name || font.id;
+            if (idx === 0) option.selected = true;
+            fontSelect.appendChild(option);
+        });
+    }
+
+    // Auto-load font on page load
+    loadFontIndex().then((fonts) => {
+        fontIndex = Array.isArray(fonts) ? fonts : [];
+        if (fontIndex.length === 0) {
+            throw new Error('No fonts found in index');
+        }
+        populateFontSelect();
+        return loadFontByPath(fontIndex[0].path);
     }).catch(err => {
         fontPreview.innerHTML = '<div class="font-error">Failed to load font</div>';
         console.error('Font load error:', err);
+    });
+
+    fontSelect.addEventListener('change', async () => {
+        const selected = fontIndex.find(f => f.id === fontSelect.value);
+        if (!selected) return;
+        try {
+            await loadFontByPath(selected.path);
+        } catch (err) {
+            fontPreview.innerHTML = '<div class="font-error">Failed to load font</div>';
+            console.error('Font load error:', err);
+        }
     });
 
     // Render text helper

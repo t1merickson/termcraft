@@ -263,9 +263,9 @@
         <div class="tab-content" id="tab-font">
             <div class="font-container">
                 <h2>Pixel Font</h2>
-                <p class="font-subtitle">Render text using ANSI half-block pixel art</p>
+                <p class="font-subtitle">Render text using block-character pixel art</p>
 
-                <!-- Font Preview (shows all 26 letters) -->
+                <!-- Font Preview (shows available glyphs) -->
                 <div class="font-preview" id="font-preview">
                     <div class="font-loading">Loading font...</div>
                 </div>
@@ -273,6 +273,10 @@
                 <!-- Text Input -->
                 <div class="input-section" id="font-input-section">
                     <h3>Enter Text</h3>
+                    <div class="input-row">
+                        <label for="font-select">Font</label>
+                        <select id="font-select"></select>
+                    </div>
                     <div class="input-row">
                         <input type="text" id="font-text" placeholder="HELLO WORLD" maxlength="50">
                     </div>

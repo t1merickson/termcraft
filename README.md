@@ -72,6 +72,11 @@ Based on [dom111/image-to-ansi](https://github.com/dom111/image-to-ansi):
 3. In Unicode mode, combine two vertical pixels using half-block characters (▀/▄)
 4. Optimize output by only emitting escape codes when color changes
 
+## Pixel Fonts
+
+Pixel fonts live under `fonts/` and are loaded from `fonts/index.json`.
+See `fonts/README.md` for the format and import workflow.
+
 ## License
 
 MIT

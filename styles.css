@@ -379,6 +379,22 @@ body {
     font-size: 14px;
 }
 
+.input-row select {
+    flex: 1;
+    background: #222;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 10px 12px;
+    color: #fff;
+    font-family: 'SF Mono', monospace;
+    font-size: 14px;
+}
+
+.input-row select:focus {
+    outline: none;
+    border-color: #888;
+}
+
 .input-row input:focus {
     outline: none;
     border-color: #888;
