@@ -2,41 +2,49 @@
   {
     "id": "pixel-alpha",
     "name": "Pixel Alpha",
+    "type": "pixel",
     "path": "fonts/pixel-alpha/font.json"
   },
   {
     "id": "public-pixel",
     "name": "Public-Pixel",
+    "type": "pixel",
     "path": "fonts/public-pixel/font.json"
   },
   {
     "id": "lild0t",
     "name": "LilD0t",
+    "type": "pixel",
     "path": "fonts/lild0t/font.json"
   },
   {
     "id": "springwrite-iii",
     "name": "Springwrite III",
+    "type": "pixel",
     "path": "fonts/springwrite-iii/font.json"
   },
   {
     "id": "frostyfreeze-square-6x6",
     "name": "Square 6x6",
+    "type": "pixel",
     "path": "fonts/frostyfreeze-square-6x6/font.json"
   },
   {
     "id": "frostyfreeze-round-6x6",
     "name": "Round 6x6",
+    "type": "pixel",
     "path": "fonts/frostyfreeze-round-6x6/font.json"
   },
   {
     "id": "frostyfreeze-minogram-6x10",
     "name": "Minogram 6x10",
+    "type": "pixel",
     "path": "fonts/frostyfreeze-minogram-6x10/font.json"
   },
   {
     "id": "frostyfreeze-thick-8x8",
     "name": "Thick 8x8",
+    "type": "pixel",
     "path": "fonts/frostyfreeze-thick-8x8/font.json"
   }
 ]

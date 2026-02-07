@@ -624,4 +624,199 @@
         }
     });
 
+    // ============================================================
+    // Image to ASCII Tab
+    // ============================================================
+
+    const asciiUploadArea = document.getElementById('ascii-upload-area');
+    const asciiFileInput = document.getElementById('ascii-file-input');
+    const asciiProcessing = document.getElementById('ascii-processing');
+    const asciiPreviewArea = document.getElementById('ascii-preview-area');
+    const asciiSourceImage = document.getElementById('ascii-source-image');
+    const asciiSourceInfo = document.getElementById('ascii-source-info');
+    const asciiTerminal = document.getElementById('ascii-terminal');
+    const asciiEscapeOutput = document.getElementById('ascii-escape-output');
+    const asciiEscapeCode = document.getElementById('ascii-escape-code');
+
+    const asciiOptWidth = document.getElementById('ascii-opt-width');
+    const asciiOptHeight = document.getElementById('ascii-opt-height');
+    const asciiOptCharset = document.getElementById('ascii-opt-charset');
+    const asciiOptColor = document.getElementById('ascii-opt-color');
+    const asciiOptInvert = document.getElementById('ascii-opt-invert');
+    const asciiBtnHalf = document.getElementById('ascii-btn-half');
+    const asciiBtnFull = document.getElementById('ascii-btn-full');
+    const asciiBtnDouble = document.getElementById('ascii-btn-double');
+
+    let currentAsciiOutput = '';
+    let currentAsciiPrintf = '';
+    let asciiSourceWidth = 0;
+    let asciiSourceHeight = 0;
+
+    // File upload
+    asciiUploadArea.addEventListener('click', () => asciiFileInput.click());
+
+    asciiUploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        asciiUploadArea.classList.add('drag-over');
+    });
+
+    asciiUploadArea.addEventListener('dragleave', () => {
+        asciiUploadArea.classList.remove('drag-over');
+    });
+
+    asciiUploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        asciiUploadArea.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            processAsciiFile(file);
+        }
+    });
+
+    asciiFileInput.addEventListener('change', () => {
+        const file = asciiFileInput.files[0];
+        if (file) processAsciiFile(file);
+    });
+
+    async function processAsciiFile(file) {
+        asciiProcessing.classList.add('visible');
+        asciiPreviewArea.classList.remove('visible');
+        asciiEscapeOutput.classList.remove('visible');
+
+        try {
+            const dataUrl = await ImageToAscii.readFile(file);
+            const img = await ImageToAscii.loadImage(dataUrl);
+
+            asciiSourceImage.src = dataUrl;
+            asciiSourceWidth = img.width;
+            asciiSourceHeight = img.height;
+            asciiSourceInfo.textContent = `${img.width} × ${img.height} pixels`;
+
+            // Enable preset buttons
+            asciiBtnHalf.disabled = false;
+            asciiBtnFull.disabled = false;
+            asciiBtnDouble.disabled = false;
+
+            const result = ImageToAscii.processImage(img, {
+                maxWidth: parseInt(asciiOptWidth.value) || 80,
+                maxHeight: parseInt(asciiOptHeight.value) || 40,
+                charset: asciiOptCharset.value,
+                colorMode: asciiOptColor.value,
+                invert: asciiOptInvert.checked
+            });
+
+            currentAsciiOutput = result.ansi;
+            currentAsciiPrintf = `printf "${ImageToAscii.escapeForPrintf(result.ansi)}"`;
+
+            asciiTerminal.innerHTML = `<code>${result.html}</code>`;
+            asciiEscapeCode.textContent = currentAsciiPrintf;
+
+            asciiProcessing.classList.remove('visible');
+            asciiPreviewArea.classList.add('visible');
+            asciiEscapeOutput.classList.add('visible');
+
+        } catch (error) {
+            console.error('Error processing image:', error);
+            asciiProcessing.classList.remove('visible');
+            showToast('Error processing image');
+        }
+    }
+
+    // Re-process on option change
+    function reprocessAsciiImage() {
+        if (asciiSourceImage.src && asciiSourceImage.src !== window.location.href) {
+            ImageToAscii.loadImage(asciiSourceImage.src).then(img => {
+                const result = ImageToAscii.processImage(img, {
+                    maxWidth: parseInt(asciiOptWidth.value) || 80,
+                    maxHeight: parseInt(asciiOptHeight.value) || 40,
+                    charset: asciiOptCharset.value,
+                    colorMode: asciiOptColor.value,
+                    invert: asciiOptInvert.checked
+                });
+
+                currentAsciiOutput = result.ansi;
+                currentAsciiPrintf = `printf "${ImageToAscii.escapeForPrintf(result.ansi)}"`;
+                asciiTerminal.innerHTML = `<code>${result.html}</code>`;
+                asciiEscapeCode.textContent = currentAsciiPrintf;
+            });
+        }
+    }
+
+    [asciiOptWidth, asciiOptHeight, asciiOptCharset, asciiOptColor, asciiOptInvert].forEach(opt => {
+        opt.addEventListener('change', reprocessAsciiImage);
+    });
+
+    // Preset buttons
+    asciiBtnHalf.addEventListener('click', () => {
+        if (asciiSourceWidth && asciiSourceHeight) {
+            asciiOptWidth.value = Math.floor(asciiSourceWidth / 2);
+            asciiOptHeight.value = Math.floor(asciiSourceHeight / 2);
+            reprocessAsciiImage();
+        }
+    });
+
+    asciiBtnFull.addEventListener('click', () => {
+        if (asciiSourceWidth && asciiSourceHeight) {
+            asciiOptWidth.value = asciiSourceWidth;
+            asciiOptHeight.value = asciiSourceHeight;
+            reprocessAsciiImage();
+        }
+    });
+
+    asciiBtnDouble.addEventListener('click', () => {
+        if (asciiSourceWidth && asciiSourceHeight) {
+            asciiOptWidth.value = asciiSourceWidth * 2;
+            asciiOptHeight.value = asciiSourceHeight * 2;
+            reprocessAsciiImage();
+        }
+    });
+
+    // Copy buttons
+    document.getElementById('ascii-copy-ansi').addEventListener('click', async () => {
+        if (currentAsciiOutput) {
+            await copyToClipboard(currentAsciiOutput);
+            showToast('ASCII art copied!');
+        }
+    });
+
+    document.getElementById('ascii-copy-printf').addEventListener('click', async () => {
+        if (currentAsciiPrintf) {
+            await copyToClipboard(currentAsciiPrintf);
+            showToast('printf command copied!');
+        }
+    });
+
+    // Preview controls
+    const asciiCtrlFontSize = document.getElementById('ascii-ctrl-font-size');
+    const asciiCtrlFontSizeVal = document.getElementById('ascii-ctrl-font-size-val');
+    const asciiCtrlLineHeight = document.getElementById('ascii-ctrl-line-height');
+    const asciiCtrlLineHeightVal = document.getElementById('ascii-ctrl-line-height-val');
+    const asciiCtrlLetterSpacing = document.getElementById('ascii-ctrl-letter-spacing');
+    const asciiCtrlLetterSpacingVal = document.getElementById('ascii-ctrl-letter-spacing-val');
+    const asciiCtrlNoWrap = document.getElementById('ascii-ctrl-no-wrap');
+
+    function updateAsciiPreviewStyles() {
+        const fontSize = asciiCtrlFontSize.value;
+        const lineHeight = asciiCtrlLineHeight.value / 100;
+        const letterSpacing = asciiCtrlLetterSpacing.value;
+
+        asciiTerminal.style.setProperty('--preview-font-size', fontSize + 'px');
+        asciiTerminal.style.setProperty('--preview-line-height', lineHeight);
+        asciiTerminal.style.setProperty('--preview-letter-spacing', letterSpacing + 'px');
+
+        asciiCtrlFontSizeVal.textContent = fontSize + 'px';
+        asciiCtrlLineHeightVal.textContent = lineHeight.toFixed(2);
+        asciiCtrlLetterSpacingVal.textContent = letterSpacing + 'px';
+
+        asciiTerminal.classList.toggle('no-wrap', asciiCtrlNoWrap.checked);
+    }
+
+    asciiCtrlFontSize.addEventListener('input', updateAsciiPreviewStyles);
+    asciiCtrlLineHeight.addEventListener('input', updateAsciiPreviewStyles);
+    asciiCtrlLetterSpacing.addEventListener('input', updateAsciiPreviewStyles);
+    asciiCtrlNoWrap.addEventListener('change', updateAsciiPreviewStyles);
+
+    // Initialize
+    updateAsciiPreviewStyles();
+
 })();

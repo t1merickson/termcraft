@@ -30,6 +30,10 @@
                 <span class="icon">▦</span>
                 <span>Pixel Font</span>
             </div>
+            <div class="nav-item" data-tab="ascii">
+                <span class="icon">A</span>
+                <span>Image to ASCII</span>
+            </div>
         </nav>
         <div class="sidebar-footer">
             Colors computed from ANSI 256 specification
@@ -295,6 +299,108 @@
                 </div>
             </div>
         </div>
+
+        <!-- Tab 5: Image to ASCII -->
+        <div class="tab-content" id="tab-ascii">
+            <div class="image-container">
+                <h2>Image to ASCII</h2>
+                <p class="image-subtitle">Convert images to ASCII art using character brightness mapping</p>
+
+                <!-- Upload Area -->
+                <div class="upload-area" id="ascii-upload-area">
+                    <div class="icon">A</div>
+                    <p>Drop an image here or click to upload</p>
+                    <p class="hint">Supports PNG, JPG, GIF, WebP</p>
+                    <input type="file" id="ascii-file-input" accept="image/*">
+                </div>
+
+                <!-- Options Panel -->
+                <div class="options-panel">
+                    <h3>Options</h3>
+                    <div class="options-grid">
+                        <div class="option-group">
+                            <label for="ascii-opt-width">Max Width</label>
+                            <input type="number" id="ascii-opt-width" value="80" min="10" max="300">
+                        </div>
+                        <div class="option-group">
+                            <label for="ascii-opt-height">Max Height</label>
+                            <input type="number" id="ascii-opt-height" value="40" min="10" max="150">
+                        </div>
+                        <div class="option-group">
+                            <label>Scale</label>
+                            <div class="preset-buttons">
+                                <button class="btn btn-small" id="ascii-btn-half" disabled>½×</button>
+                                <button class="btn btn-small" id="ascii-btn-full" disabled>1×</button>
+                                <button class="btn btn-small" id="ascii-btn-double" disabled>2×</button>
+                            </div>
+                        </div>
+                        <div class="option-group">
+                            <label for="ascii-opt-charset">Character Set</label>
+                            <select id="ascii-opt-charset">
+                                <option value="standard">Standard ( .:-=+*#%@)</option>
+                                <option value="detailed">Detailed ( .'`:;-~=+*!?#%@)</option>
+                                <option value="blocks">Blocks ( ░▒▓█)</option>
+                                <option value="simple">Simple ( .*#)</option>
+                                <option value="extended">Extended (70 chars)</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <label for="ascii-opt-color">Color Mode</label>
+                            <select id="ascii-opt-color">
+                                <option value="none">None (Plain ASCII)</option>
+                                <option value="24bit">24-bit True Color</option>
+                                <option value="256">256 Color</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="ascii-opt-invert">
+                                Invert Brightness
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Processing Indicator -->
+                <div class="processing" id="ascii-processing">
+                    <div class="spinner"></div>
+                    <p>Processing image...</p>
+                </div>
+
+                <!-- Preview Area -->
+                <div class="preview-area" id="ascii-preview-area">
+                    <div class="source-preview">
+                        <h4>Source</h4>
+                        <img id="ascii-source-image" alt="Source image">
+                        <div class="source-info" id="ascii-source-info"></div>
+                    </div>
+                    <div class="ansi-output">
+                        <div class="ansi-output-header">
+                            <h4>ASCII Output</h4>
+                            <div class="ansi-output-actions">
+                                <button class="btn btn-secondary" id="ascii-copy-ansi">Copy ASCII</button>
+                                <button class="btn btn-secondary" id="ascii-copy-printf">Copy printf</button>
+                            </div>
+                        </div>
+                        <div class="preview-controls">
+                            <label>Font Size <input type="range" id="ascii-ctrl-font-size" min="4" max="24" value="12"><span id="ascii-ctrl-font-size-val">12px</span></label>
+                            <label>Line Height <input type="range" id="ascii-ctrl-line-height" min="50" max="150" value="100"><span id="ascii-ctrl-line-height-val">1.0</span></label>
+                            <label>Letter Spacing <input type="range" id="ascii-ctrl-letter-spacing" min="-5" max="5" value="0"><span id="ascii-ctrl-letter-spacing-val">0px</span></label>
+                            <label><input type="checkbox" id="ascii-ctrl-no-wrap" checked> No Wrap</label>
+                        </div>
+                        <div class="ansi-terminal" id="ascii-terminal"></div>
+                    </div>
+                </div>
+
+                <!-- Escape Code Output -->
+                <div class="escape-output" id="ascii-escape-output">
+                    <div class="escape-output-header">
+                        <h4>Shell Command (printf)</h4>
+                    </div>
+                    <pre class="escape-code" id="ascii-escape-code"></pre>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Tooltip -->
@@ -332,6 +438,7 @@
     <!-- Scripts -->
     <script src="ansi256.js"></script>
     <script src="image-to-ansi.js"></script>
+    <script src="image-to-ascii.js"></script>
     <script src="pixel-font.js"></script>
     <script src="app.js"></script>
 </body>
