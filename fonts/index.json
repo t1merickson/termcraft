@@ -1,27 +1,27 @@
 [
   {
-    "id": "pixel-alpha",
-    "name": "Pixel Alpha",
+    "id": "tom-thumb",
+    "name": "Tom Thumb 4x6",
     "type": "pixel",
-    "path": "fonts/pixel-alpha/font.json"
+    "path": "fonts/tom-thumb/font.json"
   },
   {
-    "id": "public-pixel",
-    "name": "Public-Pixel",
+    "id": "font4x6",
+    "name": "Micro 4x6",
     "type": "pixel",
-    "path": "fonts/public-pixel/font.json"
+    "path": "fonts/font4x6/font.json"
   },
   {
-    "id": "lild0t",
-    "name": "LilD0t",
+    "id": "nitram-micro-5x5",
+    "name": "Nitram Micro 5x5",
     "type": "pixel",
-    "path": "fonts/lild0t/font.json"
+    "path": "fonts/nitram-micro-5x5/font.json"
   },
   {
-    "id": "springwrite-iii",
-    "name": "Springwrite III",
+    "id": "five-pixel-font",
+    "name": "Five Pixel 5x5",
     "type": "pixel",
-    "path": "fonts/springwrite-iii/font.json"
+    "path": "fonts/five-pixel-font/font.json"
   },
   {
     "id": "frostyfreeze-square-6x6",
@@ -36,15 +36,45 @@
     "path": "fonts/frostyfreeze-round-6x6/font.json"
   },
   {
-    "id": "frostyfreeze-minogram-6x10",
-    "name": "Minogram 6x10",
+    "id": "lild0t",
+    "name": "LilD0t 7x7",
     "type": "pixel",
-    "path": "fonts/frostyfreeze-minogram-6x10/font.json"
+    "path": "fonts/lild0t/font.json"
+  },
+  {
+    "id": "pixel-alpha",
+    "name": "Pixel Alpha",
+    "type": "pixel",
+    "path": "fonts/pixel-alpha/font.json"
+  },
+  {
+    "id": "public-pixel",
+    "name": "Public-Pixel",
+    "type": "pixel",
+    "path": "fonts/public-pixel/font.json"
+  },
+  {
+    "id": "springwrite-iii",
+    "name": "Springwrite III",
+    "type": "pixel",
+    "path": "fonts/springwrite-iii/font.json"
+  },
+  {
+    "id": "font8x8-basic",
+    "name": "VGA 8x8",
+    "type": "pixel",
+    "path": "fonts/font8x8-basic/font.json"
   },
   {
     "id": "frostyfreeze-thick-8x8",
     "name": "Thick 8x8",
     "type": "pixel",
     "path": "fonts/frostyfreeze-thick-8x8/font.json"
+  },
+  {
+    "id": "frostyfreeze-minogram-6x10",
+    "name": "Minogram 6x10",
+    "type": "pixel",
+    "path": "fonts/frostyfreeze-minogram-6x10/font.json"
   }
 ]

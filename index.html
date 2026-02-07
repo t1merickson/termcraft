@@ -26,13 +26,13 @@
                 <span class="icon">▣</span>
                 <span>Image to ANSI</span>
             </div>
-            <div class="nav-item" data-tab="font">
-                <span class="icon">▦</span>
-                <span>Pixel Font</span>
-            </div>
             <div class="nav-item" data-tab="ascii">
                 <span class="icon">A</span>
                 <span>Image to ASCII</span>
+            </div>
+            <div class="nav-item" data-tab="font">
+                <span class="icon">▦</span>
+                <span>Pixel Font</span>
             </div>
         </nav>
         <div class="sidebar-footer">
@@ -263,44 +263,7 @@
             </div>
         </div>
 
-        <!-- Tab 4: Pixel Font -->
-        <div class="tab-content" id="tab-font">
-            <div class="font-container">
-                <h2>Pixel Font</h2>
-                <p class="font-subtitle">Render text using block-character pixel art</p>
-
-                <!-- Font Preview (shows available glyphs) -->
-                <div class="font-preview" id="font-preview">
-                    <div class="font-loading">Loading font...</div>
-                </div>
-
-                <!-- Text Input -->
-                <div class="input-section" id="font-input-section">
-                    <h3>Enter Text</h3>
-                    <div class="input-row">
-                        <label for="font-select">Font</label>
-                        <select id="font-select"></select>
-                    </div>
-                    <div class="input-row">
-                        <input type="text" id="font-text" placeholder="HELLO WORLD" maxlength="50">
-                    </div>
-                </div>
-
-                <!-- Rendered Output -->
-                <div class="font-output" id="font-output">
-                    <div class="font-output-header">
-                        <h4>Output</h4>
-                        <div class="font-output-actions">
-                            <button class="btn btn-secondary" id="copy-font-ansi">Copy ANSI</button>
-                            <button class="btn btn-secondary" id="copy-font-printf">Copy printf</button>
-                        </div>
-                    </div>
-                    <div class="ansi-terminal" id="font-terminal"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab 5: Image to ASCII -->
+        <!-- Tab 4: Image to ASCII -->
         <div class="tab-content" id="tab-ascii">
             <div class="image-container">
                 <h2>Image to ASCII</h2>
@@ -398,6 +361,43 @@
                         <h4>Shell Command (printf)</h4>
                     </div>
                     <pre class="escape-code" id="ascii-escape-code"></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 5: Pixel Font -->
+        <div class="tab-content" id="tab-font">
+            <div class="font-container">
+                <h2>Pixel Font</h2>
+                <p class="font-subtitle">Render text using block-character pixel art</p>
+
+                <!-- Font Preview (shows available glyphs) -->
+                <div class="font-preview" id="font-preview">
+                    <div class="font-loading">Loading font...</div>
+                </div>
+
+                <!-- Text Input -->
+                <div class="input-section" id="font-input-section">
+                    <h3>Enter Text</h3>
+                    <div class="input-row">
+                        <label for="font-select">Font</label>
+                        <select id="font-select"></select>
+                    </div>
+                    <div class="input-row">
+                        <input type="text" id="font-text" placeholder="HELLO WORLD" maxlength="50">
+                    </div>
+                </div>
+
+                <!-- Rendered Output -->
+                <div class="font-output" id="font-output">
+                    <div class="font-output-header">
+                        <h4>Output</h4>
+                        <div class="font-output-actions">
+                            <button class="btn btn-secondary" id="copy-font-ansi">Copy ANSI</button>
+                            <button class="btn btn-secondary" id="copy-font-printf">Copy printf</button>
+                        </div>
+                    </div>
+                    <div class="ansi-terminal" id="font-terminal"></div>
                 </div>
             </div>
         </div>
