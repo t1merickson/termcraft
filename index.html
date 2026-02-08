@@ -74,12 +74,12 @@
 
         <!-- Tab 2: Lookup & Convert -->
         <div class="tab-content" id="tab-lookup">
-            <div class="lookup-container">
+            <div class="tab-container tab-container--narrow">
                 <h2>Color Lookup &amp; Convert</h2>
-                <p class="lookup-subtitle">Find the nearest ANSI 256 color from HEX, RGB, or HSL</p>
+                <p class="tab-subtitle">Find the nearest ANSI 256 color from HEX, RGB, or HSL</p>
 
                 <!-- HEX Input -->
-                <div class="input-section">
+                <div class="panel input-section">
                     <h3>HEX Color</h3>
                     <div class="input-row">
                         <label>HEX</label>
@@ -90,7 +90,7 @@
                 </div>
 
                 <!-- RGB Input -->
-                <div class="input-section">
+                <div class="panel input-section">
                     <h3>RGB Color</h3>
                     <div class="input-row">
                         <label>R</label>
@@ -105,7 +105,7 @@
                 </div>
 
                 <!-- HSL Input -->
-                <div class="input-section">
+                <div class="panel input-section">
                     <h3>HSL Color</h3>
                     <div class="input-row">
                         <label>H</label>
@@ -120,7 +120,7 @@
                 </div>
 
                 <!-- Result -->
-                <div class="lookup-result" id="lookup-result">
+                <div class="panel panel-hideable lookup-result" id="lookup-result">
                     <div class="lookup-result-header">
                         <div class="lookup-result-swatches">
                             <div class="lookup-swatch" id="result-input-swatch">
@@ -168,9 +168,9 @@
 
         <!-- Tab 3: Image to ANSI -->
         <div class="tab-content" id="tab-image">
-            <div class="image-container">
+            <div class="tab-container tab-container--wide">
                 <h2>Image to ANSI</h2>
-                <p class="image-subtitle">Convert images to ANSI 256 color terminal art</p>
+                <p class="tab-subtitle">Convert images to ANSI 256 color terminal art</p>
 
                 <!-- Upload Area -->
                 <div class="upload-area" id="upload-area">
@@ -190,7 +190,7 @@
                 </div>
 
                 <!-- Options Panel -->
-                <div class="options-panel">
+                <div class="panel options-panel">
                     <h3>Options</h3>
                     <div class="options-grid">
                         <div class="option-group">
@@ -239,12 +239,11 @@
 
                 <!-- Preview Area -->
                 <div class="preview-area" id="preview-area">
-                    <div class="ansi-output">
-                        <div class="ansi-output-header">
+                    <div class="panel">
+                        <div class="panel-header">
                             <h4>ANSI Output</h4>
-                            <div class="ansi-output-actions">
+                            <div class="panel-actions">
                                 <button class="btn btn-secondary" id="copy-ansi">Copy ANSI</button>
-                                <button class="btn btn-secondary" id="copy-printf">Copy printf</button>
                             </div>
                         </div>
                         <div class="preview-controls">
@@ -258,9 +257,12 @@
                 </div>
 
                 <!-- Escape Code Output -->
-                <div class="escape-output" id="escape-output">
-                    <div class="escape-output-header">
+                <div class="panel panel-hideable escape-output" id="escape-output">
+                    <div class="panel-header">
                         <h4>Shell Command (printf)</h4>
+                        <div class="panel-actions">
+                            <button class="btn btn-secondary" id="copy-printf">Copy printf</button>
+                        </div>
                     </div>
                     <pre class="escape-code" id="escape-code"></pre>
                 </div>
@@ -269,9 +271,9 @@
 
         <!-- Tab 4: Image to ASCII -->
         <div class="tab-content" id="tab-ascii">
-            <div class="image-container">
+            <div class="tab-container tab-container--wide">
                 <h2>Image to ASCII</h2>
-                <p class="image-subtitle">Convert images to ASCII art using character brightness mapping</p>
+                <p class="tab-subtitle">Convert images to ASCII art using character brightness mapping</p>
 
                 <!-- Upload Area -->
                 <div class="upload-area" id="ascii-upload-area">
@@ -291,7 +293,7 @@
                 </div>
 
                 <!-- Options Panel -->
-                <div class="options-panel">
+                <div class="panel options-panel">
                     <h3>Options</h3>
                     <div class="options-grid">
                         <div class="option-group">
@@ -345,12 +347,11 @@
 
                 <!-- Preview Area -->
                 <div class="preview-area" id="ascii-preview-area">
-                    <div class="ansi-output">
-                        <div class="ansi-output-header">
+                    <div class="panel">
+                        <div class="panel-header">
                             <h4>ASCII Output</h4>
-                            <div class="ansi-output-actions">
+                            <div class="panel-actions">
                                 <button class="btn btn-secondary" id="ascii-copy-ansi">Copy ASCII</button>
-                                <button class="btn btn-secondary" id="ascii-copy-printf">Copy printf</button>
                             </div>
                         </div>
                         <div class="preview-controls">
@@ -364,9 +365,12 @@
                 </div>
 
                 <!-- Escape Code Output -->
-                <div class="escape-output" id="ascii-escape-output">
-                    <div class="escape-output-header">
+                <div class="panel panel-hideable escape-output" id="ascii-escape-output">
+                    <div class="panel-header">
                         <h4>Shell Command (printf)</h4>
+                        <div class="panel-actions">
+                            <button class="btn btn-secondary" id="ascii-copy-printf">Copy printf</button>
+                        </div>
                     </div>
                     <pre class="escape-code" id="ascii-escape-code"></pre>
                 </div>
@@ -375,9 +379,9 @@
 
         <!-- Tab 5: Pixel Font -->
         <div class="tab-content" id="tab-font">
-            <div class="font-container">
+            <div class="tab-container tab-container--medium">
                 <h2>Pixel Font</h2>
-                <p class="font-subtitle">Render text using block-character pixel art</p>
+                <p class="tab-subtitle">Render text using block-character pixel art</p>
 
                 <!-- Font Preview (shows available glyphs) -->
                 <div class="font-preview" id="font-preview">
@@ -385,7 +389,7 @@
                 </div>
 
                 <!-- Text Input -->
-                <div class="input-section" id="font-input-section">
+                <div class="panel input-section" id="font-input-section">
                     <h3>Enter Text</h3>
                     <div class="input-row">
                         <label for="font-select">Font</label>
@@ -412,10 +416,10 @@
                 </div>
 
                 <!-- Rendered Output -->
-                <div class="font-output" id="font-output">
-                    <div class="font-output-header">
+                <div class="panel panel-hideable font-output" id="font-output">
+                    <div class="panel-header">
                         <h4>Output</h4>
-                        <div class="font-output-actions">
+                        <div class="panel-actions">
                             <button class="btn btn-secondary" id="copy-font-ansi">Copy ANSI</button>
                             <button class="btn btn-secondary" id="copy-font-printf">Copy printf</button>
                         </div>
