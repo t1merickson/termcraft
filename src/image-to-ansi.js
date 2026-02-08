@@ -84,9 +84,14 @@
         const isBinary = renderMode === 'binary';
         const is1to1 = renderMode.endsWith('-1x');
 
-        // Calculate scaled dimensions (characters are ~2x taller than wide)
+        // Calculate scaled dimensions
+        // The pixel grid matches the source image aspect ratio directly.
+        // Each render mode maps pixels to characters differently (half blocks
+        // pack 2 rows per line, quadrant packs 2×2 per char, etc.) but the
+        // pixel grid itself always preserves the original image proportions.
+        // Visual aspect correction is handled by the display layer (CSS
+        // line-height in the preview, or the terminal's font metrics).
         const aspectRatio = img.width / img.height;
-        const charAspect = 2;
 
         let width, height;
 
@@ -103,48 +108,51 @@
             width = img.width;
             height = img.height;
         } else if (useHalfBlocks || useHalfFgOnly || isBinary) {
-            // Half blocks: 2 vertical pixels per character
-            const effectiveHeight = maxHeight * 2;
-            if (aspectRatio > (maxWidth / effectiveHeight) * charAspect) {
+            // Half blocks: charW = pixelW, charH = pixelH / 2
+            // For correct display aspect: pixelH = 2 * pixelW / aspectRatio
+            const maxPixH = maxHeight * 2; // max pixel rows = max char lines × 2
+            if (aspectRatio > maxWidth / maxHeight) {
                 width = maxWidth;
-                height = Math.round(maxWidth / aspectRatio / charAspect) * 2;
+                height = Math.round(2 * maxWidth / aspectRatio);
             } else {
-                height = effectiveHeight;
-                width = Math.round(effectiveHeight * aspectRatio * charAspect);
+                height = maxPixH;
+                width = Math.round(maxPixH * aspectRatio / 2);
             }
             height = Math.max(2, Math.floor(height / 2) * 2);
         } else if (useQuadrant) {
-            // Quadrant blocks: 2x2 pixels per character
-            const effectiveWidth = maxWidth * 2;
-            const effectiveHeight = maxHeight * 2;
-            if (aspectRatio > (effectiveWidth / effectiveHeight)) {
-                width = effectiveWidth;
-                height = Math.round(effectiveWidth / aspectRatio);
+            // Quadrant: charW = pixelW / 2, charH = pixelH / 2
+            // Char aspect = (pixelW/2) / (pixelH/2) = pixelW/pixelH
+            // So pixel grid matches image ratio. No correction needed.
+            if (aspectRatio > maxWidth / maxHeight) {
+                width = maxWidth;
+                height = Math.round(maxWidth / aspectRatio);
             } else {
-                height = effectiveHeight;
-                width = Math.round(effectiveHeight * aspectRatio);
+                height = maxHeight;
+                width = Math.round(maxHeight * aspectRatio);
             }
             // Round to even
             width = Math.max(2, Math.floor(width / 2) * 2);
             height = Math.max(2, Math.floor(height / 2) * 2);
         } else if (useBlockChars) {
-            // Block chars (█): 1 char per pixel, need to double width for aspect ratio
-            if (aspectRatio > (maxWidth / maxHeight) * charAspect) {
+            // Block chars: charW = pixelW, charH = pixelH
+            // Pixel grid matches image ratio directly.
+            if (aspectRatio > maxWidth / maxHeight) {
                 width = maxWidth;
-                height = Math.round(maxWidth / aspectRatio / charAspect);
-            } else {
-                height = maxHeight;
-                width = Math.round(maxHeight * aspectRatio * charAspect);
-            }
-        } else {
-            // Full spaces mode: each pixel becomes 2 spaces wide, so we don't
-            // apply charAspect to width calculation (the 2 spaces handle it)
-            if (aspectRatio > maxWidth / 2 / maxHeight) {
-                width = Math.floor(maxWidth / 2);
-                height = Math.round((maxWidth / 2) / aspectRatio);
+                height = Math.round(maxWidth / aspectRatio);
             } else {
                 height = maxHeight;
                 width = Math.round(maxHeight * aspectRatio);
+            }
+        } else {
+            // Full spaces: charW = pixelW × 2, charH = pixelH
+            // For correct display aspect: pixelH = 2 * pixelW / aspectRatio
+            const maxPixW = Math.floor(maxWidth / 2); // max pixel cols = max char cols / 2
+            if (aspectRatio > maxWidth / 2 / maxHeight) {
+                width = maxPixW;
+                height = Math.round(2 * maxPixW / aspectRatio);
+            } else {
+                height = maxHeight;
+                width = Math.round(maxHeight * aspectRatio / 2);
             }
         }
 

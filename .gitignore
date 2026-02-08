@@ -3,5 +3,6 @@ node_modules/
 assets/font-sources/**
 !assets/font-sources/**/
 !assets/font-sources/**/sprite.json
+test-output/
 fonts/downloads/
 font-pixel-alpha.png
