@@ -1,4 +1,9 @@
 {
+  "scripts": {
+    "start": "node scripts/dev-server.js",
+    "import:png": "node scripts/import-png-sprite.js",
+    "import:bmfont": "node scripts/import-bmfont-xml.js"
+  },
   "devDependencies": {
     "pngjs": "^7.0.0"
   }
