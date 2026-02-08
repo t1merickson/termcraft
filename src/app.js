@@ -282,6 +282,8 @@
     const optHeight = document.getElementById('opt-height');
     const optRender = document.getElementById('opt-render');
     const optColor = document.getElementById('opt-color');
+    const optInvert = document.getElementById('opt-invert');
+    const optGreyscale = document.getElementById('opt-greyscale');
     const btnHalf = document.getElementById('btn-half');
     const btnFull = document.getElementById('btn-full');
     const btnDouble = document.getElementById('btn-double');
@@ -367,7 +369,9 @@
             const result = ImageToAnsi.processImage(img, {
                 maxWidth: parseInt(optWidth.value) || 80,
                 maxHeight: parseInt(optHeight.value) || 40,
-                renderMode: getRenderMode()
+                renderMode: getRenderMode(),
+                invert: optInvert.checked,
+                greyscale: optGreyscale.checked
             });
 
             currentAnsiOutput = result.ansi;
@@ -394,7 +398,9 @@
                 const result = ImageToAnsi.processImage(img, {
                     maxWidth: parseInt(optWidth.value) || 80,
                     maxHeight: parseInt(optHeight.value) || 40,
-                    renderMode: getRenderMode()
+                    renderMode: getRenderMode(),
+                    invert: optInvert.checked,
+                    greyscale: optGreyscale.checked
                 });
 
                 currentAnsiOutput = result.ansi;
@@ -405,7 +411,7 @@
         }
     }
 
-    [optWidth, optHeight, optRender, optColor].forEach(opt => {
+    [optWidth, optHeight, optRender, optColor, optInvert, optGreyscale].forEach(opt => {
         opt.addEventListener('change', reprocessImage);
     });
 
@@ -662,6 +668,7 @@
     const asciiOptCharset = document.getElementById('ascii-opt-charset');
     const asciiOptColor = document.getElementById('ascii-opt-color');
     const asciiOptInvert = document.getElementById('ascii-opt-invert');
+    const asciiOptGreyscale = document.getElementById('ascii-opt-greyscale');
     const asciiBtnHalf = document.getElementById('ascii-btn-half');
     const asciiBtnFull = document.getElementById('ascii-btn-full');
     const asciiBtnDouble = document.getElementById('ascii-btn-double');
@@ -726,7 +733,8 @@
                 maxHeight: parseInt(asciiOptHeight.value) || 40,
                 charset: asciiOptCharset.value,
                 colorMode: asciiOptColor.value,
-                invert: asciiOptInvert.checked
+                invert: asciiOptInvert.checked,
+                greyscale: asciiOptGreyscale.checked
             });
 
             currentAsciiOutput = result.ansi;
@@ -755,7 +763,8 @@
                     maxHeight: parseInt(asciiOptHeight.value) || 40,
                     charset: asciiOptCharset.value,
                     colorMode: asciiOptColor.value,
-                    invert: asciiOptInvert.checked
+                    invert: asciiOptInvert.checked,
+                    greyscale: asciiOptGreyscale.checked
                 });
 
                 currentAsciiOutput = result.ansi;
@@ -766,7 +775,7 @@
         }
     }
 
-    [asciiOptWidth, asciiOptHeight, asciiOptCharset, asciiOptColor, asciiOptInvert].forEach(opt => {
+    [asciiOptWidth, asciiOptHeight, asciiOptCharset, asciiOptColor, asciiOptInvert, asciiOptGreyscale].forEach(opt => {
         opt.addEventListener('change', reprocessAsciiImage);
     });
 

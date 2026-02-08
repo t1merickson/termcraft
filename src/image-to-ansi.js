@@ -164,7 +164,9 @@
         const {
             maxWidth = 80,
             maxHeight = 40,
-            renderMode = 'half-256'
+            renderMode = 'half-256',
+            invert = false,
+            greyscale = false
         } = options;
 
         // Parse render mode flags
@@ -188,6 +190,25 @@
 
         const imageData = ctx.getImageData(0, 0, width, height);
         const pixels = imageData.data;
+
+        // Apply pixel transforms
+        if (greyscale || invert) {
+            for (let i = 0; i < pixels.length; i += 4) {
+                let r = pixels[i], g = pixels[i + 1], b = pixels[i + 2];
+                if (greyscale) {
+                    const lum = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+                    r = g = b = lum;
+                }
+                if (invert) {
+                    r = 255 - r;
+                    g = 255 - g;
+                    b = 255 - b;
+                }
+                pixels[i] = r;
+                pixels[i + 1] = g;
+                pixels[i + 2] = b;
+            }
+        }
 
         let result;
 

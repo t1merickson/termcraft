@@ -93,7 +93,8 @@
             maxHeight = 40,
             charset = 'standard',
             colorMode = 'none',
-            invert = false
+            invert = false,
+            greyscale = false
         } = options;
 
         // Get charset string (allow preset name or custom string)
@@ -129,6 +130,14 @@
 
         const imageData = ctx.getImageData(0, 0, width, height);
         const pixels = imageData.data;
+
+        // Apply greyscale transform (invert is handled in getCharForLuminance)
+        if (greyscale) {
+            for (let i = 0; i < pixels.length; i += 4) {
+                const lum = Math.round(0.299 * pixels[i] + 0.587 * pixels[i + 1] + 0.114 * pixels[i + 2]);
+                pixels[i] = pixels[i + 1] = pixels[i + 2] = lum;
+            }
+        }
 
         const useColor = colorMode !== 'none';
         const useTrue24bit = colorMode === '24bit';

@@ -93,52 +93,38 @@ function cellsToPng(rows) {
     return png;
 }
 
+// Quadrant bit pattern: bit 0=TL, bit 1=TR, bit 2=BL, bit 3=BR
+// Maps each character to its fg bitmask (bg = inverse)
+const QUAD_BITS = {
+    ' ': 0, '▘': 1, '▝': 2, '▀': 3, '▖': 4, '▌': 5, '▞': 6, '▛': 7,
+    '▗': 8, '▚': 9, '▐': 10, '▜': 11, '▄': 12, '▙': 13, '▟': 14, '█': 15
+};
+
 function drawCell(png, x0, y0, w, h, cell) {
     const { char, fg, bg } = cell;
     const hw = w / 2;
     const hh = h / 2;
 
-    switch (char) {
-        case '█':
-            if (fg) fillRect(png, x0, y0, w, h, fg);
-            break;
-        case '▀':
-            if (fg) fillRect(png, x0, y0, w, hh, fg);
-            if (bg) fillRect(png, x0, y0 + hh, w, hh, bg);
-            break;
-        case '▄':
-            if (bg) fillRect(png, x0, y0, w, hh, bg);
-            if (fg) fillRect(png, x0, y0 + hh, w, hh, fg);
-            break;
-        case '  ':
-            if (bg) fillRect(png, x0, y0, w, h, bg);
-            break;
-        // Quadrant characters (fg only)
-        case '▘': if (fg) fillRect(png, x0, y0, hw, hh, fg); break;
-        case '▝': if (fg) fillRect(png, x0 + hw, y0, hw, hh, fg); break;
-        case '▖': if (fg) fillRect(png, x0, y0 + hh, hw, hh, fg); break;
-        case '▗': if (fg) fillRect(png, x0 + hw, y0 + hh, hw, hh, fg); break;
-        case '▌': if (fg) fillRect(png, x0, y0, hw, h, fg); break;
-        case '▐': if (fg) fillRect(png, x0 + hw, y0, hw, h, fg); break;
-        case '▞': // top-right + bottom-left
-            if (fg) { fillRect(png, x0 + hw, y0, hw, hh, fg); fillRect(png, x0, y0 + hh, hw, hh, fg); }
-            break;
-        case '▚': // top-left + bottom-right
-            if (fg) { fillRect(png, x0, y0, hw, hh, fg); fillRect(png, x0 + hw, y0 + hh, hw, hh, fg); }
-            break;
-        case '▛': // all but bottom-right
-            if (fg) { fillRect(png, x0, y0, w, hh, fg); fillRect(png, x0, y0 + hh, hw, hh, fg); }
-            break;
-        case '▜': // all but bottom-left
-            if (fg) { fillRect(png, x0, y0, w, hh, fg); fillRect(png, x0 + hw, y0 + hh, hw, hh, fg); }
-            break;
-        case '▙': // all but top-right
-            if (fg) { fillRect(png, x0, y0, hw, hh, fg); fillRect(png, x0, y0 + hh, w, hh, fg); }
-            break;
-        case '▟': // all but top-left
-            if (fg) { fillRect(png, x0 + hw, y0, hw, hh, fg); fillRect(png, x0, y0 + hh, w, hh, fg); }
-            break;
-        // ' ' (space) = just background, already filled
+    // Full-space mode (bg only, 2 chars wide)
+    if (char === '  ') {
+        if (bg) fillRect(png, x0, y0, w, h, bg);
+        return;
+    }
+
+    // Quadrant/half/full block — data-driven by bit pattern
+    const bits = QUAD_BITS[char];
+    if (bits !== undefined) {
+        // Sub-cell rects: [x, y, w, h] for TL, TR, BL, BR
+        const quads = [
+            [x0,      y0,      hw, hh],  // bit 0: TL
+            [x0 + hw, y0,      hw, hh],  // bit 1: TR
+            [x0,      y0 + hh, hw, hh],  // bit 2: BL
+            [x0 + hw, y0 + hh, hw, hh],  // bit 3: BR
+        ];
+        for (let i = 0; i < 4; i++) {
+            const color = (bits & (1 << i)) ? fg : bg;
+            if (color) fillRect(png, quads[i][0], quads[i][1], quads[i][2], quads[i][3], color);
+        }
     }
 }
 
