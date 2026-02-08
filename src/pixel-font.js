@@ -51,13 +51,29 @@
         loaded = true;
     }
 
+    // Shadow shade characters by intensity (1-4)
+    const SHADOW_CHARS = [' ', '░', '▒', '▓', '█'];
+    // Direction offsets: [dx, dy]
+    const SHADOW_OFFSETS = {
+        br: [1, 1],
+        bl: [-1, 1],
+        tl: [-1, -1],
+        tr: [1, -1]
+    };
+
     /**
      * Render a text string using the loaded font
      * Returns { ansi, html } with multi-line output
      * The output uses █ for filled pixels and space for empty - no color codes
+     * Options: { shadow: { direction: 'br'|'bl'|'tl'|'tr'|'none', intensity: 1-4 } }
      */
-    function renderText(text) {
+    function renderText(text, options) {
         if (!loaded) return { ansi: '', html: '' };
+
+        const shadow = (options && options.shadow) || null;
+        const shadowDir = shadow && shadow.direction !== 'none' ? shadow.direction : null;
+        const shadowIntensity = shadow ? Math.max(1, Math.min(4, shadow.intensity || 2)) : 2;
+        const shadowChar = SHADOW_CHARS[shadowIntensity];
 
         // Initialize line arrays (one per glyph row)
         const lines = Array(fontMeta.glyphHeight).fill('');
@@ -89,6 +105,66 @@
                 for (let i = 0; i < fontMeta.glyphHeight; i++) {
                     lines[i] += space;
                 }
+            }
+        }
+
+        // Apply directional shadow if requested
+        if (shadowDir && SHADOW_OFFSETS[shadowDir]) {
+            const [dx, dy] = SHADOW_OFFSETS[shadowDir];
+            const origH = lines.length;
+            const origW = Math.max(...lines.map(l => l.length));
+
+            // Pad grid: add 1 row/col on the side the shadow falls toward
+            const padTop = dy < 0 ? 1 : 0;
+            const padBot = dy > 0 ? 1 : 0;
+            const padLeft = dx < 0 ? 1 : 0;
+            const padRight = dx > 0 ? 1 : 0;
+            const gridH = origH + padTop + padBot;
+            const gridW = origW + padLeft + padRight;
+
+            // Build grid with original content offset by padding
+            const grid = [];
+            for (let r = 0; r < gridH; r++) {
+                const row = [];
+                const srcR = r - padTop;
+                const src = (srcR >= 0 && srcR < origH) ? lines[srcR] : '';
+                for (let c = 0; c < gridW; c++) {
+                    const srcC = c - padLeft;
+                    row.push(srcC >= 0 && srcC < src.length ? src[srcC] : ' ');
+                }
+                grid.push(row);
+            }
+
+            // Place shadows: for each filled pixel, offset by (dx,dy).
+            // Shadow only appears where the target cell is empty (space).
+            for (let r = 0; r < gridH; r++) {
+                for (let c = 0; c < gridW; c++) {
+                    if (grid[r][c] === '█') {
+                        const sr = r + dy;
+                        const sc = c + dx;
+                        if (sr >= 0 && sr < gridH && sc >= 0 && sc < gridW) {
+                            if (grid[sr][sc] === ' ') {
+                                grid[sr][sc] = shadowChar;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Convert grid back to lines
+            lines.length = 0;
+            for (let r = 0; r < gridH; r++) {
+                lines.push(grid[r].join(''));
+            }
+
+            // Trim padding rows/cols if they ended up empty
+            // Trim top
+            while (lines.length > origH && lines[0].trim() === '') {
+                lines.shift();
+            }
+            // Trim bottom
+            while (lines.length > origH && lines[lines.length - 1].trim() === '') {
+                lines.pop();
             }
         }
 

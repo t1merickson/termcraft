@@ -971,6 +971,10 @@ body {
     display: block;
 }
 
+#font-shadow-intensity.hidden {
+    display: none;
+}
+
 #font-text {
     width: 100%;
     font-size: 16px;

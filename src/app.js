@@ -496,6 +496,8 @@
     const fontTerminal = document.getElementById('font-terminal');
     const fontOutput = document.getElementById('font-output');
     const fontSelect = document.getElementById('font-select');
+    const fontShadowDir = document.getElementById('font-shadow-dir');
+    const fontShadowIntensity = document.getElementById('font-shadow-intensity');
 
     let currentFontAnsi = '';
     let currentFontPrintf = '';
@@ -591,7 +593,14 @@
             return;
         }
 
-        const result = PixelFont.renderText(text);
+        const shadowOpts = {
+            shadow: {
+                direction: fontShadowDir.value,
+                intensity: parseInt(fontShadowIntensity.value, 10)
+            }
+        };
+
+        const result = PixelFont.renderText(text, shadowOpts);
         currentFontAnsi = result.ansi;
         currentFontPrintf = `printf "${escapeForPrintf(result.ansi)}"`;
 
@@ -599,8 +608,13 @@
         fontOutput.classList.add('visible');
     }
 
-    // Render text on input or toggle change
+    // Render text on input or shadow change
     fontText.addEventListener('input', renderFontText);
+    fontShadowDir.addEventListener('change', () => {
+        fontShadowIntensity.classList.toggle('hidden', fontShadowDir.value === 'none');
+        renderFontText();
+    });
+    fontShadowIntensity.addEventListener('change', renderFontText);
 
     function escapeForPrintf(ansi) {
         return ansi
