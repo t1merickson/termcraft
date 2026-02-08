@@ -174,9 +174,18 @@
 
                 <!-- Upload Area -->
                 <div class="upload-area" id="upload-area">
-                    <div class="icon">▣</div>
-                    <p>Drop an image here or click to upload</p>
-                    <p class="hint">Supports PNG, JPG, GIF, WebP</p>
+                    <div class="upload-prompt" id="upload-prompt">
+                        <div class="icon">▣</div>
+                        <p>Drop an image here or click to upload</p>
+                        <p class="hint">Supports PNG, JPG, GIF, WebP</p>
+                    </div>
+                    <div class="upload-loaded" id="upload-loaded" style="display:none">
+                        <img id="source-image" alt="Source image">
+                        <div class="upload-loaded-info">
+                            <div class="source-info" id="source-info"></div>
+                            <p class="hint">Click or drop to change image</p>
+                        </div>
+                    </div>
                     <input type="file" id="file-input" accept="image/*">
                 </div>
 
@@ -230,11 +239,6 @@
 
                 <!-- Preview Area -->
                 <div class="preview-area" id="preview-area">
-                    <div class="source-preview">
-                        <h4>Source</h4>
-                        <img id="source-image" alt="Source image">
-                        <div class="source-info" id="source-info"></div>
-                    </div>
                     <div class="ansi-output">
                         <div class="ansi-output-header">
                             <h4>ANSI Output</h4>
@@ -271,9 +275,18 @@
 
                 <!-- Upload Area -->
                 <div class="upload-area" id="ascii-upload-area">
-                    <div class="icon">A</div>
-                    <p>Drop an image here or click to upload</p>
-                    <p class="hint">Supports PNG, JPG, GIF, WebP</p>
+                    <div class="upload-prompt" id="ascii-upload-prompt">
+                        <div class="icon">A</div>
+                        <p>Drop an image here or click to upload</p>
+                        <p class="hint">Supports PNG, JPG, GIF, WebP</p>
+                    </div>
+                    <div class="upload-loaded" id="ascii-upload-loaded" style="display:none">
+                        <img id="ascii-source-image" alt="Source image">
+                        <div class="upload-loaded-info">
+                            <div class="source-info" id="ascii-source-info"></div>
+                            <p class="hint">Click or drop to change image</p>
+                        </div>
+                    </div>
                     <input type="file" id="ascii-file-input" accept="image/*">
                 </div>
 
@@ -332,11 +345,6 @@
 
                 <!-- Preview Area -->
                 <div class="preview-area" id="ascii-preview-area">
-                    <div class="source-preview">
-                        <h4>Source</h4>
-                        <img id="ascii-source-image" alt="Source image">
-                        <div class="source-info" id="ascii-source-info"></div>
-                    </div>
                     <div class="ansi-output">
                         <div class="ansi-output-header">
                             <h4>ASCII Output</h4>

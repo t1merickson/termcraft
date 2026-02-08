@@ -5,11 +5,16 @@
  * Requires: ansi256.js
  */
 
-(function(window) {
+(function(root) {
     'use strict';
 
+    // Resolve ANSI256 dependency (works in both Node and browser)
+    const ANSI256 = (typeof require !== 'undefined' && typeof window === 'undefined')
+        ? require('./ansi256.js')
+        : root.ANSI256;
+
     /**
-     * Load an image from a URL or data URL
+     * Load an image from a URL or data URL (browser only)
      */
     function loadImage(src) {
         return new Promise((resolve, reject) => {
@@ -22,7 +27,7 @@
     }
 
     /**
-     * Read a file as a data URL
+     * Read a file as a data URL (browser only)
      */
     function readFile(file) {
         return new Promise((resolve, reject) => {
@@ -58,59 +63,49 @@
     }
 
     /**
-     * Process an image and convert to ANSI art
-     *
-     * @param {HTMLImageElement} img - Source image
-     * @param {object} options - Conversion options
-     * @param {number} options.maxWidth - Max output width in characters (default: 80)
-     * @param {number} options.maxHeight - Max output height in lines (default: 40)
-     * @param {string} options.renderMode - Render mode: 'half-256', 'half-24bit', 'full-256', 'full-24bit', 'binary'
-     * @returns {{ ansi: string, html: string, width: number, height: number }}
+     * Get the display color for a cell (quantized for 256 mode, raw for 24bit)
      */
-    function processImage(img, options = {}) {
-        const {
-            maxWidth = 80,
-            maxHeight = 40,
-            renderMode = 'half-256'
-        } = options;
+    function cellColor(r, g, b, useTrue24bit) {
+        if (useTrue24bit) {
+            return { r, g, b };
+        }
+        const idx = ANSI256.rgbToAnsi256(r, g, b);
+        const c = ANSI256.getColor(idx);
+        return { r: c.r, g: c.g, b: c.b };
+    }
 
-        // Parse render mode
+    /**
+     * Calculate pixel grid dimensions for a given render mode.
+     *
+     * @param {number} imgW - Source image width
+     * @param {number} imgH - Source image height
+     * @param {number} maxWidth - Max output width in characters
+     * @param {number} maxHeight - Max output height in lines
+     * @param {string} renderMode - Render mode string
+     * @returns {{ width: number, height: number }}
+     */
+    function calcDimensions(imgW, imgH, maxWidth, maxHeight, renderMode) {
         const useHalfBlocks = renderMode.startsWith('half-');
         const useHalfFgOnly = renderMode.startsWith('halffg-');
         const useQuadrant = renderMode.startsWith('quad-');
-        const useFullSpaces = renderMode.startsWith('full-');
         const useBlockChars = renderMode.startsWith('block-');
-        const useTrue24bit = renderMode.includes('-24bit');
         const isBinary = renderMode === 'binary';
         const is1to1 = renderMode.endsWith('-1x');
-
-        // Calculate scaled dimensions
-        // The pixel grid matches the source image aspect ratio directly.
-        // Each render mode maps pixels to characters differently (half blocks
-        // pack 2 rows per line, quadrant packs 2×2 per char, etc.) but the
-        // pixel grid itself always preserves the original image proportions.
-        // Visual aspect correction is handled by the display layer (CSS
-        // line-height in the preview, or the terminal's font metrics).
-        const aspectRatio = img.width / img.height;
+        const aspectRatio = imgW / imgH;
 
         let width, height;
 
         if (is1to1 && (useHalfBlocks || useHalfFgOnly)) {
-            // Half blocks 1:1: use source width, round height up to even
-            width = img.width;
-            height = img.height % 2 === 0 ? img.height : img.height + 1;
+            width = imgW;
+            height = imgH % 2 === 0 ? imgH : imgH + 1;
         } else if (is1to1 && useQuadrant) {
-            // Quadrant 1:1: 2x2 pixels per char, round up to even
-            width = img.width % 2 === 0 ? img.width : img.width + 1;
-            height = img.height % 2 === 0 ? img.height : img.height + 1;
+            width = imgW % 2 === 0 ? imgW : imgW + 1;
+            height = imgH % 2 === 0 ? imgH : imgH + 1;
         } else if (is1to1) {
-            // Other 1:1 modes: use source dimensions directly, no scaling
-            width = img.width;
-            height = img.height;
+            width = imgW;
+            height = imgH;
         } else if (useHalfBlocks || useHalfFgOnly || isBinary) {
-            // Half blocks: charW = pixelW, charH = pixelH / 2
-            // For correct display aspect: pixelH = 2 * pixelW / aspectRatio
-            const maxPixH = maxHeight * 2; // max pixel rows = max char lines × 2
+            const maxPixH = maxHeight * 2;
             if (aspectRatio > maxWidth / maxHeight) {
                 width = maxWidth;
                 height = Math.round(2 * maxWidth / aspectRatio);
@@ -120,9 +115,6 @@
             }
             height = Math.max(2, Math.floor(height / 2) * 2);
         } else if (useQuadrant) {
-            // Quadrant: charW = pixelW / 2, charH = pixelH / 2
-            // Char aspect = (pixelW/2) / (pixelH/2) = pixelW/pixelH
-            // So pixel grid matches image ratio. No correction needed.
             if (aspectRatio > maxWidth / maxHeight) {
                 width = maxWidth;
                 height = Math.round(maxWidth / aspectRatio);
@@ -130,12 +122,9 @@
                 height = maxHeight;
                 width = Math.round(maxHeight * aspectRatio);
             }
-            // Round to even
             width = Math.max(2, Math.floor(width / 2) * 2);
             height = Math.max(2, Math.floor(height / 2) * 2);
         } else if (useBlockChars) {
-            // Block chars: charW = pixelW, charH = pixelH
-            // Pixel grid matches image ratio directly.
             if (aspectRatio > maxWidth / maxHeight) {
                 width = maxWidth;
                 height = Math.round(maxWidth / aspectRatio);
@@ -144,9 +133,8 @@
                 width = Math.round(maxHeight * aspectRatio);
             }
         } else {
-            // Full spaces: charW = pixelW × 2, charH = pixelH
-            // For correct display aspect: pixelH = 2 * pixelW / aspectRatio
-            const maxPixW = Math.floor(maxWidth / 2); // max pixel cols = max char cols / 2
+            // Full spaces
+            const maxPixW = Math.floor(maxWidth / 2);
             if (aspectRatio > maxWidth / 2 / maxHeight) {
                 width = maxPixW;
                 height = Math.round(2 * maxPixW / aspectRatio);
@@ -156,8 +144,38 @@
             }
         }
 
-        width = Math.max(1, width);
-        height = Math.max(1, height);
+        return {
+            width: Math.max(1, width),
+            height: Math.max(1, height)
+        };
+    }
+
+    /**
+     * Process an image and convert to ANSI art (browser only — uses canvas)
+     *
+     * @param {HTMLImageElement} img - Source image
+     * @param {object} options - Conversion options
+     * @param {number} options.maxWidth - Max output width in characters (default: 80)
+     * @param {number} options.maxHeight - Max output height in lines (default: 40)
+     * @param {string} options.renderMode - Render mode string
+     * @returns {{ ansi: string, html: string, width: number, height: number }}
+     */
+    function processImage(img, options = {}) {
+        const {
+            maxWidth = 80,
+            maxHeight = 40,
+            renderMode = 'half-256'
+        } = options;
+
+        // Parse render mode flags
+        const useHalfBlocks = renderMode.startsWith('half-');
+        const useHalfFgOnly = renderMode.startsWith('halffg-');
+        const useQuadrant = renderMode.startsWith('quad-');
+        const useBlockChars = renderMode.startsWith('block-');
+        const useTrue24bit = renderMode.includes('-24bit');
+        const isBinary = renderMode === 'binary';
+
+        const { width, height } = calcDimensions(img.width, img.height, maxWidth, maxHeight, renderMode);
 
         // Draw to canvas
         const canvas = document.createElement('canvas');
@@ -171,43 +189,25 @@
         const imageData = ctx.getImageData(0, 0, width, height);
         const pixels = imageData.data;
 
-        let output = '';
-        let htmlOutput = '';
+        let result;
 
         if (isBinary) {
-            // Binary mode: just █ and space, no color codes
-            output = renderBinary(pixels, width, height);
-            htmlOutput = output;
-        } else if (useHalfBlocks) {
-            // Half-block mode: ▀ (upper half) with fg=top, bg=bottom
-            const result = renderHalfBlocks(pixels, width, height, useTrue24bit);
-            output = result.ansi;
-            htmlOutput = result.html;
+            result = renderBinary(pixels, width, height);
         } else if (useHalfFgOnly) {
-            // Half-block fg-only mode: ▀▄█ with foreground color only
-            const result = renderHalfBlocksFgOnly(pixels, width, height, useTrue24bit);
-            output = result.ansi;
-            htmlOutput = result.html;
+            result = renderHalfBlocksFgOnly(pixels, width, height, useTrue24bit);
+        } else if (useHalfBlocks) {
+            result = renderHalfBlocks(pixels, width, height, useTrue24bit);
         } else if (useQuadrant) {
-            // Quadrant mode: 2x2 pixels per char using ▖▗▘▝▙▛▜▟█
-            const result = renderQuadrant(pixels, width, height, useTrue24bit);
-            output = result.ansi;
-            htmlOutput = result.html;
+            result = renderQuadrant(pixels, width, height, useTrue24bit);
         } else if (useBlockChars) {
-            // Block char mode: █ with foreground color, 1 char per pixel
-            const result = renderBlockChars(pixels, width, height, useTrue24bit);
-            output = result.ansi;
-            htmlOutput = result.html;
+            result = renderBlockChars(pixels, width, height, useTrue24bit);
         } else {
-            // Full spaces mode: two spaces per pixel with background color
-            const result = renderFullBlocks(pixels, width, height, useTrue24bit);
-            output = result.ansi;
-            htmlOutput = result.html;
+            result = renderFullBlocks(pixels, width, height, useTrue24bit);
         }
 
         return {
-            ansi: output,
-            html: htmlOutput,
+            ansi: result.ansi,
+            html: result.html,
             width: width,
             height: useHalfBlocks || useHalfFgOnly || isBinary ? height / 2 : (useQuadrant ? height / 2 : height)
         };
@@ -215,16 +215,19 @@
 
     /**
      * Render using half blocks (▀▄) - 2x vertical resolution
+     * @returns {{ ansi: string, html: string, cells: Array }}
      */
     function renderHalfBlocks(pixels, width, height, useTrue24bit) {
         let ansi = '';
         let html = '';
+        const cells = [];
 
         for (let y = 0; y < height; y += 2) {
             let lineAnsi = '';
             let lineHtml = '';
             let lastFg = null;
             let lastBg = null;
+            const row = [];
 
             for (let x = 0; x < width; x++) {
                 const topIdx = (y * width + x) * 4;
@@ -245,30 +248,39 @@
                 const topTransparent = topA < 32;
                 const botTransparent = botA < 32;
 
-                let char, fgCode, bgCode, fgColor, bgColor;
+                let char, fgCode, bgCode, fgColor, bgColor, cellFg, cellBg;
 
                 if (topTransparent && botTransparent) {
                     char = ' ';
                     fgCode = bgCode = fgColor = bgColor = null;
+                    cellFg = cellBg = null;
                 } else if (topTransparent) {
                     char = '▄';
                     fgCode = rgbaToFgAnsi(botR, botG, botB, botA, useTrue24bit);
                     bgCode = null;
                     fgColor = `rgb(${botR},${botG},${botB})`;
                     bgColor = null;
+                    cellFg = cellColor(botR, botG, botB, useTrue24bit);
+                    cellBg = null;
                 } else if (botTransparent) {
                     char = '▀';
                     fgCode = rgbaToFgAnsi(topR, topG, topB, topA, useTrue24bit);
                     bgCode = null;
                     fgColor = `rgb(${topR},${topG},${topB})`;
                     bgColor = null;
+                    cellFg = cellColor(topR, topG, topB, useTrue24bit);
+                    cellBg = null;
                 } else {
                     char = '▀';
                     fgCode = rgbaToFgAnsi(topR, topG, topB, topA, useTrue24bit);
                     bgCode = rgbaToBgAnsi(botR, botG, botB, botA, useTrue24bit);
                     fgColor = `rgb(${topR},${topG},${topB})`;
                     bgColor = `rgb(${botR},${botG},${botB})`;
+                    cellFg = cellColor(topR, topG, topB, useTrue24bit);
+                    cellBg = cellColor(botR, botG, botB, useTrue24bit);
                 }
+
+                row.push({ char, fg: cellFg, bg: cellBg });
 
                 // ANSI output
                 if (fgCode !== lastFg || bgCode !== lastBg) {
@@ -288,25 +300,29 @@
                 lineHtml += style ? `<span style="${style}">${char}</span>` : char;
             }
 
+            cells.push(row);
             ansi += lineAnsi + '\x1b[0m\n';
             html += lineHtml + '\n';
         }
 
-        return { ansi, html };
+        return { ansi, html, cells };
     }
 
     /**
      * Render using half blocks with foreground color only (no background)
      * Uses ▀ for top, ▄ for bottom, █ for both, space for neither
+     * @returns {{ ansi: string, html: string, cells: Array }}
      */
     function renderHalfBlocksFgOnly(pixels, width, height, useTrue24bit) {
         let ansi = '';
         let html = '';
+        const cells = [];
 
         for (let y = 0; y < height; y += 2) {
             let lineAnsi = '';
             let lineHtml = '';
             let lastFg = null;
+            const row = [];
 
             for (let x = 0; x < width; x++) {
                 const topIdx = (y * width + x) * 4;
@@ -327,29 +343,31 @@
                 const topOn = topA >= 32;
                 const botOn = botA >= 32;
 
-                let char, fgCode, fgColor;
+                let char, fgCode, fgColor, cellFg;
 
                 if (!topOn && !botOn) {
-                    // Both transparent
                     char = ' ';
                     fgCode = null;
                     fgColor = null;
+                    cellFg = null;
                 } else if (topOn && botOn) {
-                    // Both on - use full block with averaged/top color
                     char = '█';
                     fgCode = rgbaToFgAnsi(topR, topG, topB, topA, useTrue24bit);
                     fgColor = `rgb(${topR},${topG},${topB})`;
+                    cellFg = cellColor(topR, topG, topB, useTrue24bit);
                 } else if (topOn) {
-                    // Only top
                     char = '▀';
                     fgCode = rgbaToFgAnsi(topR, topG, topB, topA, useTrue24bit);
                     fgColor = `rgb(${topR},${topG},${topB})`;
+                    cellFg = cellColor(topR, topG, topB, useTrue24bit);
                 } else {
-                    // Only bottom
                     char = '▄';
                     fgCode = rgbaToFgAnsi(botR, botG, botB, botA, useTrue24bit);
                     fgColor = `rgb(${botR},${botG},${botB})`;
+                    cellFg = cellColor(botR, botG, botB, useTrue24bit);
                 }
+
+                row.push({ char, fg: cellFg, bg: null });
 
                 // ANSI output
                 if (fgCode !== lastFg) {
@@ -364,16 +382,18 @@
                     : char;
             }
 
+            cells.push(row);
             ansi += lineAnsi + '\x1b[0m\n';
             html += lineHtml + '\n';
         }
 
-        return { ansi, html };
+        return { ansi, html, cells };
     }
 
     /**
      * Render using quadrant block characters - 2x2 pixels per character
      * Uses ▖▗▘▝▙▛▜▟█ and space for the 16 possible 2x2 patterns
+     * @returns {{ ansi: string, html: string, cells: Array }}
      */
     function renderQuadrant(pixels, width, height, useTrue24bit) {
         // Quadrant characters indexed by bit pattern:
@@ -399,11 +419,13 @@
 
         let ansi = '';
         let html = '';
+        const cells = [];
 
         for (let y = 0; y < height; y += 2) {
             let lineAnsi = '';
             let lineHtml = '';
             let lastFg = null;
+            const row = [];
 
             for (let x = 0; x < width; x += 2) {
                 // Get 2x2 pixel block
@@ -441,13 +463,17 @@
 
                 let fgCode = null;
                 let fgColor = null;
+                let cellFg = null;
                 if (count > 0) {
                     r = Math.round(r / count);
                     g = Math.round(g / count);
                     b = Math.round(b / count);
                     fgCode = rgbaToFgAnsi(r, g, b, 255, useTrue24bit);
                     fgColor = `rgb(${r},${g},${b})`;
+                    cellFg = cellColor(r, g, b, useTrue24bit);
                 }
+
+                row.push({ char, fg: cellFg, bg: null });
 
                 // ANSI output
                 if (fgCode !== lastFg) {
@@ -462,24 +488,28 @@
                     : char;
             }
 
+            cells.push(row);
             ansi += lineAnsi + '\x1b[0m\n';
             html += lineHtml + '\n';
         }
 
-        return { ansi, html };
+        return { ansi, html, cells };
     }
 
     /**
      * Render using full blocks (two spaces with background color)
+     * @returns {{ ansi: string, html: string, cells: Array }}
      */
     function renderFullBlocks(pixels, width, height, useTrue24bit) {
         let ansi = '';
         let html = '';
+        const cells = [];
 
         for (let y = 0; y < height; y++) {
             let lineAnsi = '';
             let lineHtml = '';
             let lastBg = null;
+            const row = [];
 
             for (let x = 0; x < width; x++) {
                 const idx = (y * width + x) * 4;
@@ -490,6 +520,9 @@
 
                 const bgCode = rgbaToBgAnsi(r, g, b, a, useTrue24bit);
                 const bgColor = a >= 32 ? `rgb(${r},${g},${b})` : null;
+                const cellBg = a >= 32 ? cellColor(r, g, b, useTrue24bit) : null;
+
+                row.push({ char: '  ', fg: null, bg: cellBg });
 
                 if (bgCode !== lastBg) {
                     lineAnsi += bgCode ? `\x1b[${bgCode}m` : '\x1b[0m';
@@ -502,24 +535,28 @@
                     : '  ';
             }
 
+            cells.push(row);
             ansi += lineAnsi + '\x1b[0m\n';
             html += lineHtml + '\n';
         }
 
-        return { ansi, html };
+        return { ansi, html, cells };
     }
 
     /**
      * Render using block characters (█) with foreground color - 1 char per pixel
+     * @returns {{ ansi: string, html: string, cells: Array }}
      */
     function renderBlockChars(pixels, width, height, useTrue24bit) {
         let ansi = '';
         let html = '';
+        const cells = [];
 
         for (let y = 0; y < height; y++) {
             let lineAnsi = '';
             let lineHtml = '';
             let lastFg = null;
+            const row = [];
 
             for (let x = 0; x < width; x++) {
                 const idx = (y * width + x) * 4;
@@ -530,6 +567,7 @@
 
                 if (a < 32) {
                     // Transparent pixel
+                    row.push({ char: ' ', fg: null, bg: null });
                     if (lastFg !== null) {
                         lineAnsi += '\x1b[0m';
                         lastFg = null;
@@ -539,6 +577,9 @@
                 } else {
                     const fgCode = rgbaToFgAnsi(r, g, b, a, useTrue24bit);
                     const fgColor = `rgb(${r},${g},${b})`;
+                    const cf = cellColor(r, g, b, useTrue24bit);
+
+                    row.push({ char: '█', fg: cf, bg: null });
 
                     if (fgCode !== lastFg) {
                         lineAnsi += `\x1b[${fgCode}m`;
@@ -549,21 +590,26 @@
                 }
             }
 
+            cells.push(row);
             ansi += lineAnsi + '\x1b[0m\n';
             html += lineHtml + '\n';
         }
 
-        return { ansi, html };
+        return { ansi, html, cells };
     }
 
     /**
      * Render in binary mode - just █ and space based on luminance, no color codes
+     * @returns {{ ansi: string, html: string, cells: Array }}
      */
     function renderBinary(pixels, width, height) {
-        let output = '';
+        let ansi = '';
+        const cells = [];
+        const white = { r: 255, g: 255, b: 255 };
 
         for (let y = 0; y < height; y += 2) {
             let line = '';
+            const row = [];
 
             for (let x = 0; x < width; x++) {
                 const topIdx = (y * width + x) * 4;
@@ -591,19 +637,24 @@
 
                 if (!topFilled && !botFilled) {
                     line += ' ';
+                    row.push({ char: ' ', fg: null, bg: null });
                 } else if (!topFilled && botFilled) {
                     line += '▄';
+                    row.push({ char: '▄', fg: white, bg: null });
                 } else if (topFilled && !botFilled) {
                     line += '▀';
+                    row.push({ char: '▀', fg: white, bg: null });
                 } else {
                     line += '█';
+                    row.push({ char: '█', fg: white, bg: null });
                 }
             }
 
-            output += line + '\n';
+            cells.push(row);
+            ansi += line + '\n';
         }
 
-        return output;
+        return { ansi, html: ansi, cells };
     }
 
     /**
@@ -617,11 +668,28 @@
     }
 
     // Export API
-    window.ImageToAnsi = Object.freeze({
+    const API = Object.freeze({
+        // Browser-only (will not work in Node)
         loadImage,
         readFile,
         processImage,
+        // Core rendering (works in both environments)
+        calcDimensions,
+        renderHalfBlocks,
+        renderHalfBlocksFgOnly,
+        renderQuadrant,
+        renderBlockChars,
+        renderFullBlocks,
+        renderBinary,
+        rgbaToFgAnsi,
+        rgbaToBgAnsi,
         escapeForPrintf
     });
 
-})(window);
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = API;
+    } else {
+        root.ImageToAnsi = API;
+    }
+
+})(typeof window !== 'undefined' ? window : global);

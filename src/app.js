@@ -353,6 +353,11 @@
             sourceHeight = img.height;
             sourceInfo.textContent = `${img.width} × ${img.height} pixels`;
 
+            // Show loaded state in upload area
+            document.getElementById('upload-prompt').style.display = 'none';
+            document.getElementById('upload-loaded').style.display = 'flex';
+            uploadArea.classList.add('has-image');
+
             // Enable preset buttons
             btnHalf.disabled = false;
             btnFull.disabled = false;
@@ -705,6 +710,11 @@
             asciiSourceWidth = img.width;
             asciiSourceHeight = img.height;
             asciiSourceInfo.textContent = `${img.width} × ${img.height} pixels`;
+
+            // Show loaded state in upload area
+            document.getElementById('ascii-upload-prompt').style.display = 'none';
+            document.getElementById('ascii-upload-loaded').style.display = 'flex';
+            asciiUploadArea.classList.add('has-image');
 
             // Enable preset buttons
             asciiBtnHalf.disabled = false;

@@ -5,8 +5,13 @@
  * Requires: ansi256.js
  */
 
-(function(window) {
+(function(root) {
     'use strict';
+
+    // Resolve ANSI256 dependency (works in both Node and browser)
+    const ANSI256 = (typeof require !== 'undefined' && typeof window === 'undefined')
+        ? require('./ansi256.js')
+        : root.ANSI256;
 
     // Preset character sets ordered from dark to light
     const CHARSETS = {
@@ -219,7 +224,7 @@
     }
 
     // Export API
-    window.ImageToAscii = Object.freeze({
+    const API = Object.freeze({
         loadImage,
         readFile,
         processImage,
@@ -227,4 +232,10 @@
         getCharsets
     });
 
-})(window);
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = API;
+    } else {
+        root.ImageToAscii = API;
+    }
+
+})(typeof window !== 'undefined' ? window : global);

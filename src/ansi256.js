@@ -7,7 +7,7 @@
  * - 232-255: 24 grayscale steps (8 + 10*i for i in 0..23)
  */
 
-(function(window) {
+(function(root) {
     'use strict';
 
     // 6×6×6 cube channel values
@@ -265,7 +265,7 @@
     // Export API
     // ========================================
 
-    window.ANSI256 = Object.freeze({
+    const API = Object.freeze({
         // Constants
         PALETTE,
         CUBE_VALUES,
@@ -295,4 +295,10 @@
         bgEscapeString
     });
 
-})(window);
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = API;
+    } else {
+        root.ANSI256 = API;
+    }
+
+})(typeof window !== 'undefined' ? window : global);
