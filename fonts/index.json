@@ -54,12 +54,6 @@
     "path": "fonts/public-pixel/font.json"
   },
   {
-    "id": "springwrite-iii",
-    "name": "Springwrite III",
-    "type": "pixel",
-    "path": "fonts/springwrite-iii/font.json"
-  },
-  {
     "id": "font8x8-basic",
     "name": "VGA 8x8",
     "type": "pixel",

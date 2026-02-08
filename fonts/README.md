@@ -31,6 +31,10 @@ Each font lives in its own folder:
 }
 ```
 
+## Fonts to Avoid
+
+LSDJ-style fonts (designed for the Game Boy music tracker Little Sound DJ) use non-standard charsets that don't follow ASCII ordering. They typically rearrange characters and include custom icons (pulse width waveforms, paw prints, etc.) in place of standard punctuation. Not worth importing.
+
 ## Adding a Font
 
 1. Find a permissively licensed pixel font (OFL, MIT, Apache-2.0, CC0).

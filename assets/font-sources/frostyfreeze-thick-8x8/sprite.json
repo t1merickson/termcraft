@@ -1,0 +1,8 @@
+{
+  "format": "bmfont",
+  "fontId": "frostyfreeze-thick-8x8",
+  "fontName": "Thick 8x8",
+  "glyphWidth": 8,
+  "glyphHeight": 8,
+  "notes": "Originally imported from BMFont XML (thick_8x8.xml). Re-import would require re-downloading the frostyfreeze pack."
+}

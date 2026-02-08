@@ -1,0 +1,15 @@
+{
+  "format": "grid",
+  "fontId": "public-pixel",
+  "fontName": "Public-Pixel",
+  "glyphWidth": 8,
+  "glyphHeight": 8,
+  "columns": 16,
+  "rows": 14,
+  "xGap": 0,
+  "yGap": 0,
+  "marginX": 0,
+  "marginY": 0,
+  "charset": " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
+  "notes": "1px doc margin right and bottom (asymmetric, doesn't affect extraction from top-left)"
+}

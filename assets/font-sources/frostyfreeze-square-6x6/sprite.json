@@ -1,0 +1,8 @@
+{
+  "format": "bmfont",
+  "fontId": "frostyfreeze-square-6x6",
+  "fontName": "Square 6x6",
+  "glyphWidth": 6,
+  "glyphHeight": 6,
+  "notes": "Originally imported from BMFont XML (square_6x6.xml). Re-import would require re-downloading the frostyfreeze pack."
+}

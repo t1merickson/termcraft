@@ -1,0 +1,8 @@
+{
+  "format": "bmfont",
+  "fontId": "frostyfreeze-minogram-6x10",
+  "fontName": "Minogram 6x10",
+  "glyphWidth": 6,
+  "glyphHeight": 10,
+  "notes": "Originally imported from BMFont XML (minogram_6x10.xml). Re-import would require re-downloading the frostyfreeze pack."
+}

@@ -1,0 +1,15 @@
+{
+  "format": "grid",
+  "fontId": "pixel-alpha",
+  "fontName": "Pixel Alpha",
+  "glyphWidth": 10,
+  "glyphHeight": 16,
+  "columns": 26,
+  "rows": 1,
+  "xGap": 0,
+  "yGap": 0,
+  "marginX": 1,
+  "marginY": 1,
+  "charset": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+  "notes": "1px doc margin all sides. Uppercase letters only."
+}

@@ -1,0 +1,15 @@
+{
+  "format": "grid",
+  "fontId": "lild0t",
+  "fontName": "LilD0t 7x7",
+  "glyphWidth": 7,
+  "glyphHeight": 7,
+  "columns": 9,
+  "rows": 11,
+  "xGap": 1,
+  "yGap": 1,
+  "marginX": 0,
+  "marginY": 0,
+  "charset": " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
+  "notes": "1px padding top + 1px padding left per tile (xGap/yGap). 1px doc margin bottom + 1px right (asymmetric, doesn't affect extraction)."
+}
