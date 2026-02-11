@@ -509,10 +509,36 @@
     const fontSelect = document.getElementById('font-select');
     const fontShadowDir = document.getElementById('font-shadow-dir');
     const fontShadowIntensity = document.getElementById('font-shadow-intensity');
+    const fontDotStyle = document.getElementById('font-dot-style');
+    const fontDotCustom = document.getElementById('font-dot-custom');
 
     let currentFontAnsi = '';
     let currentFontPrintf = '';
     let fontIndex = [];
+
+    // Dot style selector: change fill character
+    fontDotStyle.addEventListener('change', () => {
+        if (fontDotStyle.value === 'custom') {
+            fontDotCustom.style.display = '';
+            fontDotCustom.focus();
+            if (fontDotCustom.value) {
+                PixelFont.setFillChar(fontDotCustom.value);
+            }
+        } else {
+            fontDotCustom.style.display = 'none';
+            PixelFont.setFillChar(fontDotStyle.value);
+        }
+        renderFontPreview();
+        renderFontText();
+    });
+
+    fontDotCustom.addEventListener('input', () => {
+        if (fontDotCustom.value) {
+            PixelFont.setFillChar(fontDotCustom.value);
+            renderFontPreview();
+            renderFontText();
+        }
+    });
 
     function renderFontPreview() {
         const letters = PixelFont.getLetters();

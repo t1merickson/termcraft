@@ -145,7 +145,7 @@ for (let i = 0; i < charset.length; i++) {
       } else {
         on = px.a >= threshold;
       }
-      line += on ? '█' : ' ';
+      line += on ? '1' : '0';
     }
     rowsOut.push(line);
   }

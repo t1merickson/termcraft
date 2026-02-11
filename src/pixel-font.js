@@ -1,6 +1,8 @@
 /**
  * Pixel Font Renderer
- * Loads pre-extracted font data from JSON and renders text using block characters
+ * Loads pre-extracted font data from JSON and renders text using block characters.
+ * Font data stores pixels as binary strings ('1' = filled, '0' = empty).
+ * The fill character is configurable at render time.
  */
 (function(window) {
     'use strict';
@@ -15,10 +17,13 @@
         charset: null
     });
 
-    // Stored letter data { 'A': ['row1', 'row2', ...], ... }
+    // Stored letter data { 'A': ['1010', '1111', ...], ... }
     let fontData = {};
     let fontMeta = { ...DEFAULT_META };
     let loaded = false;
+
+    // Configurable fill character (what '1' becomes in output)
+    let fillChar = '█';
 
     /**
      * Load font data from JSON file
@@ -51,8 +56,28 @@
         loaded = true;
     }
 
-    // Shadow shade characters by intensity (1-4)
-    const SHADOW_CHARS = [' ', '░', '▒', '▓', '█'];
+    /**
+     * Set the character used to represent filled pixels.
+     * Does not trigger re-render — caller should re-render after calling this.
+     */
+    function setFillChar(char) {
+        if (char && char.length > 0) {
+            fillChar = char;
+        }
+    }
+
+    /**
+     * Get the current fill character.
+     */
+    function getFillChar() {
+        return fillChar;
+    }
+
+    // Shadow shade characters by intensity (1-4), relative to fill char
+    function shadowChars() {
+        return [' ', '░', '▒', '▓', fillChar];
+    }
+
     // Direction offsets: [dx, dy]
     const SHADOW_OFFSETS = {
         br: [1, 1],
@@ -62,9 +87,20 @@
     };
 
     /**
+     * Convert a binary glyph row to display characters.
+     * '1' → fillChar, '0' → space
+     */
+    function binaryToDisplay(row) {
+        let out = '';
+        for (let i = 0; i < row.length; i++) {
+            out += row[i] === '1' ? fillChar : ' ';
+        }
+        return out;
+    }
+
+    /**
      * Render a text string using the loaded font
      * Returns { ansi, html } with multi-line output
-     * The output uses █ for filled pixels and space for empty - no color codes
      * Options: { shadow: { direction: 'br'|'bl'|'tl'|'tr'|'none', intensity: 1-4 } }
      */
     function renderText(text, options) {
@@ -73,15 +109,15 @@
         const shadow = (options && options.shadow) || null;
         const shadowDir = shadow && shadow.direction !== 'none' ? shadow.direction : null;
         const shadowIntensity = shadow ? Math.max(1, Math.min(4, shadow.intensity || 2)) : 2;
-        const shadowChar = SHADOW_CHARS[shadowIntensity];
+        const shadowChar = shadowChars()[shadowIntensity];
 
-        // Initialize line arrays (one per glyph row)
+        // Initialize line arrays (one per glyph row) — kept as binary during layout
         const lines = Array(fontMeta.glyphHeight).fill('');
 
         for (const char of text) {
             if (char === ' ') {
                 // Add space
-                const space = ' '.repeat(fontMeta.spaceWidth);
+                const space = '0'.repeat(fontMeta.spaceWidth);
                 for (let i = 0; i < fontMeta.glyphHeight; i++) {
                     lines[i] += space;
                 }
@@ -96,12 +132,12 @@
 
             if (glyph) {
                 for (let i = 0; i < fontMeta.glyphHeight; i++) {
-                    const row = glyph[i] || ' '.repeat(fontMeta.glyphWidth);
-                    lines[i] += row + ' '.repeat(fontMeta.letterGap);
+                    const row = glyph[i] || '0'.repeat(fontMeta.glyphWidth);
+                    lines[i] += row + '0'.repeat(fontMeta.letterGap);
                 }
             } else {
                 // Unknown glyph: fall back to spacing so output doesn't collapse
-                const space = ' '.repeat(fontMeta.spaceWidth);
+                const space = '0'.repeat(fontMeta.spaceWidth);
                 for (let i = 0; i < fontMeta.glyphHeight; i++) {
                     lines[i] += space;
                 }
@@ -123,6 +159,7 @@
             const gridW = origW + padLeft + padRight;
 
             // Build grid with original content offset by padding
+            // Grid cells: ' ' = empty, 'F' = filled, 'S' = shadow
             const grid = [];
             for (let r = 0; r < gridH; r++) {
                 const row = [];
@@ -130,7 +167,8 @@
                 const src = (srcR >= 0 && srcR < origH) ? lines[srcR] : '';
                 for (let c = 0; c < gridW; c++) {
                     const srcC = c - padLeft;
-                    row.push(srcC >= 0 && srcC < src.length ? src[srcC] : ' ');
+                    const bit = srcC >= 0 && srcC < src.length ? src[srcC] : '0';
+                    row.push(bit === '1' ? 'F' : ' ');
                 }
                 grid.push(row);
             }
@@ -139,32 +177,42 @@
             // Shadow only appears where the target cell is empty (space).
             for (let r = 0; r < gridH; r++) {
                 for (let c = 0; c < gridW; c++) {
-                    if (grid[r][c] === '█') {
+                    if (grid[r][c] === 'F') {
                         const sr = r + dy;
                         const sc = c + dx;
                         if (sr >= 0 && sr < gridH && sc >= 0 && sc < gridW) {
                             if (grid[sr][sc] === ' ') {
-                                grid[sr][sc] = shadowChar;
+                                grid[sr][sc] = 'S';
                             }
                         }
                     }
                 }
             }
 
-            // Convert grid back to lines
+            // Convert grid to display characters
             lines.length = 0;
             for (let r = 0; r < gridH; r++) {
-                lines.push(grid[r].join(''));
+                let line = '';
+                for (let c = 0; c < gridW; c++) {
+                    const cell = grid[r][c];
+                    if (cell === 'F') line += fillChar;
+                    else if (cell === 'S') line += shadowChar;
+                    else line += ' ';
+                }
+                lines.push(line);
             }
 
-            // Trim padding rows/cols if they ended up empty
-            // Trim top
+            // Trim padding rows if they ended up empty
             while (lines.length > origH && lines[0].trim() === '') {
                 lines.shift();
             }
-            // Trim bottom
             while (lines.length > origH && lines[lines.length - 1].trim() === '') {
                 lines.pop();
+            }
+        } else {
+            // No shadow — convert binary lines to display characters
+            for (let i = 0; i < lines.length; i++) {
+                lines[i] = binaryToDisplay(lines[i]);
             }
         }
 
@@ -182,7 +230,7 @@
     function getLetters() {
         const letters = {};
         for (const [char, rows] of Object.entries(fontData)) {
-            const output = rows.join('\n');
+            const output = rows.map(binaryToDisplay).join('\n');
             letters[char] = { ansi: output, html: output };
         }
         return letters;
@@ -211,6 +259,8 @@
         getMeta,
         getLetters,
         isLoaded,
+        setFillChar,
+        getFillChar,
         DEFAULT_META
     });
 

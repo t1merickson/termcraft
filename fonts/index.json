@@ -70,5 +70,11 @@
     "name": "Minogram 6x10",
     "type": "pixel",
     "path": "fonts/frostyfreeze-minogram-6x10/font.json"
+  },
+  {
+    "id": "geist-pixel",
+    "name": "Geist Pixel 12x17",
+    "type": "pixel",
+    "path": "fonts/geist-pixel/font.json"
   }
 ]

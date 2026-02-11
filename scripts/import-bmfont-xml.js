@@ -103,7 +103,7 @@ for (const ch of chars) {
       const srcY = ch.y + y - ch.yoffset;
       const px = getPixel(srcX, srcY);
       const on = px.a >= 32;
-      line += on ? '█' : ' ';
+      line += on ? '1' : '0';
     }
     rows.push(line);
   }
