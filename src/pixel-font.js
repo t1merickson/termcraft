@@ -87,13 +87,35 @@
     };
 
     /**
-     * Convert a binary glyph row to display characters.
+     * Convert a binary glyph row to display characters (plain text).
      * '1' → fillChar, '0' → space
      */
     function binaryToDisplay(row) {
         let out = '';
         for (let i = 0; i < row.length; i++) {
             out += row[i] === '1' ? fillChar : ' ';
+        }
+        return out;
+    }
+
+    /**
+     * Wrap a single character in a fixed-width span for HTML output.
+     * Ensures every cell is exactly 1ch wide regardless of the glyph's
+     * natural width — fixes alignment for ■, ●, ◆, etc.
+     */
+    function wrapChar(ch) {
+        // Space doesn't need wrapping — it's always 1ch in monospace
+        if (ch === ' ') return ' ';
+        return '<span class="pc">' + ch + '</span>';
+    }
+
+    /**
+     * Convert a binary glyph row to HTML with fixed-width spans.
+     */
+    function binaryToHtml(row) {
+        let out = '';
+        for (let i = 0; i < row.length; i++) {
+            out += row[i] === '1' ? wrapChar(fillChar) : ' ';
         }
         return out;
     }
@@ -189,38 +211,57 @@
                 }
             }
 
-            // Convert grid to display characters
-            lines.length = 0;
+            // Convert grid to display characters (plain text + HTML)
+            const ansiLines = [];
+            const htmlLines = [];
             for (let r = 0; r < gridH; r++) {
-                let line = '';
+                let ansiLine = '';
+                let htmlLine = '';
                 for (let c = 0; c < gridW; c++) {
                     const cell = grid[r][c];
-                    if (cell === 'F') line += fillChar;
-                    else if (cell === 'S') line += shadowChar;
-                    else line += ' ';
+                    if (cell === 'F') {
+                        ansiLine += fillChar;
+                        htmlLine += wrapChar(fillChar);
+                    } else if (cell === 'S') {
+                        ansiLine += shadowChar;
+                        htmlLine += wrapChar(shadowChar);
+                    } else {
+                        ansiLine += ' ';
+                        htmlLine += ' ';
+                    }
                 }
-                lines.push(line);
+                ansiLines.push(ansiLine);
+                htmlLines.push(htmlLine);
             }
 
             // Trim padding rows if they ended up empty
-            while (lines.length > origH && lines[0].trim() === '') {
-                lines.shift();
+            while (ansiLines.length > origH && ansiLines[0].trim() === '') {
+                ansiLines.shift();
+                htmlLines.shift();
             }
-            while (lines.length > origH && lines[lines.length - 1].trim() === '') {
-                lines.pop();
+            while (ansiLines.length > origH && ansiLines[ansiLines.length - 1].trim() === '') {
+                ansiLines.pop();
+                htmlLines.pop();
             }
+
+            return {
+                ansi: ansiLines.join('\n'),
+                html: htmlLines.join('\n')
+            };
         } else {
             // No shadow — convert binary lines to display characters
+            const ansiLines = [];
+            const htmlLines = [];
             for (let i = 0; i < lines.length; i++) {
-                lines[i] = binaryToDisplay(lines[i]);
+                ansiLines.push(binaryToDisplay(lines[i]));
+                htmlLines.push(binaryToHtml(lines[i]));
             }
-        }
 
-        const output = lines.join('\n');
-        return {
-            ansi: output,
-            html: output // Same thing - just plain text with block characters
-        };
+            return {
+                ansi: ansiLines.join('\n'),
+                html: htmlLines.join('\n')
+            };
+        }
     }
 
     /**
@@ -230,8 +271,9 @@
     function getLetters() {
         const letters = {};
         for (const [char, rows] of Object.entries(fontData)) {
-            const output = rows.map(binaryToDisplay).join('\n');
-            letters[char] = { ansi: output, html: output };
+            const ansi = rows.map(binaryToDisplay).join('\n');
+            const html = rows.map(binaryToHtml).join('\n');
+            letters[char] = { ansi, html };
         }
         return letters;
     }
