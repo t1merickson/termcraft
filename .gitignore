@@ -1,9 +1,17 @@
 .DS_Store
 node_modules/
+dist/
+
+# Font source assets (large binaries, only sprite.json metadata is tracked)
 assets/font-sources/**
 !assets/font-sources/**/
 !assets/font-sources/**/sprite.json
+assets/geist-pixel/
+
+# Test output (only expected baselines are tracked)
 test-output/*
 !test-output/expected/
+
+# Legacy
 fonts/downloads/
 font-pixel-alpha.png

@@ -1,81 +1,113 @@
 # ANSI 256 Color Tools
 
-A browser-based toolkit for working with ANSI 256 terminal colors. No build tools required.
+A browser-based toolkit for working with ANSI 256 terminal colors, image-to-ANSI conversion, and pixel font rendering. Built with Tailwind CSS v4 and Vite.
 
-## Features
+## Tools
 
 ### Color Wheel
-Visual representation of all 256 ANSI colors arranged by hue angle, with grayscale colors in a separate strip. Supports three viewing modes:
-- **Grayscale** - Only grayscale colors
-- **ANSI 16** - Standard 16 terminal colors
-- **ANSI 256** - Full 256 color palette
 
-Click any color to copy its escape code.
+Visual representation of all 256 ANSI colors arranged by hue angle, with grayscale colors in a separate strip. Two viewing modes:
+
+- **ANSI 16** — Standard 16 terminal colors
+- **ANSI 256** — Full 256 color palette with 6x6x6 color cube
+
+Click any color to copy its escape code. Hover for color details.
 
 ### Lookup & Convert
-Find the nearest ANSI 256 color from:
-- HEX (`#FF5733`)
-- RGB (`255, 87, 51`)
-- HSL (`11°, 100%, 60%`)
 
-Shows the input color, matched ANSI color, and Euclidean distance.
+Find the nearest ANSI 256 color from HEX, RGB, or HSL input. Shows the input color, matched ANSI color, escape code, and Euclidean distance in RGB space.
 
 ### Image to ANSI
-Convert images to ANSI terminal art.
 
-**Options:**
-- Max width/height in characters
-- ANSI 256 or True Color (24-bit) mode
-- Unicode half-blocks for 2x vertical resolution
+Convert images to terminal art using ANSI escape codes.
 
-**Output:**
-- Live preview
-- Copy raw ANSI escape codes
-- Copy shell `printf` command
+- **Render modes** — Half blocks (fg+bg or fg-only), quadrant blocks, full blocks, spaces (bg-only), binary
+- **Color depth** — 256-color or 24-bit true color
+- **Options** — Configurable dimensions, preset scales (1/2x, 1x, 2x, 1:1), invert brightness, greyscale
+- **Output** — Live preview, copy raw ANSI escape codes or shell `printf` command
 
-## Usage
+### Image to ASCII
 
-Serve the directory with any static file server:
+Convert images to ASCII art using character density mapping.
+
+- **Character sets** — Standard, detailed, blocks, simple, extended (70 chars)
+- **Color modes** — Plain ASCII, 256-color, 24-bit true color
+- **Options** — Same dimension/scale controls, invert, greyscale
+
+### Pixel Font
+
+Render text using block-character pixel art with 13 built-in fonts.
+
+- **Featured fonts** — Geist Pixel, Pixel Alpha, Public Pixel
+- **Dot styles** — Full block, square, circle, diamond, rectangle, and more (or custom character)
+- **Shadow** — Four directional shadows with adjustable intensity
+- **Glyph preview** — Browse all characters in the current font
+- **Output** — Copy rendered text as ANSI or `printf` command
+
+## Getting Started
 
 ```bash
-python3 -m http.server 8000
-# or
-npx serve .
+npm install
+npm run dev
 ```
 
-Open `http://localhost:8000` in your browser.
+Open `http://localhost:8000`.
 
-## Files
+### Build for production
 
-```
-├── index.html        # Main HTML structure
-├── styles.css        # Minimal black/white theme
-├── app.js            # Application logic
-├── image-to-ansi.js  # Image conversion algorithm
-└── colors.json       # Color data reference
+```bash
+npm run build
+npm run preview
 ```
 
-## Color Computation
+### Run tests
 
-All colors are computed from the ANSI 256 specification:
+```bash
+npm test
+```
 
-- **0-15**: Standard 16 terminal colors
-- **16-231**: 6×6×6 color cube (`16 + 36r + 6g + b`, values: 0, 95, 135, 175, 215, 255)
-- **232-255**: 24 grayscale steps (`8 + 10i` for i in 0..23)
+Runs 33 headless render tests across all image conversion modes. Test images live in `samples/`, expected output in `test-output/expected/`.
 
-## Image Conversion Algorithm
+## Project Structure
 
-Based on [dom111/image-to-ansi](https://github.com/dom111/image-to-ansi):
+```
+index.html              Single-page app (all 5 tools)
+vite.config.js          Vite + Tailwind CSS v4 plugin
+src/
+  styles.css            Tailwind v4 with @theme (Geist design tokens)
+  app.js                UI logic, tab navigation, event handling
+  ansi256.js            ANSI 256 color computation and lookup
+  image-to-ansi.js      Image-to-ANSI conversion engine
+  image-to-ascii.js     Image-to-ASCII conversion engine
+  pixel-font.js         Pixel font loader and renderer
+fonts/
+  index.json            Font registry (13 fonts)
+  <font-id>/font.json   Individual font glyph data
+assets/
+  geist/                Geist Sans + Mono variable woff2 fonts
+scripts/
+  test-render.js        Headless render test harness
+  import-png-sprite.js  Import fonts from PNG sprite sheets
+  import-bmfont-xml.js  Import fonts from BMFont XML format
+  import-otf.js         Import fonts from OTF files
+samples/                Test input images
+```
 
-1. Scale image to fit within max dimensions
-2. For each pixel, find nearest ANSI color using Manhattan distance
-3. In Unicode mode, combine two vertical pixels using half-block characters (▀/▄)
-4. Optimize output by only emitting escape codes when color changes
+## Design System
+
+The UI follows the [Geist](https://vercel.com/geist) design system, using real `--ds-*` tokens extracted from vercel.com/geist (dark theme). Tailwind CSS v4's `@theme` directive maps these to utility classes like `bg-gray-alpha-100`, `text-gray-900`, `shadow-focus-ring`, etc.
+
+## ANSI 256 Color Specification
+
+Colors 0-255 are computed from the standard:
+
+- **0-15** — Standard 16 terminal colors (implementation-defined)
+- **16-231** — 6x6x6 color cube: `16 + 36r + 6g + b` where each channel maps to `[0, 95, 135, 175, 215, 255]`
+- **232-255** — 24 grayscale steps: `8 + 10i` for i in 0..23
 
 ## Pixel Fonts
 
-Pixel fonts live under `fonts/` and are loaded from `fonts/index.json`.
-See `fonts/README.md` for the format and import workflow.
+See [`fonts/README.md`](fonts/README.md) for the font JSON format and import workflow.
 
 ## License
 
