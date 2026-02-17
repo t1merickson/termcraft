@@ -70,7 +70,6 @@
                     <p class="mb-8 text-xl leading-[30px] text-gray-900">Explore the full ANSI 256 color palette</p>
 
                     <!-- Mode Selector -->
-                    <span class="hidden" id="mode-swatch-grayscale"></span>
                     <div class="mb-5 flex justify-center gap-2" id="mode-selector">
                         <button class="mode-btn flex h-8 cursor-pointer items-center gap-1.5 rounded-sm border border-gray-400 bg-transparent px-3 text-[13px] text-gray-900 transition-colors hover:bg-background-200 hover:text-gray-1000 focus-visible:shadow-focus-ring" data-mode="ansi16">
                             <span class="size-3 rounded-[3px] border border-gray-500" id="mode-swatch-ansi16"></span>
@@ -710,19 +709,5 @@
     <script src="src/image-to-ascii.js"></script>
     <script src="src/pixel-font.js"></script>
     <script src="src/app.js"></script>
-    <script>
-    // Insert <hr> separator in font select after featured fonts
-    (function() {
-        var sel = document.getElementById('font-select');
-        if (!sel) return;
-        var observer = new MutationObserver(function() {
-            if (sel.options.length > 3 && !sel.querySelector('hr')) {
-                sel.insertBefore(document.createElement('hr'), sel.options[3]);
-                observer.disconnect();
-            }
-        });
-        observer.observe(sel, { childList: true });
-    })();
-    </script>
 </body>
 </html>

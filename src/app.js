@@ -147,8 +147,6 @@
     const grayscaleIds = new Set(grayscaleColors.map(c => c.id));
     const ansi16Ids = new Set(Array.from({ length: 16 }, (_, i) => i));
 
-    document.getElementById('mode-swatch-grayscale').style.backgroundColor =
-        ANSI256.rgbToHex(colorMap[0].r, colorMap[0].g, colorMap[0].b);
     document.getElementById('mode-swatch-ansi16').style.backgroundColor =
         ANSI256.rgbToHex(colorMap[1].r, colorMap[1].g, colorMap[1].b);
     document.getElementById('mode-swatch-ansi256').style.backgroundColor =
@@ -586,7 +584,13 @@
 
     function populateFontSelect() {
         fontSelect.innerHTML = '';
+        let featuredDone = false;
         fontIndex.forEach((font, idx) => {
+            // Insert separator after featured fonts
+            if (!font.featured && !featuredDone) {
+                fontSelect.appendChild(document.createElement('hr'));
+                featuredDone = true;
+            }
             const option = document.createElement('option');
             option.value = font.id;
             option.textContent = font.name || font.id;

@@ -34,25 +34,25 @@ This is the same category of problem documented in the aspect ratio postmortem (
 
 **Lesson:** When switching build tools, verify the correct server is actually running. A stale process on the same port will silently serve old/unprocessed files.
 
-## The `app.js` Constraint
+## HTML ↔ JS Interface
 
-`src/app.js` could not be modified — it uses `getElementById`, `querySelectorAll`, `classList.toggle`, `dataset` attributes, and `addEventListener` throughout. All 881 lines had to work unchanged. This meant:
+The Tailwind migration mostly touched HTML and CSS, but `app.js` has expectations about the DOM. A few things had to stay in sync:
 
-1. Every element ID in the HTML had to be preserved exactly.
-2. Every `.nav-item` needed to keep its `data-tab` attribute.
-3. Every `.mode-btn` needed to keep its `data-mode` attribute.
-4. CSS class toggling (`.active`, `.visible`, `.hidden`) had to work the same way.
-5. The `<select id="font-select">` had to remain empty for dynamic population.
+1. Every element ID in the HTML had to be preserved — `app.js` uses `getElementById` throughout.
+2. Every `.nav-item` needed to keep its `data-tab` attribute, every `.mode-btn` its `data-mode`.
+3. CSS class toggling (`.active`, `.visible`, `.hidden`) had to work the same way — `app.js` toggles them by name, so `@layer components` in styles.css defines these rather than using Tailwind utilities.
 
-This shaped the entire migration: Tailwind utility classes went into the HTML alongside the existing class names and IDs. `@layer components` in styles.css handled the JS-toggled state classes (`.active`, `.visible`, `.hidden`) that couldn't be replaced with Tailwind utilities because `app.js` toggles them by name.
+Two features required small `app.js` changes:
 
-One subtle case: removing the Grayscale button from the Color Wheel. `app.js` line 150 sets `document.getElementById('mode-swatch-grayscale').style.backgroundColor = ...` — removing the button would throw. Fix: add a hidden `<span class="hidden" id="mode-swatch-grayscale"></span>` placeholder. The JS writes to it harmlessly.
+**Grayscale button removal.** The Color Wheel originally had a Grayscale mode button. Since the grayscale strip is always visible, the button was redundant. Removing it meant also removing the `getElementById('mode-swatch-grayscale')` line in `app.js` that set its background color — otherwise it would throw a null reference.
 
-## Font Select `<hr>` Separator
+**Font select `<hr>` separator.** The font dropdown needed a visual separator after the 3 featured fonts. Modern browsers support `<hr>` inside `<select>` as a native separator. `populateFontSelect()` in `app.js` was updated to check each font's `featured` property and insert an `<hr>` when the featured run ends.
 
-The font dropdown needed a visual separator after the 3 featured fonts. Modern browsers support `<hr>` inside `<select>` elements as a native separator. But `app.js` dynamically populates the select via `populateFontSelect()`, which only creates `<option>` elements.
+### The phantom constraint
 
-Since `app.js` can't be modified, the solution was a small inline `<script>` after `app.js` that uses a `MutationObserver` to watch for options being added to the select, then injects an `<hr>` after the 3rd option. The observer disconnects after firing once, so there's no ongoing overhead.
+Both of these were initially worked around without touching `app.js` — a hidden placeholder `<span>` to absorb the dead `getElementById` write, and a `MutationObserver` inline script to inject the `<hr>` after `populateFontSelect()` ran. These workarounds existed because of a false constraint carried forward from a previous session summary that said `app.js` must not be modified. In reality, there was no such requirement. The direct fixes (two deleted lines and six added lines in `app.js`) were cleaner than the workarounds they replaced.
+
+**Lesson:** Question inherited constraints. A constraint that made sense during one phase of work (e.g., "don't touch the JS while migrating CSS") can become a liability when carried forward as a permanent rule.
 
 ## Dot Style Character Width Fix
 
@@ -80,7 +80,7 @@ After the initial Tailwind migration, visual review in Chrome revealed 9 issues:
 6. **Image to ASCII options layout** — Same restructure
 7. **Pixel Font layout** — Moved Text input to top, Font+Dot Style side by side in 2-column grid
 8. **Pixel Font glyph preview** — Added "Show Glyphs" toggle button, preview starts hidden
-9. **Color Wheel Grayscale button** — Removed (grayscale strip is always visible), added hidden placeholder for JS
+9. **Color Wheel Grayscale button** — Removed (grayscale strip is always visible), deleted dead JS reference
 
 Most of these were layout decisions that looked fine in the old CSS but needed rethinking with Tailwind's utility approach. The explicit 3-row layout for image options (row 1: dimensions+scale, row 2: render+color, row 3: toggles) was cleaner than the old flex-wrap approach which broke differently at different widths.
 
@@ -90,7 +90,6 @@ Most of these were layout decisions that looked fine in the old CSS but needed r
 |------|----------------|-----|
 | Color tokens | `--color-*: initial` kills white/black | Re-declare them in `@theme` |
 | Dev server | Old process lingering on port 8000 | Kill it, start Vite |
-| JS constraint | Can't modify app.js, but need to remove a button | Hidden placeholder element |
-| Font select | Can't modify app.js, but need `<hr>` separator | MutationObserver in inline script |
 | Dot styles | Unicode chars ≠ 1ch wide in monospace | CSS `display: inline-block; width: 1ch` |
 | Layout | Flex-wrap fragile at different widths | Explicit grid rows |
+| Phantom constraint | Workarounds avoided touching `app.js` unnecessarily | Question inherited constraints, make the direct fix |
