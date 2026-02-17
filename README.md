@@ -1,6 +1,6 @@
-# ANSI 256 Color Tools
+# Termcraft
 
-A browser-based toolkit for working with ANSI 256 terminal colors, image-to-ANSI conversion, and pixel font rendering. Built with Tailwind CSS v4 and Vite.
+A browser-based terminal art toolkit. 7 tools for working with ANSI colors, image/video conversion, ASCII editing, and pixel fonts. Built with Tailwind CSS v4 and Vite.
 
 ## Tools
 
@@ -28,11 +28,28 @@ Convert images to terminal art using ANSI escape codes.
 
 ### Image to ASCII
 
-Convert images to ASCII art using character density mapping.
+Convert images to ASCII art using character density mapping or shape-aware 6D vector matching.
 
 - **Character sets** — Standard, detailed, blocks, simple, extended (70 chars)
+- **Matching modes** — Brightness (traditional) or Shape-Aware (6D vector matching for structural fidelity)
 - **Color modes** — Plain ASCII, 256-color, 24-bit true color
-- **Options** — Same dimension/scale controls, invert, greyscale
+- **Shape controls** — Adjustable contrast exponent, directional contrast from neighboring cells
+
+### ASCII Editor
+
+Grid-based canvas editor for composing ASCII art.
+
+- **Tools** — Type, brush, line, fill, eraser
+- **Features** — Quick character palette, configurable grid size, undo/redo
+- **Export** — Copy as plain text or ANSI codes
+
+### Video to ASCII
+
+Real-time video and webcam to ASCII art conversion.
+
+- **Sources** — Upload video files or use webcam (with camera switching)
+- **Modes** — Brightness or shape-aware matching
+- **Controls** — Adjustable FPS, auto-reduce for performance, play/pause/stop
 
 ### Pixel Font
 
@@ -50,8 +67,6 @@ Render text using block-character pixel art with 13 built-in fonts.
 npm install
 npm run dev
 ```
-
-Open `http://localhost:8000`.
 
 ### Build for production
 
@@ -71,15 +86,27 @@ Runs 33 headless render tests across all image conversion modes. Test images liv
 ## Project Structure
 
 ```
-index.html              Single-page app (all 5 tools)
+index.html              App shell (header, sidebar nav, empty tab containers)
 vite.config.js          Vite + Tailwind CSS v4 plugin
 src/
-  styles.css            Tailwind v4 with @theme (Geist design tokens)
-  app.js                UI logic, tab navigation, event handling
+  app.js                Entry point: tab navigation + lazy init
+  utils.js              Shared helpers (toast, clipboard, image loading)
   ansi256.js            ANSI 256 color computation and lookup
   image-to-ansi.js      Image-to-ANSI conversion engine
   image-to-ascii.js     Image-to-ASCII conversion engine
+  shape-vectors.js      6D shape vector matching for ASCII rendering
+  ascii-editor.js       Grid-based ASCII art editor
+  video-to-ascii.js     Real-time video-to-ASCII converter
   pixel-font.js         Pixel font loader and renderer
+  styles.css            Tailwind v4 with @theme (Geist design tokens)
+  tabs/
+    color-wheel.js      Color Wheel tab (UI + template)
+    lookup.js           Lookup & Convert tab
+    image-to-ansi-tab.js  Image to ANSI tab
+    image-to-ascii-tab.js Image to ASCII tab
+    ascii-editor-tab.js   ASCII Editor tab
+    video-to-ascii-tab.js Video to ASCII tab
+    pixel-font-tab.js     Pixel Font tab
 fonts/
   index.json            Font registry (13 fonts)
   <font-id>/font.json   Individual font glyph data
