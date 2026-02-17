@@ -58,6 +58,17 @@ function requireArg(args, name) {
 
 // ── Grid detection ────────────────────────────────────────────────
 
+function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+
+/**
+ * Detect pixel grid size from font outlines.
+ *
+ * First tries exact GCD of all coordinate deltas.  When rounding errors
+ * in the font's coordinate table produce ±1 jitter (e.g. 285/286 instead
+ * of a clean 286), the exact GCD collapses to 1.  In that case we fall
+ * back to a fuzzy approach: snap every delta to the nearest multiple of a
+ * candidate divisor and accept it if the worst residual is ≤ 1 unit.
+ */
 function detectGridSize(font) {
   const deltas = [];
   for (let i = 33; i <= 90; i++) {
@@ -82,13 +93,38 @@ function detectGridSize(font) {
     }
   }
 
-  function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+  if (deltas.length === 0) return 1;
+
+  // Try exact GCD first
   let g = deltas[0];
   for (let i = 1; i < deltas.length; i++) {
     g = gcd(g, deltas[i]);
     if (g === 1) break;
   }
-  return g;
+  if (g > 1) return g;
+
+  // Exact GCD is 1 — likely rounding jitter.  Find the smallest delta
+  // cluster center that evenly divides all deltas within ±1 tolerance.
+  const minDelta = Math.min(...deltas);
+
+  // Candidate divisors: try values near the smallest delta ±1
+  for (const candidate of [minDelta, minDelta + 1, minDelta - 1]) {
+    if (candidate < 2) continue;
+    let ok = true;
+    for (const d of deltas) {
+      const remainder = d % candidate;
+      const residual = Math.min(remainder, candidate - remainder);
+      if (residual > 1) { ok = false; break; }
+    }
+    if (ok) {
+      console.log(`  (fuzzy GCD: snapped to ${candidate}, exact was 1)`);
+      return candidate;
+    }
+  }
+
+  // Last resort: return smallest delta as best guess
+  console.warn(`  Warning: could not find clean grid divisor; using smallest delta ${minDelta}`);
+  return minDelta;
 }
 
 // ── Point-in-path (winding number) ───────────────────────────────
@@ -166,6 +202,74 @@ function isPointInPath(cmds, x, y) {
   return winding !== 0;
 }
 
+// ── Strip empty padding ──────────────────────────────────────────
+
+/**
+ * Strip rows/columns that are all-zero across every non-space glyph.
+ * Returns { glyphs, topStripped, bottomStripped, leftStripped, rightStripped }.
+ */
+function stripPadding(glyphs) {
+  const chars = Object.keys(glyphs).filter(c => c !== ' ');
+  if (chars.length === 0) return { glyphs, topStripped: 0, bottomStripped: 0, leftStripped: 0, rightStripped: 0 };
+
+  const h = glyphs[chars[0]].length;
+
+  // Count strippable top rows
+  let topStrip = 0;
+  for (let r = 0; r < h; r++) {
+    if (chars.every(ch => !glyphs[ch][r].includes('1'))) topStrip++;
+    else break;
+  }
+
+  // Count strippable bottom rows
+  let bottomStrip = 0;
+  for (let r = h - 1; r >= topStrip; r--) {
+    if (chars.every(ch => !glyphs[ch][r].includes('1'))) bottomStrip++;
+    else break;
+  }
+
+  // Count strippable left columns (min across all non-space glyphs)
+  let leftStrip = Infinity;
+  for (const ch of chars) {
+    const rows = glyphs[ch];
+    const w = rows[0].length;
+    let cols = 0;
+    for (let c = 0; c < w; c++) {
+      if (rows.every(row => row[c] === '0')) cols++;
+      else break;
+    }
+    if (cols < leftStrip) leftStrip = cols;
+  }
+  if (!Number.isFinite(leftStrip)) leftStrip = 0;
+
+  // Count strippable right columns
+  let rightStrip = Infinity;
+  for (const ch of chars) {
+    const rows = glyphs[ch];
+    const w = rows[0].length;
+    let cols = 0;
+    for (let c = w - 1; c >= leftStrip; c--) {
+      if (rows.every(row => row[c] === '0')) cols++;
+      else break;
+    }
+    if (cols < rightStrip) rightStrip = cols;
+  }
+  if (!Number.isFinite(rightStrip)) rightStrip = 0;
+
+  if (topStrip === 0 && bottomStrip === 0 && leftStrip === 0 && rightStrip === 0) {
+    return { glyphs, topStripped: 0, bottomStripped: 0, leftStripped: 0, rightStripped: 0 };
+  }
+
+  // Apply stripping to all glyphs (including space)
+  const stripped = {};
+  for (const [ch, rows] of Object.entries(glyphs)) {
+    const trimmedRows = rows.slice(topStrip, h - bottomStrip);
+    stripped[ch] = trimmedRows.map(row => row.slice(leftStrip, row.length - rightStrip));
+  }
+
+  return { glyphs: stripped, topStripped: topStrip, bottomStripped: bottomStrip, leftStripped: leftStrip, rightStripped: rightStrip };
+}
+
 // ── Main ──────────────────────────────────────────────────────────
 
 const args = parseArgs(process.argv.slice(2));
@@ -187,6 +291,13 @@ console.log(`Detected grid size: ${gridSize} units/pixel`);
 const ascentPx = Math.ceil(font.ascender / gridSize);
 const descentPx = Math.ceil(-font.descender / gridSize);
 const glyphHeight = ascentPx + descentPx;
+
+// Sanity check — pixel fonts should not exceed ~128px in any dimension
+if (glyphHeight > 128) {
+  console.error(`Glyph height ${glyphHeight}px is unreasonably large (grid=${gridSize}).`);
+  console.error(`Grid detection probably failed. Use --grid-size N to override.`);
+  process.exit(1);
+}
 
 // Printable ASCII charset
 const charset = [];
@@ -238,12 +349,24 @@ for (const char of charset) {
   glyphs[char] = rows;
 }
 
+// Strip uniform padding
+const pad = stripPadding(glyphs);
+const finalGlyphs = pad.glyphs;
+const finalHeight = glyphHeight - pad.topStripped - pad.bottomStripped;
+const finalMaxW = maxAdvPx - pad.leftStripped - pad.rightStripped;
+const finalSpaceW = Math.max(1, Math.round((font.charToGlyph(' ').advanceWidth || font.unitsPerEm / 4) / gridSize) - pad.leftStripped - pad.rightStripped);
+
+if (pad.topStripped || pad.bottomStripped || pad.leftStripped || pad.rightStripped) {
+  console.log(`Stripped padding: top=${pad.topStripped} bottom=${pad.bottomStripped} left=${pad.leftStripped} right=${pad.rightStripped}`);
+  console.log(`Effective size: ${finalMaxW}x${finalHeight} (was ${maxAdvPx}x${glyphHeight})`);
+}
+
 // Preview
 for (const ch of ['.', 'A', 'H', 'g', 'W', 'i', '0', '@']) {
-  if (glyphs[ch]) {
-    const w = glyphs[ch][0].length;
+  if (finalGlyphs[ch]) {
+    const w = finalGlyphs[ch][0].length;
     console.log(`\n[${ch}] ${w}px wide:`);
-    for (const row of glyphs[ch]) {
+    for (const row of finalGlyphs[ch]) {
       const display = row.replace(/1/g, '█').replace(/0/g, ' ');
       console.log('|' + display + '|');
     }
@@ -258,18 +381,18 @@ const fontJson = {
   meta: {
     id,
     name,
-    glyphWidth: maxAdvPx,
-    glyphHeight,
-    spaceWidth: Math.round((font.charToGlyph(' ').advanceWidth || font.unitsPerEm / 4) / gridSize),
-    letterGap: 0,
+    glyphWidth: finalMaxW,
+    glyphHeight: finalHeight,
+    spaceWidth: finalSpaceW,
+    letterGap: 1,
     fallback,
     author: authorArg,
     source: sourceArg,
     license: licenseArg,
     charset: charset.join('')
   },
-  glyphs
+  glyphs: finalGlyphs
 };
 
 fs.writeFileSync(output, JSON.stringify(fontJson, null, 2) + '\n');
-console.log(`\nWrote ${output} (max ${maxAdvPx}x${glyphHeight})`);
+console.log(`\nWrote ${output} (max ${finalMaxW}x${finalHeight})`);

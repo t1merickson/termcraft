@@ -111,19 +111,73 @@ for (const ch of chars) {
   glyphs[char] = rows;
 }
 
+// ── Strip empty padding ──────────────────────────────────────────
+
+function stripPadding(glyphs) {
+  const chars = Object.keys(glyphs).filter(c => c !== ' ');
+  if (chars.length === 0) return { glyphs, topStripped: 0, bottomStripped: 0, leftStripped: 0, rightStripped: 0 };
+  const h = glyphs[chars[0]].length;
+
+  let topStrip = 0;
+  for (let r = 0; r < h; r++) {
+    if (chars.every(ch => !glyphs[ch][r].includes('1'))) topStrip++;
+    else break;
+  }
+  let bottomStrip = 0;
+  for (let r = h - 1; r >= topStrip; r--) {
+    if (chars.every(ch => !glyphs[ch][r].includes('1'))) bottomStrip++;
+    else break;
+  }
+  let leftStrip = Infinity;
+  for (const ch of chars) {
+    const rows = glyphs[ch]; const w = rows[0].length; let cols = 0;
+    for (let c = 0; c < w; c++) { if (rows.every(row => row[c] === '0')) cols++; else break; }
+    if (cols < leftStrip) leftStrip = cols;
+  }
+  if (!Number.isFinite(leftStrip)) leftStrip = 0;
+  let rightStrip = Infinity;
+  for (const ch of chars) {
+    const rows = glyphs[ch]; const w = rows[0].length; let cols = 0;
+    for (let c = w - 1; c >= leftStrip; c--) { if (rows.every(row => row[c] === '0')) cols++; else break; }
+    if (cols < rightStrip) rightStrip = cols;
+  }
+  if (!Number.isFinite(rightStrip)) rightStrip = 0;
+
+  if (topStrip === 0 && bottomStrip === 0 && leftStrip === 0 && rightStrip === 0) {
+    return { glyphs, topStripped: 0, bottomStripped: 0, leftStripped: 0, rightStripped: 0 };
+  }
+  const stripped = {};
+  for (const [ch, rows] of Object.entries(glyphs)) {
+    const trimmedRows = rows.slice(topStrip, h - bottomStrip);
+    stripped[ch] = trimmedRows.map(row => row.slice(leftStrip, row.length - rightStrip));
+  }
+  return { glyphs: stripped, topStripped: topStrip, bottomStripped: bottomStrip, leftStripped: leftStrip, rightStripped: rightStrip };
+}
+
+const pad = stripPadding(glyphs);
+const finalGlyphs = pad.glyphs;
+const finalWidth = glyphWidth - pad.leftStripped - pad.rightStripped;
+const finalHeight = glyphHeight - pad.topStripped - pad.bottomStripped;
+const finalSpaceW = Math.max(1, Math.floor(glyphWidth / 2) - pad.leftStripped - pad.rightStripped);
+
+if (pad.topStripped || pad.bottomStripped || pad.leftStripped || pad.rightStripped) {
+  console.log(`Stripped padding: top=${pad.topStripped} bottom=${pad.bottomStripped} left=${pad.leftStripped} right=${pad.rightStripped}`);
+  console.log(`Effective size: ${finalWidth}x${finalHeight} (was ${glyphWidth}x${glyphHeight})`);
+}
+
 const font = {
   meta: {
     id,
     name,
-    glyphWidth,
-    glyphHeight,
-    spaceWidth: Math.floor(glyphWidth / 2),
+    glyphWidth: finalWidth,
+    glyphHeight: finalHeight,
+    spaceWidth: finalSpaceW,
     letterGap: 1,
     fallback,
     charset: chars.map(c => String.fromCharCode(c.id)).join(''),
     source: path.basename(pngPath)
   },
-  glyphs
+  glyphs: finalGlyphs
 };
 
 fs.mkdirSync(path.dirname(output), { recursive: true });
