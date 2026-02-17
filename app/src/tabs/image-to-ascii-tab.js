@@ -4,6 +4,7 @@
 
 import * as ImageToAscii from '../engines/image-to-ascii.js';
 import { showToast, copyToClipboard, loadImage, readFileAsDataURL } from '../utils.js';
+import { terminalControlsHTML, initTerminalControls } from '../terminal-controls.js';
 
 const template = `
 <div class="mx-auto max-w-[1400px]">
@@ -151,30 +152,7 @@ const template = `
                     <button class="flex h-8 cursor-pointer items-center rounded-sm border border-gray-400 bg-transparent px-3 text-xs text-gray-1000 transition-colors hover:bg-gray-200 hover:border-gray-500" id="ascii-copy-ansi">Copy ASCII</button>
                 </div>
             </div>
-            <div class="flex flex-wrap items-center gap-x-5 gap-y-3 border-b border-gray-400 bg-gray-100 px-4 py-2.5 text-xs text-gray-900">
-                <div class="flex items-center gap-1.5">
-                    <label for="ascii-ctrl-font-size" class="whitespace-nowrap">Font Size</label>
-                    <input type="range" id="ascii-ctrl-font-size" min="4" max="24" value="12">
-                    <span class="min-w-[35px] text-gray-700" id="ascii-ctrl-font-size-val">12px</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                    <label for="ascii-ctrl-line-height" class="whitespace-nowrap">Line Height</label>
-                    <input type="range" id="ascii-ctrl-line-height" min="50" max="150" value="100">
-                    <span class="min-w-[35px] text-gray-700" id="ascii-ctrl-line-height-val">1.0</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                    <label for="ascii-ctrl-letter-spacing" class="whitespace-nowrap">Letter Spacing</label>
-                    <input type="range" id="ascii-ctrl-letter-spacing" min="-5" max="5" value="0">
-                    <span class="min-w-[35px] text-gray-700" id="ascii-ctrl-letter-spacing-val">0px</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                    <label class="relative inline-block h-[18px] w-8 cursor-pointer">
-                        <input type="checkbox" id="ascii-ctrl-no-wrap" checked class="peer absolute h-0 w-0 opacity-0">
-                        <span class="absolute inset-0 rounded-full bg-gray-400 transition-colors after:absolute after:left-0.5 after:top-0.5 after:h-[14px] after:w-[14px] after:rounded-full after:bg-white after:transition-transform peer-checked:bg-blue-700 peer-checked:after:translate-x-[14px]"></span>
-                    </label>
-                    <span class="text-xs text-gray-1000">No Wrap</span>
-                </div>
-            </div>
+            ${terminalControlsHTML('ascii', { noWrap: true })}
             <div class="ansi-terminal min-h-[200px] max-h-[700px] overflow-auto p-4" id="ascii-terminal"></div>
         </div>
     </div>
@@ -372,34 +350,6 @@ export function init(container) {
         }
     });
 
-    const asciiCtrlFontSize = container.querySelector('#ascii-ctrl-font-size');
-    const asciiCtrlFontSizeVal = container.querySelector('#ascii-ctrl-font-size-val');
-    const asciiCtrlLineHeight = container.querySelector('#ascii-ctrl-line-height');
-    const asciiCtrlLineHeightVal = container.querySelector('#ascii-ctrl-line-height-val');
-    const asciiCtrlLetterSpacing = container.querySelector('#ascii-ctrl-letter-spacing');
-    const asciiCtrlLetterSpacingVal = container.querySelector('#ascii-ctrl-letter-spacing-val');
-    const asciiCtrlNoWrap = container.querySelector('#ascii-ctrl-no-wrap');
-
-    function updateAsciiPreviewStyles() {
-        const fontSize = asciiCtrlFontSize.value;
-        const lineHeight = asciiCtrlLineHeight.value / 100;
-        const letterSpacing = asciiCtrlLetterSpacing.value;
-
-        asciiTerminal.style.setProperty('--preview-font-size', fontSize + 'px');
-        asciiTerminal.style.setProperty('--preview-line-height', lineHeight);
-        asciiTerminal.style.setProperty('--preview-letter-spacing', letterSpacing + 'px');
-
-        asciiCtrlFontSizeVal.textContent = fontSize + 'px';
-        asciiCtrlLineHeightVal.textContent = lineHeight.toFixed(2);
-        asciiCtrlLetterSpacingVal.textContent = letterSpacing + 'px';
-
-        asciiTerminal.classList.toggle('no-wrap', asciiCtrlNoWrap.checked);
-    }
-
-    asciiCtrlFontSize.addEventListener('input', updateAsciiPreviewStyles);
-    asciiCtrlLineHeight.addEventListener('input', updateAsciiPreviewStyles);
-    asciiCtrlLetterSpacing.addEventListener('input', updateAsciiPreviewStyles);
-    asciiCtrlNoWrap.addEventListener('change', updateAsciiPreviewStyles);
-
-    updateAsciiPreviewStyles();
+    const asciiPreviewControls = initTerminalControls(container, asciiTerminal, 'ascii');
+    asciiPreviewControls.update();
 }

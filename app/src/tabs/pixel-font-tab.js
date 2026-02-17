@@ -4,6 +4,7 @@
 
 import * as PixelFont from '../engines/pixel-font.js';
 import { showToast, copyToClipboard, escapeForPrintf } from '../utils.js';
+import { terminalControlsHTML, initTerminalControls } from '../terminal-controls.js';
 
 const template = `
 <div class="mx-auto max-w-[900px]">
@@ -19,7 +20,7 @@ const template = `
                 <rect x="1" y="10" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
                 <rect x="10" y="10" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
             </svg>
-            <span>Show Glyphs</span>
+            <span>Show All Glyphs</span>
         </button>
     </div>
     <div class="mb-8" id="font-preview" style="display: none;">
@@ -80,8 +81,8 @@ const template = `
                 <div class="relative flex-1">
                     <select id="font-shadow-dir"
                         class="h-10 w-full cursor-pointer appearance-none rounded-sm border border-gray-400 bg-background-100 px-3 pr-8 font-sans text-sm text-gray-1000 outline-none transition-[border-color,box-shadow] focus:border-blue-700 focus:shadow-focus-ring">
-                        <option value="none">None</option>
-                        <option value="br" selected>Bottom Right ↘</option>
+                        <option value="none" selected>None</option>
+                        <option value="br">Bottom Right ↘</option>
                         <option value="bl">Bottom Left ↙</option>
                         <option value="tl">Top Left ↖</option>
                         <option value="tr">Top Right ↗</option>
@@ -114,6 +115,7 @@ const template = `
                 <button class="flex h-8 cursor-pointer items-center rounded-sm border border-gray-400 bg-transparent px-3 text-xs text-gray-1000 transition-colors hover:bg-gray-200 hover:border-gray-500" id="copy-font-printf">Copy printf</button>
             </div>
         </div>
+        ${terminalControlsHTML('pf')}
         <div class="ansi-terminal overflow-x-auto p-5" id="font-terminal"></div>
     </div>
 </div>
@@ -132,6 +134,8 @@ export function init(container) {
     const fontDotStyle = container.querySelector('#font-dot-style');
     const fontDotCustom = container.querySelector('#font-dot-custom');
 
+    initTerminalControls(container, fontTerminal, 'pf');
+
     let currentFontAnsi = '';
     let currentFontPrintf = '';
     let fontIndex = [];
@@ -140,7 +144,7 @@ export function init(container) {
     container.querySelector('#toggle-glyph-preview').addEventListener('click', function () {
         const open = fontPreview.style.display !== 'none';
         fontPreview.style.display = open ? 'none' : '';
-        this.querySelector('span').textContent = open ? 'Show Glyphs' : 'Hide Glyphs';
+        this.querySelector('span').textContent = open ? 'Show All Glyphs' : 'Hide All Glyphs';
     });
 
     fontDotStyle.addEventListener('change', () => {

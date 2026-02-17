@@ -4,6 +4,7 @@
 
 import * as ImageToAnsi from '../engines/image-to-ansi.js';
 import { showToast, copyToClipboard, loadImage, readFileAsDataURL } from '../utils.js';
+import { terminalControlsHTML, initTerminalControls } from '../terminal-controls.js';
 
 const template = `
 <div class="mx-auto max-w-[1400px]">
@@ -125,30 +126,7 @@ const template = `
                     <button class="flex h-8 cursor-pointer items-center rounded-sm border border-gray-400 bg-transparent px-3 text-xs text-gray-1000 transition-colors hover:bg-gray-200 hover:border-gray-500" id="copy-ansi">Copy ANSI</button>
                 </div>
             </div>
-            <div class="flex flex-wrap items-center gap-x-5 gap-y-3 border-b border-gray-400 bg-gray-100 px-4 py-2.5 text-xs text-gray-900">
-                <div class="flex items-center gap-1.5">
-                    <label for="ctrl-font-size" class="whitespace-nowrap">Font Size</label>
-                    <input type="range" id="ctrl-font-size" min="4" max="24" value="12">
-                    <span class="min-w-[35px] text-gray-700" id="ctrl-font-size-val">12px</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                    <label for="ctrl-line-height" class="whitespace-nowrap">Line Height</label>
-                    <input type="range" id="ctrl-line-height" min="50" max="150" value="100">
-                    <span class="min-w-[35px] text-gray-700" id="ctrl-line-height-val">1.0</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                    <label for="ctrl-letter-spacing" class="whitespace-nowrap">Letter Spacing</label>
-                    <input type="range" id="ctrl-letter-spacing" min="-5" max="5" value="0">
-                    <span class="min-w-[35px] text-gray-700" id="ctrl-letter-spacing-val">0px</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                    <label class="relative inline-block h-[18px] w-8 cursor-pointer">
-                        <input type="checkbox" id="ctrl-no-wrap" checked class="peer absolute h-0 w-0 opacity-0">
-                        <span class="absolute inset-0 rounded-full bg-gray-400 transition-colors after:absolute after:left-0.5 after:top-0.5 after:h-[14px] after:w-[14px] after:rounded-full after:bg-white after:transition-transform peer-checked:bg-blue-700 peer-checked:after:translate-x-[14px]"></span>
-                    </label>
-                    <span class="text-xs text-gray-1000">No Wrap</span>
-                </div>
-            </div>
+            ${terminalControlsHTML('ansi', { noWrap: true })}
             <div class="ansi-terminal min-h-[200px] max-h-[700px] overflow-auto p-4" id="ansi-terminal"></div>
         </div>
     </div>
@@ -357,34 +335,6 @@ export function init(container) {
         }
     });
 
-    const ctrlFontSize = container.querySelector('#ctrl-font-size');
-    const ctrlFontSizeVal = container.querySelector('#ctrl-font-size-val');
-    const ctrlLineHeight = container.querySelector('#ctrl-line-height');
-    const ctrlLineHeightVal = container.querySelector('#ctrl-line-height-val');
-    const ctrlLetterSpacing = container.querySelector('#ctrl-letter-spacing');
-    const ctrlLetterSpacingVal = container.querySelector('#ctrl-letter-spacing-val');
-    const ctrlNoWrap = container.querySelector('#ctrl-no-wrap');
-
-    function updatePreviewStyles() {
-        const fontSize = ctrlFontSize.value;
-        const lineHeight = ctrlLineHeight.value / 100;
-        const letterSpacing = ctrlLetterSpacing.value;
-
-        ansiTerminal.style.setProperty('--preview-font-size', fontSize + 'px');
-        ansiTerminal.style.setProperty('--preview-line-height', lineHeight);
-        ansiTerminal.style.setProperty('--preview-letter-spacing', letterSpacing + 'px');
-
-        ctrlFontSizeVal.textContent = fontSize + 'px';
-        ctrlLineHeightVal.textContent = lineHeight.toFixed(2);
-        ctrlLetterSpacingVal.textContent = letterSpacing + 'px';
-
-        ansiTerminal.classList.toggle('no-wrap', ctrlNoWrap.checked);
-    }
-
-    ctrlFontSize.addEventListener('input', updatePreviewStyles);
-    ctrlLineHeight.addEventListener('input', updatePreviewStyles);
-    ctrlLetterSpacing.addEventListener('input', updatePreviewStyles);
-    ctrlNoWrap.addEventListener('change', updatePreviewStyles);
-
-    updatePreviewStyles();
+    const previewControls = initTerminalControls(container, ansiTerminal, 'ansi');
+    previewControls.update();
 }
