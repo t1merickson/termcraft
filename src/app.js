@@ -699,9 +699,25 @@
     const asciiOptColor = document.getElementById('ascii-opt-color');
     const asciiOptInvert = document.getElementById('ascii-opt-invert');
     const asciiOptGreyscale = document.getElementById('ascii-opt-greyscale');
+    const asciiOptMode = document.getElementById('ascii-opt-mode');
+    const asciiShapeControls = document.getElementById('ascii-shape-controls');
+    const asciiOptContrast = document.getElementById('ascii-opt-contrast');
+    const asciiContrastVal = document.getElementById('ascii-contrast-val');
+    const asciiOptDirectional = document.getElementById('ascii-opt-directional');
     const asciiBtnHalf = document.getElementById('ascii-btn-half');
     const asciiBtnFull = document.getElementById('ascii-btn-full');
     const asciiBtnDouble = document.getElementById('ascii-btn-double');
+
+    // Show/hide shape-aware controls based on mode
+    asciiOptMode.addEventListener('change', () => {
+        asciiShapeControls.style.display = asciiOptMode.value === 'shape' ? '' : 'none';
+        reprocessAsciiImage();
+    });
+
+    // Contrast slider display
+    asciiOptContrast.addEventListener('input', () => {
+        asciiContrastVal.textContent = (parseInt(asciiOptContrast.value) / 10).toFixed(1);
+    });
 
     let currentAsciiOutput = '';
     let currentAsciiPrintf = '';
@@ -758,14 +774,7 @@
             asciiBtnFull.disabled = false;
             asciiBtnDouble.disabled = false;
 
-            const result = ImageToAscii.processImage(img, {
-                maxWidth: parseInt(asciiOptWidth.value) || 80,
-                maxHeight: parseInt(asciiOptHeight.value) || 40,
-                charset: asciiOptCharset.value,
-                colorMode: asciiOptColor.value,
-                invert: asciiOptInvert.checked,
-                greyscale: asciiOptGreyscale.checked
-            });
+            const result = ImageToAscii.processImage(img, getAsciiOptions());
 
             currentAsciiOutput = result.ansi;
             currentAsciiPrintf = `printf "${ImageToAscii.escapeForPrintf(result.ansi)}"`;
@@ -784,18 +793,26 @@
         }
     }
 
+    // Collect all ASCII options into a single object
+    function getAsciiOptions() {
+        return {
+            maxWidth: parseInt(asciiOptWidth.value) || 80,
+            maxHeight: parseInt(asciiOptHeight.value) || 40,
+            charset: asciiOptCharset.value,
+            colorMode: asciiOptColor.value,
+            invert: asciiOptInvert.checked,
+            greyscale: asciiOptGreyscale.checked,
+            mode: asciiOptMode.value,
+            contrastExponent: parseInt(asciiOptContrast.value) / 10,
+            directionalContrast: asciiOptDirectional.checked
+        };
+    }
+
     // Re-process on option change
     function reprocessAsciiImage() {
         if (asciiSourceImage.src && asciiSourceImage.src !== window.location.href) {
             ImageToAscii.loadImage(asciiSourceImage.src).then(img => {
-                const result = ImageToAscii.processImage(img, {
-                    maxWidth: parseInt(asciiOptWidth.value) || 80,
-                    maxHeight: parseInt(asciiOptHeight.value) || 40,
-                    charset: asciiOptCharset.value,
-                    colorMode: asciiOptColor.value,
-                    invert: asciiOptInvert.checked,
-                    greyscale: asciiOptGreyscale.checked
-                });
+                const result = ImageToAscii.processImage(img, getAsciiOptions());
 
                 currentAsciiOutput = result.ansi;
                 currentAsciiPrintf = `printf "${ImageToAscii.escapeForPrintf(result.ansi)}"`;
@@ -808,6 +825,10 @@
     [asciiOptWidth, asciiOptHeight, asciiOptCharset, asciiOptColor, asciiOptInvert, asciiOptGreyscale].forEach(opt => {
         opt.addEventListener('change', reprocessAsciiImage);
     });
+
+    // Shape-aware controls also trigger reprocess
+    asciiOptContrast.addEventListener('change', reprocessAsciiImage);
+    asciiOptDirectional.addEventListener('change', reprocessAsciiImage);
 
     // Preset buttons
     asciiBtnHalf.addEventListener('click', () => {
@@ -881,5 +902,296 @@
 
     // Initialize
     updateAsciiPreviewStyles();
+
+    // ============================================================
+    // ASCII Editor Tab
+    // ============================================================
+
+    let editor = null;
+
+    // Lazy-init: create editor on first tab activation
+    document.querySelectorAll('.nav-item').forEach(item => {
+        if (item.dataset.tab === 'editor') {
+            item.addEventListener('click', () => {
+                if (!editor) {
+                    const canvas = document.getElementById('editor-canvas');
+                    const cols = parseInt(document.getElementById('editor-cols').value) || 80;
+                    const rows = parseInt(document.getElementById('editor-rows').value) || 24;
+                    editor = AsciiEditor.create(canvas, { cols, rows });
+                    // Auto-focus for keyboard input
+                    requestAnimationFrame(() => editor.focus());
+                }
+            });
+        }
+    });
+
+    // Tool buttons
+    document.querySelectorAll('.editor-tool-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.editor-tool-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if (editor) editor.setTool(btn.dataset.tool);
+        });
+    });
+
+    // Quick character buttons
+    document.querySelectorAll('.editor-quick-char').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const brushInput = document.getElementById('editor-brush-char');
+            brushInput.value = btn.dataset.char;
+            if (editor) editor.setBrushChar(btn.dataset.char);
+        });
+    });
+
+    // Brush char input
+    document.getElementById('editor-brush-char').addEventListener('input', (e) => {
+        if (editor && e.target.value) editor.setBrushChar(e.target.value);
+    });
+
+    // Undo / Redo / Clear
+    document.getElementById('editor-undo').addEventListener('click', () => { if (editor) editor.undo(); });
+    document.getElementById('editor-redo').addEventListener('click', () => { if (editor) editor.redo(); });
+    document.getElementById('editor-clear').addEventListener('click', () => { if (editor) editor.clear(); });
+
+    // Resize
+    document.getElementById('editor-resize').addEventListener('click', () => {
+        if (!editor) return;
+        const newCols = parseInt(document.getElementById('editor-cols').value) || 80;
+        const newRows = parseInt(document.getElementById('editor-rows').value) || 24;
+        editor.resize(newCols, newRows);
+    });
+
+    // Copy buttons
+    document.getElementById('editor-copy-text').addEventListener('click', async () => {
+        if (!editor) return;
+        await copyToClipboard(editor.exportPlainText());
+        showToast('ASCII text copied!');
+    });
+
+    document.getElementById('editor-copy-ansi').addEventListener('click', async () => {
+        if (!editor) return;
+        await copyToClipboard(editor.exportAnsi());
+        showToast('ANSI codes copied!');
+    });
+
+    // ============================================================
+    // Video to ASCII Tab
+    // ============================================================
+
+    let videoCtrl = null;
+    let videoActive = false;
+
+    const videoUploadArea = document.getElementById('video-upload-area');
+    const videoFileInput = document.getElementById('video-file-input');
+    const videoUploadLabel = document.getElementById('video-upload-label');
+    const videoWebcamBtn = document.getElementById('video-webcam-btn');
+    const videoCameraSelect = document.getElementById('video-camera-select');
+    const videoOptFps = document.getElementById('video-opt-fps');
+    const videoFpsVal = document.getElementById('video-fps-val');
+    const videoOptMode = document.getElementById('video-opt-mode');
+    const videoShapeControls = document.getElementById('video-shape-controls');
+    const videoOptContrast = document.getElementById('video-opt-contrast');
+    const videoContrastVal = document.getElementById('video-contrast-val');
+    const videoPlayPause = document.getElementById('video-play-pause');
+    const videoPlayIcon = document.getElementById('video-play-icon');
+    const videoPlayLabel = document.getElementById('video-play-label');
+    const videoStopBtn = document.getElementById('video-stop');
+    const videoFpsDisplay = document.getElementById('video-fps-display');
+    const videoReduceWarning = document.getElementById('video-reduce-warning');
+
+    function getVideoOptions() {
+        return {
+            maxWidth: parseInt(document.getElementById('video-opt-width').value) || 80,
+            maxHeight: parseInt(document.getElementById('video-opt-height').value) || 40,
+            charset: document.getElementById('video-opt-charset').value,
+            colorMode: document.getElementById('video-opt-color').value,
+            invert: document.getElementById('video-opt-invert').checked,
+            greyscale: document.getElementById('video-opt-greyscale').checked,
+            mode: videoOptMode.value,
+            contrastExponent: parseInt(videoOptContrast.value) / 10,
+            directionalContrast: document.getElementById('video-opt-directional').checked
+        };
+    }
+
+    function ensureVideoCtrl() {
+        if (!videoCtrl) {
+            videoCtrl = VideoToAscii.create({
+                video: document.getElementById('video-source'),
+                terminal: document.getElementById('video-terminal'),
+                getOptions: getVideoOptions,
+                onFps(fps) {
+                    videoFpsDisplay.textContent = fps + ' fps';
+                    const factor = videoCtrl.getAutoReduceFactor();
+                    videoReduceWarning.classList.toggle('hidden', factor <= 1);
+                }
+            });
+        }
+        return videoCtrl;
+    }
+
+    function enableVideoControls() {
+        videoPlayPause.disabled = false;
+        videoStopBtn.disabled = false;
+        document.getElementById('video-copy-text').disabled = false;
+        document.getElementById('video-copy-ansi').disabled = false;
+    }
+
+    function resetVideoUI() {
+        videoPlayPause.disabled = true;
+        videoStopBtn.disabled = true;
+        document.getElementById('video-copy-text').disabled = true;
+        document.getElementById('video-copy-ansi').disabled = true;
+        videoPlayIcon.textContent = '▶';
+        videoPlayLabel.textContent = 'Play';
+        videoFpsDisplay.textContent = '0 fps';
+        videoReduceWarning.classList.add('hidden');
+        videoUploadLabel.textContent = 'Upload video';
+        document.getElementById('video-placeholder').style.display = '';
+    }
+
+    // Clean up when leaving the video tab
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            if (item.dataset.tab !== 'video' && videoCtrl) {
+                videoCtrl.pause();
+                videoActive = false;
+                videoPlayIcon.textContent = '▶';
+                videoPlayLabel.textContent = 'Play';
+            }
+            if (item.dataset.tab === 'video') {
+                videoActive = true;
+            }
+        });
+    });
+
+    // File upload
+    videoUploadArea.addEventListener('click', () => videoFileInput.click());
+    videoFileInput.addEventListener('change', async () => {
+        const file = videoFileInput.files[0];
+        if (!file) return;
+        const ctrl = ensureVideoCtrl();
+        ctrl.stop();
+        try {
+            await ctrl.loadFile(file);
+            videoUploadLabel.textContent = file.name;
+            document.getElementById('video-placeholder').style.display = 'none';
+            enableVideoControls();
+            ctrl.play();
+            videoPlayIcon.textContent = '⏸';
+            videoPlayLabel.textContent = 'Pause';
+        } catch (err) {
+            console.error('Video load error:', err);
+            showToast('Failed to load video');
+        }
+    });
+
+    // Webcam
+    videoWebcamBtn.addEventListener('click', async () => {
+        const ctrl = ensureVideoCtrl();
+
+        // If webcam is already active, stop it
+        const video = document.getElementById('video-source');
+        if (video.srcObject) {
+            ctrl.stop();
+            resetVideoUI();
+            videoCameraSelect.classList.add('hidden');
+            return;
+        }
+
+        try {
+            await ctrl.startWebcam();
+            document.getElementById('video-placeholder').style.display = 'none';
+            enableVideoControls();
+            ctrl.play();
+            videoPlayIcon.textContent = '⏸';
+            videoPlayLabel.textContent = 'Pause';
+
+            // Populate camera list
+            const cameras = await ctrl.listCameras();
+            if (cameras.length > 1) {
+                videoCameraSelect.innerHTML = '';
+                cameras.forEach(cam => {
+                    const opt = document.createElement('option');
+                    opt.value = cam.deviceId;
+                    opt.textContent = cam.label || `Camera ${videoCameraSelect.options.length + 1}`;
+                    videoCameraSelect.appendChild(opt);
+                });
+                videoCameraSelect.classList.remove('hidden');
+            }
+        } catch (err) {
+            console.error('Webcam error:', err);
+            showToast('Could not access webcam');
+        }
+    });
+
+    // Camera switch
+    videoCameraSelect.addEventListener('change', async () => {
+        if (!videoCtrl) return;
+        videoCtrl.stopWebcam();
+        try {
+            await videoCtrl.startWebcam(videoCameraSelect.value);
+            videoCtrl.play();
+        } catch (err) {
+            console.error('Camera switch error:', err);
+            showToast('Failed to switch camera');
+        }
+    });
+
+    // Play/Pause
+    videoPlayPause.addEventListener('click', () => {
+        if (!videoCtrl) return;
+        if (videoCtrl.isRunning()) {
+            videoCtrl.pause();
+            videoPlayIcon.textContent = '▶';
+            videoPlayLabel.textContent = 'Play';
+        } else {
+            videoCtrl.play();
+            videoPlayIcon.textContent = '⏸';
+            videoPlayLabel.textContent = 'Pause';
+        }
+    });
+
+    // Stop
+    videoStopBtn.addEventListener('click', () => {
+        if (!videoCtrl) return;
+        videoCtrl.stop();
+        resetVideoUI();
+        videoCameraSelect.classList.add('hidden');
+    });
+
+    // FPS slider
+    videoOptFps.addEventListener('input', () => {
+        videoFpsVal.textContent = videoOptFps.value;
+        if (videoCtrl) videoCtrl.setTargetFps(parseInt(videoOptFps.value));
+    });
+
+    // Mode toggle (show/hide shape controls)
+    videoOptMode.addEventListener('change', () => {
+        videoShapeControls.style.display = videoOptMode.value === 'shape' ? '' : 'none';
+    });
+
+    // Contrast slider display
+    videoOptContrast.addEventListener('input', () => {
+        videoContrastVal.textContent = (parseInt(videoOptContrast.value) / 10).toFixed(1);
+    });
+
+    // Copy buttons
+    document.getElementById('video-copy-text').addEventListener('click', async () => {
+        if (!videoCtrl) return;
+        const text = videoCtrl.getLastPlainText();
+        if (text) {
+            await copyToClipboard(text);
+            showToast('ASCII frame copied!');
+        }
+    });
+
+    document.getElementById('video-copy-ansi').addEventListener('click', async () => {
+        if (!videoCtrl) return;
+        const ansi = videoCtrl.getLastAnsi();
+        if (ansi) {
+            await copyToClipboard(ansi);
+            showToast('ANSI frame copied!');
+        }
+    });
 
 })();

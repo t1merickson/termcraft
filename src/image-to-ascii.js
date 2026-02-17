@@ -1,8 +1,11 @@
 /**
  * Image to ASCII Converter
  *
- * Converts images to ASCII art using character brightness mapping.
+ * Converts images to ASCII art using character brightness mapping
+ * or shape-aware 6D vector matching.
+ *
  * Requires: ansi256.js
+ * Optional: shape-vectors.js (for shape-aware mode)
  */
 
 (function(root) {
@@ -76,6 +79,28 @@
     }
 
     /**
+     * Calculate output grid dimensions from image and max constraints.
+     */
+    function calcOutputDimensions(imgWidth, imgHeight, maxWidth, maxHeight) {
+        const aspectRatio = imgWidth / imgHeight;
+        const charAspect = 2;
+
+        let width, height;
+        if (aspectRatio > (maxWidth / maxHeight) * charAspect) {
+            width = maxWidth;
+            height = Math.round(maxWidth / aspectRatio / charAspect);
+        } else {
+            height = maxHeight;
+            width = Math.round(maxHeight * aspectRatio * charAspect);
+        }
+
+        return {
+            width: Math.max(1, width),
+            height: Math.max(1, height)
+        };
+    }
+
+    /**
      * Process an image and convert to ASCII art
      *
      * @param {HTMLImageElement} img - Source image
@@ -85,6 +110,9 @@
      * @param {string} options.charset - Character set name or custom string (default: 'standard')
      * @param {string} options.colorMode - Color mode: 'none', '256', '24bit' (default: 'none')
      * @param {boolean} options.invert - Invert brightness mapping (default: false)
+     * @param {string} options.mode - Matching mode: 'brightness' or 'shape' (default: 'brightness')
+     * @param {number} options.contrastExponent - Shape mode contrast exponent 1.0–4.0 (default: 2.0)
+     * @param {boolean} options.directionalContrast - Enable directional contrast (default: false)
      * @returns {{ ansi: string, html: string, width: number, height: number }}
      */
     function processImage(img, options = {}) {
@@ -94,44 +122,41 @@
             charset = 'standard',
             colorMode = 'none',
             invert = false,
-            greyscale = false
+            greyscale = false,
+            mode = 'brightness',
+            contrastExponent = 2.0,
+            directionalContrast = false
         } = options;
 
-        // Get charset string (allow preset name or custom string)
         const charsetStr = CHARSETS[charset] || charset || CHARSETS.standard;
+        const { width, height } = calcOutputDimensions(img.width, img.height, maxWidth, maxHeight);
 
-        // Calculate scaled dimensions
-        // Characters are ~2x taller than wide, so we need to compensate
-        const aspectRatio = img.width / img.height;
-        const charAspect = 2;
+        const useColor = colorMode !== 'none';
+        const useTrue24bit = colorMode === '24bit';
 
-        let width, height;
+        // Shape-aware mode needs ShapeVectors and a higher-res canvas
+        const useShape = mode === 'shape' && typeof root.ShapeVectors !== 'undefined';
 
-        // Scale to fit within maxWidth x maxHeight while maintaining aspect ratio
-        if (aspectRatio > (maxWidth / maxHeight) * charAspect) {
-            width = maxWidth;
-            height = Math.round(maxWidth / aspectRatio / charAspect);
-        } else {
-            height = maxHeight;
-            width = Math.round(maxHeight * aspectRatio * charAspect);
-        }
+        // Pixels per cell for shape sampling (more pixels = more accurate circles)
+        const cellW = useShape ? 12 : 1;
+        const cellH = useShape ? 18 : 1;
 
-        width = Math.max(1, width);
-        height = Math.max(1, height);
+        // Canvas dimensions
+        const canvasW = width * cellW;
+        const canvasH = height * cellH;
 
-        // Draw to canvas
         const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
+        canvas.width = canvasW;
+        canvas.height = canvasH;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
-        ctx.drawImage(img, 0, 0, width, height);
+        ctx.drawImage(img, 0, 0, canvasW, canvasH);
 
-        const imageData = ctx.getImageData(0, 0, width, height);
+        const imageData = ctx.getImageData(0, 0, canvasW, canvasH);
         const pixels = imageData.data;
 
-        // Apply greyscale transform (invert is handled in getCharForLuminance)
+        // Apply greyscale transform
         if (greyscale) {
             for (let i = 0; i < pixels.length; i += 4) {
                 const lum = Math.round(0.299 * pixels[i] + 0.587 * pixels[i + 1] + 0.114 * pixels[i + 2]);
@@ -139,23 +164,30 @@
             }
         }
 
-        const useColor = colorMode !== 'none';
-        const useTrue24bit = colorMode === '24bit';
+        // Precompute shape vectors if needed
+        let shapeData = null;
+        if (useShape) {
+            shapeData = root.ShapeVectors.precompute(charsetStr);
+        }
 
         let ansi = '';
         let html = '';
 
-        for (let y = 0; y < height; y++) {
+        for (let row = 0; row < height; row++) {
             let lineAnsi = '';
             let lineHtml = '';
             let lastFg = null;
 
-            for (let x = 0; x < width; x++) {
-                const idx = (y * width + x) * 4;
-                const r = pixels[idx];
-                const g = pixels[idx + 1];
-                const b = pixels[idx + 2];
-                const a = pixels[idx + 3];
+            for (let col = 0; col < width; col++) {
+                // Get the representative color for this cell
+                // (center pixel of the cell for color output)
+                const centerPx = Math.floor(col * cellW + cellW / 2);
+                const centerPy = Math.floor(row * cellH + cellH / 2);
+                const cidx = (centerPy * canvasW + centerPx) * 4;
+                const r = pixels[cidx];
+                const g = pixels[cidx + 1];
+                const b = pixels[cidx + 2];
+                const a = pixels[cidx + 3];
 
                 // Handle transparency
                 if (a < 32) {
@@ -168,8 +200,35 @@
                     continue;
                 }
 
-                const luminance = getLuminance(r, g, b);
-                const char = getCharForLuminance(luminance, charsetStr, invert);
+                let char;
+
+                if (useShape) {
+                    // Shape-aware: sample 6 circles, find nearest character
+                    const vec = root.ShapeVectors.sampleCell(imageData, col, row, cellW, cellH);
+
+                    // Invert: in shape mode, we want bright areas to have
+                    // high values (matching ink-heavy characters)
+                    if (invert) {
+                        for (let i = 0; i < 6; i++) vec[i] = 1.0 - vec[i];
+                    }
+
+                    // Apply directional contrast if enabled
+                    if (directionalContrast) {
+                        const ext = root.ShapeVectors.sampleExternalCircles(imageData, col, row, cellW, cellH);
+                        root.ShapeVectors.applyDirectionalContrast(vec, ext);
+                    }
+
+                    // Apply global contrast
+                    if (contrastExponent !== 1.0) {
+                        root.ShapeVectors.applyGlobalContrast(vec, contrastExponent);
+                    }
+
+                    char = root.ShapeVectors.findNearest(vec, shapeData.vectors, shapeData.chars);
+                } else {
+                    // Brightness mode: original behavior
+                    const luminance = getLuminance(r, g, b);
+                    char = getCharForLuminance(luminance, charsetStr, invert);
+                }
 
                 if (useColor) {
                     const fgCode = rgbaToFgAnsi(r, g, b, a, useTrue24bit);
@@ -195,12 +254,7 @@
             html += lineHtml + '\n';
         }
 
-        return {
-            ansi: ansi,
-            html: html,
-            width: width,
-            height: height
-        };
+        return { ansi, html, width, height };
     }
 
     /**

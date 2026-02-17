@@ -226,7 +226,8 @@
     }
 
     /* Mode button states */
-    .mode-btn.active {
+    .mode-btn.active,
+    .editor-tool-btn.active {
         @apply bg-gray-alpha-100 text-gray-1000;
         border-color: var(--color-gray-alpha-500);
     }
