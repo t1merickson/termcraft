@@ -21,12 +21,6 @@
     "featured": true
   },
   {
-    "id": "tom-thumb",
-    "name": "Tom Thumb 4x6",
-    "type": "pixel",
-    "path": "fonts/tom-thumb/font.json"
-  },
-  {
     "id": "font4x6",
     "name": "Micro 4x6",
     "type": "pixel",
@@ -57,12 +51,6 @@
     "path": "fonts/frostyfreeze-round-6x6/font.json"
   },
   {
-    "id": "lild0t",
-    "name": "LilD0t 7x7",
-    "type": "pixel",
-    "path": "fonts/lild0t/font.json"
-  },
-  {
     "id": "font8x8-basic",
     "name": "VGA 8x8",
     "type": "pixel",
@@ -79,5 +67,29 @@
     "name": "Minogram 6x10",
     "type": "pixel",
     "path": "fonts/frostyfreeze-minogram-6x10/font.json"
+  },
+  {
+    "id": "elektron-pixel-font-4x5",
+    "name": "Elektron 4x5",
+    "type": "pixel",
+    "path": "fonts/elektron-pixel-font-4x5/font.json"
+  },
+  {
+    "id": "stf-elektron-ar-lcd-1-6x6",
+    "name": "Elektron LCD 1",
+    "type": "pixel",
+    "path": "fonts/stf-elektron-ar-lcd-1-6x6/font.json"
+  },
+  {
+    "id": "stf-elektron-ar-lcd-2-5x8",
+    "name": "Elektron LCD 2",
+    "type": "pixel",
+    "path": "fonts/stf-elektron-ar-lcd-2-5x8/font.json"
+  },
+  {
+    "id": "stf-elektron-ar-lcd-3-6x6",
+    "name": "Elektron LCD 3",
+    "type": "pixel",
+    "path": "fonts/stf-elektron-ar-lcd-3-6x6/font.json"
   }
 ]
