@@ -6,13 +6,13 @@ This folder stores pixel fonts in a consistent JSON format so the app can list a
 
 Each font lives in its own folder:
 
-- `fonts/<font-id>/font.json`
-- `fonts/<font-id>/LICENSE`
-- `fonts/<font-id>/README.md`
+- `app/fonts/<font-id>/font.json`
+- `app/fonts/<font-id>/LICENSE`
+- `app/fonts/<font-id>/README.md`
 
 `font.json` has this shape:
 
-```
+```json
 {
   "meta": {
     "id": "pixel-alpha",
@@ -25,15 +25,17 @@ Each font lives in its own folder:
     "charset": "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
   },
   "glyphs": {
-    "A": ["   ██   ", "  ████  ", " ██████ ", "███  ███", "██    ██", "██    ██", "████████", "████████", "██    ██", "██    ██", "██    ██", "██    ██"],
-    "B": ["██████  ", "████████", "██    ██", "██    ██", "██    ██", "███████ ", "████████", "██    ██", "██    ██", "██    ██", "████████", "██████  "]
+    "A": ["00011000", "00111100", "01111110", "11100111", ...],
+    "B": ["11111100", "11111111", "11000011", "11000011", ...]
   }
 }
 ```
 
+Glyph rows use binary format: `1` = filled pixel, `0` = empty pixel.
+
 ## Fonts to Avoid
 
-LSDJ-style fonts (designed for the Game Boy music tracker Little Sound DJ) use non-standard charsets that don't follow ASCII ordering. They typically rearrange characters and include custom icons (pulse width waveforms, paw prints, etc.) in place of standard punctuation. Not worth importing.
+LSDJ-style fonts (designed for the Game Boy music tracker Little Sound DJ) use non-standard charsets that don't follow ASCII ordering. They typically rearrange characters and include custom icons in place of standard punctuation. Not worth importing.
 
 ## Adding a Font
 
@@ -43,8 +45,8 @@ LSDJ-style fonts (designed for the Game Boy music tracker Little Sound DJ) use n
 
 ```
 node scripts/import-png-sprite.js \
-  --input assets/my-font.png \
-  --output fonts/my-font/font.json \
+  --input assets/font-sources/my-font/sprite.png \
+  --output app/fonts/my-font/font.json \
   --name "My Font" \
   --id my-font \
   --glyph-width 8 \
@@ -59,25 +61,34 @@ node scripts/import-png-sprite.js \
 #   --luma-threshold 128
 ```
 
-4. Add `fonts/my-font/LICENSE` and `fonts/my-font/README.md` with attribution.
-5. Add the font to `fonts/index.json`:
+4. Add `app/fonts/my-font/LICENSE` and `app/fonts/my-font/README.md` with attribution.
+5. Add the font to `app/fonts/index.json`:
 
-```
-[
-  { "id": "pixel-alpha", "name": "Pixel Alpha", "path": "fonts/pixel-alpha/font.json" },
-  { "id": "my-font", "name": "My Font", "path": "fonts/my-font/font.json" }
-]
+```json
+{ "id": "my-font", "name": "My Font", "type": "pixel", "path": "fonts/my-font/font.json" }
 ```
 
 ## BMFont XML Import
 
-For BMFont XML+PNG pairs (like the frostyfreeze pack), use:
+For BMFont XML+PNG pairs (like the frostyfreeze pack):
 
 ```
 node scripts/import-bmfont-xml.js \
-  --xml assets/font-sources/myfont.xml \
-  --png assets/font-sources/myfont.png \
-  --output fonts/myfont/font.json \
+  --xml assets/font-sources/myfont/myfont.xml \
+  --png assets/font-sources/myfont/myfont.png \
+  --output app/fonts/myfont/font.json \
   --name "My Font" \
   --id myfont
+```
+
+## OTF Import
+
+For OpenType pixel fonts (like Geist Pixel):
+
+```
+node scripts/import-otf.js \
+  --input assets/font-sources/geist-pixel/GeistPixel-Square.otf \
+  --output app/fonts/geist-pixel/font.json \
+  --name "Geist Pixel" \
+  --id geist-pixel
 ```
