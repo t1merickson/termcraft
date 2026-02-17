@@ -3,7 +3,7 @@
  */
 
 import * as ImageToAnsi from '../engines/image-to-ansi.js';
-import { showToast, copyToClipboard, loadImage, readFileAsDataURL } from '../utils.js';
+import { showToast, copyToClipboard, loadImage, readFileAsDataURL, toggleHTML } from '../utils.js';
 import { terminalControlsHTML, initTerminalControls } from '../terminal-controls.js';
 
 const template = `
@@ -92,20 +92,8 @@ const template = `
             </div>
         </div>
         <div class="flex items-center gap-6">
-            <div class="flex items-center gap-2.5">
-                <label class="relative inline-block h-[22px] w-10 cursor-pointer">
-                    <input type="checkbox" id="opt-invert" class="peer absolute h-0 w-0 opacity-0">
-                    <span class="absolute inset-0 rounded-full bg-gray-400 transition-colors after:absolute after:left-0.5 after:top-0.5 after:h-[18px] after:w-[18px] after:rounded-full after:bg-white after:transition-transform peer-checked:bg-blue-700 peer-checked:after:translate-x-[18px]"></span>
-                </label>
-                <span class="text-sm text-gray-1000">Invert Brightness</span>
-            </div>
-            <div class="flex items-center gap-2.5">
-                <label class="relative inline-block h-[22px] w-10 cursor-pointer">
-                    <input type="checkbox" id="opt-greyscale" class="peer absolute h-0 w-0 opacity-0">
-                    <span class="absolute inset-0 rounded-full bg-gray-400 transition-colors after:absolute after:left-0.5 after:top-0.5 after:h-[18px] after:w-[18px] after:rounded-full after:bg-white after:transition-transform peer-checked:bg-blue-700 peer-checked:after:translate-x-[18px]"></span>
-                </label>
-                <span class="text-sm text-gray-1000">Greyscale</span>
-            </div>
+            ${toggleHTML('opt-invert', 'Invert Brightness')}
+            ${toggleHTML('opt-greyscale', 'Greyscale')}
         </div>
     </div>
 
@@ -123,23 +111,13 @@ const template = `
             <div class="flex items-center justify-between border-b border-gray-400 bg-gray-100 px-4 py-3">
                 <h4 class="text-[13px] font-medium text-gray-900">ANSI Output</h4>
                 <div class="flex gap-2">
+                    <button class="flex h-8 cursor-pointer items-center rounded-sm border border-gray-400 bg-transparent px-3 text-xs text-gray-1000 transition-colors hover:bg-gray-200 hover:border-gray-500" id="copy-printf">Copy printf</button>
                     <button class="flex h-8 cursor-pointer items-center rounded-sm border border-gray-400 bg-transparent px-3 text-xs text-gray-1000 transition-colors hover:bg-gray-200 hover:border-gray-500" id="copy-ansi">Copy ANSI</button>
                 </div>
             </div>
             ${terminalControlsHTML('ansi', { noWrap: true })}
             <div class="ansi-terminal min-h-[200px] max-h-[700px] overflow-auto p-4" id="ansi-terminal"></div>
         </div>
-    </div>
-
-    <!-- Escape Code Output -->
-    <div class="panel-hideable mt-5 overflow-hidden rounded-md border border-gray-400 bg-background-200" id="escape-output">
-        <div class="flex items-center justify-between border-b border-gray-400 bg-gray-100 px-4 py-3">
-            <h4 class="text-[13px] font-medium text-gray-900">Shell Command (printf)</h4>
-            <div class="flex gap-2">
-                <button class="flex h-8 cursor-pointer items-center rounded-sm border border-gray-400 bg-transparent px-3 text-xs text-gray-1000 transition-colors hover:bg-gray-200 hover:border-gray-500" id="copy-printf">Copy printf</button>
-            </div>
-        </div>
-        <pre class="max-h-[200px] overflow-auto whitespace-pre-wrap break-all bg-background-100 p-4 font-mono text-[13px] leading-relaxed text-gray-900" id="escape-code"></pre>
     </div>
 </div>
 `;
@@ -154,9 +132,6 @@ export function init(container) {
     const sourceImage = container.querySelector('#source-image');
     const sourceInfo = container.querySelector('#source-info');
     const ansiTerminal = container.querySelector('#ansi-terminal');
-    const escapeOutput = container.querySelector('#escape-output');
-    const escapeCode = container.querySelector('#escape-code');
-
     const optWidth = container.querySelector('#opt-width');
     const optHeight = container.querySelector('#opt-height');
     const optRender = container.querySelector('#opt-render');
@@ -219,8 +194,6 @@ export function init(container) {
     async function processFile(file) {
         processing.classList.add('visible');
         previewArea.classList.remove('visible');
-        escapeOutput.classList.remove('visible');
-
         try {
             const dataUrl = await readFileAsDataURL(file);
             const img = await loadImage(dataUrl);
@@ -251,11 +224,9 @@ export function init(container) {
             currentPrintfOutput = `printf "${ImageToAnsi.escapeForPrintf(result.ansi)}"`;
 
             ansiTerminal.innerHTML = `<code>${result.html}</code>`;
-            escapeCode.textContent = currentPrintfOutput;
 
             processing.classList.remove('visible');
             previewArea.classList.add('visible');
-            escapeOutput.classList.add('visible');
 
         } catch (error) {
             console.error('Error processing image:', error);
@@ -278,7 +249,6 @@ export function init(container) {
                 currentAnsiOutput = result.ansi;
                 currentPrintfOutput = `printf "${ImageToAnsi.escapeForPrintf(result.ansi)}"`;
                 ansiTerminal.innerHTML = `<code>${result.html}</code>`;
-                escapeCode.textContent = currentPrintfOutput;
             });
         }
     }

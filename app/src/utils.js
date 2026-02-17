@@ -42,6 +42,36 @@ export function readFileAsDataURL(file) {
     });
 }
 
+/**
+ * Return HTML for a toggle switch (Geist-style).
+ * @param {string} id       – checkbox element id
+ * @param {string} label    – visible label text
+ * @param {object} [opts]
+ * @param {boolean} [opts.checked] – initial state (default false)
+ * @param {'sm'|'md'} [opts.size]  – 'sm' = 18px track, 'md' = 22px track (default 'md')
+ * @param {'sm'|'base'} [opts.labelSize] – label font size (default 'sm' = text-sm)
+ */
+export function toggleHTML(id, label, opts = {}) {
+    const checked = opts.checked ? ' checked' : '';
+    if (opts.size === 'sm') {
+        return `<div class="flex items-center gap-1.5">
+                <label class="relative inline-block h-[18px] w-8 cursor-pointer">
+                    <input type="checkbox" id="${id}"${checked} class="peer absolute h-0 w-0 opacity-0">
+                    <span class="absolute inset-0 rounded-full bg-gray-400 transition-colors after:absolute after:left-0.5 after:top-0.5 after:h-[14px] after:w-[14px] after:rounded-full after:bg-white after:transition-transform peer-checked:bg-blue-700 peer-checked:after:translate-x-[14px]"></span>
+                </label>
+                <span class="text-xs text-gray-1000">${label}</span>
+            </div>`;
+    }
+    const labelCls = opts.labelSize === 'xs' ? 'text-xs' : 'text-sm';
+    return `<div class="flex items-center gap-2.5">
+                <label class="relative inline-block h-[22px] w-10 cursor-pointer">
+                    <input type="checkbox" id="${id}"${checked} class="peer absolute h-0 w-0 opacity-0">
+                    <span class="absolute inset-0 rounded-full bg-gray-400 transition-colors after:absolute after:left-0.5 after:top-0.5 after:h-[18px] after:w-[18px] after:rounded-full after:bg-white after:transition-transform peer-checked:bg-blue-700 peer-checked:after:translate-x-[18px]"></span>
+                </label>
+                <span class="${labelCls} text-gray-1000">${label}</span>
+            </div>`;
+}
+
 export function escapeForPrintf(ansi) {
     return ansi
         .replace(/\\/g, '\\\\')

@@ -3,6 +3,8 @@
  * Used by any tab that renders ANSI/ASCII into an .ansi-terminal element.
  */
 
+import { toggleHTML } from './utils.js';
+
 const MONO_FONTS = [
     { value: "'Geist Mono', monospace", label: 'Geist Mono' },
     { value: "'SF Mono', monospace",    label: 'SF Mono' },
@@ -28,12 +30,8 @@ export function terminalControlsHTML(prefix, opts = {}) {
     const noWrapCell = opts.noWrap ? `
             <div class="flex flex-col gap-2">
                 <label class="text-xs text-gray-900">&nbsp;</label>
-                <div class="flex h-8 items-center gap-1.5">
-                    <label class="relative inline-block h-[18px] w-8 cursor-pointer">
-                        <input type="checkbox" id="${prefix}-no-wrap" checked class="peer absolute h-0 w-0 opacity-0">
-                        <span class="absolute inset-0 rounded-full bg-gray-400 transition-colors after:absolute after:left-0.5 after:top-0.5 after:h-[14px] after:w-[14px] after:rounded-full after:bg-white after:transition-transform peer-checked:bg-blue-700 peer-checked:after:translate-x-[14px]"></span>
-                    </label>
-                    <span class="text-xs text-gray-1000">No Wrap</span>
+                <div class="flex h-8 items-center">
+                    ${toggleHTML(`${prefix}-no-wrap`, 'No Wrap', { checked: true, size: 'sm' })}
                 </div>
             </div>` : '';
 
