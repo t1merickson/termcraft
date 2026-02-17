@@ -4,8 +4,8 @@
  *
  * Example:
  * node scripts/import-png-sprite.js \
- *   --input assets/my-font.png \
- *   --output fonts/my-font/font.json \
+ *   --input assets/font-sources/my-font/sprite.png \
+ *   --output app/fonts/my-font/font.json \
  *   --name "My Font" \
  *   --id my-font \
  *   --glyph-width 8 \

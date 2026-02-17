@@ -2,7 +2,7 @@
  * Color Wheel Tab
  */
 
-import * as ANSI256 from '../ansi256.js';
+import * as ANSI256 from '../engines/ansi256.js';
 import { showToast, copyToClipboard } from '../utils.js';
 
 const template = `

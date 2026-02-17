@@ -2,7 +2,7 @@
  * Pixel Font Tab
  */
 
-import * as PixelFont from '../pixel-font.js';
+import * as PixelFont from '../engines/pixel-font.js';
 import { showToast, copyToClipboard, escapeForPrintf } from '../utils.js';
 
 const template = `

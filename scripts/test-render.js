@@ -10,7 +10,7 @@
  *
  * Usage:  node scripts/test-render.js            (run tests)
  *         node scripts/test-render.js --update    (regenerate expected images)
- * Output: test-output/ directory with rendered PNGs
+ * Output: tests/output/ directory with rendered PNGs
  */
 
 const fs = require('fs');
@@ -18,12 +18,12 @@ const path = require('path');
 const { PNG } = require('pngjs');
 
 // Import real source modules (no more duplicated logic)
-const ANSI256 = require('../src/ansi256.js');
-const ImageToAnsi = require('../src/image-to-ansi.js');
+const ANSI256 = require('../app/src/engines/ansi256.js');
+const ImageToAnsi = require('../app/src/engines/image-to-ansi.js');
 
-const OUTPUT_DIR = path.join(__dirname, '..', 'test-output');
-const EXPECTED_DIR = path.join(OUTPUT_DIR, 'expected');
-const SAMPLES_DIR = path.join(__dirname, '..', 'samples');
+const OUTPUT_DIR = path.join(__dirname, '..', 'tests', 'output');
+const EXPECTED_DIR = path.join(__dirname, '..', 'tests', 'expected');
+const SAMPLES_DIR = path.join(__dirname, '..', 'tests', 'samples');
 
 const updateMode = process.argv.includes('--update');
 

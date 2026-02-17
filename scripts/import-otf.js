@@ -12,8 +12,8 @@
  *
  * Example:
  *   node scripts/import-otf.js \
- *     --input assets/geist-pixel/GeistPixel-Square.otf \
- *     --output fonts/geist-pixel/font.json \
+ *     --input assets/font-sources/geist-pixel/GeistPixel-Square.otf \
+ *     --output app/fonts/geist-pixel/font.json \
  *     --name "Geist Pixel" \
  *     --id geist-pixel
  *

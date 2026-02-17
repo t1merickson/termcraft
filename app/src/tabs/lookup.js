@@ -2,7 +2,7 @@
  * Lookup & Convert Tab
  */
 
-import * as ANSI256 from '../ansi256.js';
+import * as ANSI256 from '../engines/ansi256.js';
 
 const template = `
 <div class="max-w-[600px]">

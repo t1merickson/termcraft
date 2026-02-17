@@ -2,7 +2,7 @@
  * Video to ASCII Tab
  */
 
-import * as VideoToAscii from '../video-to-ascii.js';
+import * as VideoToAscii from '../engines/video-to-ascii.js';
 import { showToast, copyToClipboard } from '../utils.js';
 
 const template = `

@@ -13,7 +13,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
-const INDEX_PATH = path.join(ROOT, 'fonts', 'index.json');
+const INDEX_PATH = path.join(ROOT, 'app', 'fonts', 'index.json');
 
 const index = JSON.parse(fs.readFileSync(INDEX_PATH, 'utf-8'));
 
@@ -33,7 +33,7 @@ for (const entry of index) {
         continue;
     }
 
-    const fontPath = path.join(ROOT, entry.path);
+    const fontPath = path.join(ROOT, 'app', entry.path);
     if (!fs.existsSync(fontPath)) {
         console.log(`SKIP (missing): ${fontPath}`);
         continue;
@@ -69,8 +69,8 @@ for (const entry of index) {
 const squareEntry = index.find(e => e.id === 'geist-pixel-square');
 if (squareEntry) {
     // Rename directory
-    const oldDir = path.join(ROOT, 'fonts', 'geist-pixel-square');
-    const newDir = path.join(ROOT, 'fonts', 'geist-pixel');
+    const oldDir = path.join(ROOT, 'app', 'fonts', 'geist-pixel-square');
+    const newDir = path.join(ROOT, 'app', 'fonts', 'geist-pixel');
     if (fs.existsSync(oldDir) && !fs.existsSync(newDir)) {
         fs.renameSync(oldDir, newDir);
         console.log(`RENAMED: fonts/geist-pixel-square → fonts/geist-pixel`);
@@ -99,7 +99,7 @@ console.log(`\nUpdated fonts/index.json: ${index.length} → ${newIndex.length} 
 
 // Remove duplicate directories
 for (const dupeId of GEIST_DUPES) {
-    const dupeDir = path.join(ROOT, 'fonts', dupeId);
+    const dupeDir = path.join(ROOT, 'app', 'fonts', dupeId);
     if (fs.existsSync(dupeDir)) {
         fs.rmSync(dupeDir, { recursive: true });
         console.log(`REMOVED: fonts/${dupeId}/`);

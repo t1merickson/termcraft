@@ -2,7 +2,7 @@
  * ASCII Editor Tab
  */
 
-import * as AsciiEditor from '../ascii-editor.js';
+import * as AsciiEditor from '../engines/ascii-editor.js';
 import { showToast, copyToClipboard } from '../utils.js';
 
 const template = `

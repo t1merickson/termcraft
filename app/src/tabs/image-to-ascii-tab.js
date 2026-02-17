@@ -2,7 +2,7 @@
  * Image to ASCII Tab
  */
 
-import * as ImageToAscii from '../image-to-ascii.js';
+import * as ImageToAscii from '../engines/image-to-ascii.js';
 import { showToast, copyToClipboard, loadImage, readFileAsDataURL } from '../utils.js';
 
 const template = `

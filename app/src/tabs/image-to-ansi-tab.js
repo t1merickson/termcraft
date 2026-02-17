@@ -2,7 +2,7 @@
  * Image to ANSI Tab
  */
 
-import * as ImageToAnsi from '../image-to-ansi.js';
+import * as ImageToAnsi from '../engines/image-to-ansi.js';
 import { showToast, copyToClipboard, loadImage, readFileAsDataURL } from '../utils.js';
 
 const template = `
