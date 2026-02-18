@@ -3,7 +3,7 @@
  */
 
 import * as ANSI256 from '../engines/ansi256.js';
-import { showToast, copyToClipboard } from '../utils.js';
+import { showToast, copyToClipboard, noteHTML } from '../utils.js';
 
 const template = `
 <h1 class="mb-3 text-[40px] font-semibold leading-[48px] text-gray-1000">Color Wheel</h1>
@@ -32,13 +32,8 @@ const template = `
     <div class="relative h-[600px] w-[600px]" id="wheel-container"></div>
 </div>
 
-<div class="mt-8 flex items-center gap-3 rounded-sm border border-gray-400 px-3 py-2 text-sm text-gray-900">
-    <svg class="size-4 shrink-0" viewBox="0 0 16 16" fill="none">
-        <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M8 7v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        <circle cx="8" cy="5" r="0.75" fill="currentColor"/>
-    </svg>
-    <span>Colors computed from ANSI 256 specification</span>
+<div class="mt-8">
+${noteHTML('Colors computed from ANSI 256 specification')}
 </div>
 `;
 
