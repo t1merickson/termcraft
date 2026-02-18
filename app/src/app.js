@@ -11,6 +11,7 @@ import * as ImageToAsciiTab from './tabs/image-to-ascii-tab.js';
 import * as AsciiEditorTab from './tabs/ascii-editor-tab.js';
 import * as VideoToAsciiTab from './tabs/video-to-ascii-tab.js';
 import * as PixelFontTab from './tabs/pixel-font-tab.js';
+import * as SpinnersTab from './tabs/spinners-tab.js';
 
 // Tab registry: maps data-tab attribute to { module, container id, lazy }
 const tabs = {
@@ -21,6 +22,7 @@ const tabs = {
     editor: { module: AsciiEditorTab,   lazy: true },
     video:  { module: VideoToAsciiTab,  lazy: true },
     font:   { module: PixelFontTab,     lazy: false },
+    spinners: { module: SpinnersTab,   lazy: true },
 };
 
 const initialized = new Set();
