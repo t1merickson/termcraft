@@ -4,6 +4,7 @@
 
 import * as VideoToAscii from '../engines/video-to-ascii.js';
 import { showToast, copyToClipboard, toggleHTML } from '../utils.js';
+import { icon } from '../icons.js';
 
 const template = `
 <div class="mx-auto max-w-[900px]">
@@ -13,17 +14,12 @@ const template = `
     <!-- Source selection -->
     <div class="mb-6 flex flex-wrap items-center gap-3">
         <div class="upload-area flex h-11 cursor-pointer items-center gap-2 rounded-md border border-dashed border-gray-500 bg-background-200 px-4 text-sm text-gray-900 transition-colors hover:border-gray-700 hover:bg-gray-100" id="video-upload-area">
-            <svg class="size-4 shrink-0" viewBox="0 0 16 16" fill="none">
-                <path d="M2 10v3a1 1 0 001 1h10a1 1 0 001-1v-3M8 2v8M5 5l3-3 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            ${icon('arrowCircleUp', 16, 'shrink-0')}
             <span id="video-upload-label">Upload video</span>
             <input type="file" id="video-file-input" accept="video/*" class="hidden">
         </div>
         <button class="flex h-11 cursor-pointer items-center gap-2 rounded-md border border-gray-400 bg-transparent px-4 text-sm text-gray-1000 transition-colors hover:bg-gray-100" id="video-webcam-btn">
-            <svg class="size-4 shrink-0" viewBox="0 0 16 16" fill="none">
-                <rect x="1" y="3" width="10" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
-                <path d="M11 6.5l3.5-2v7l-3.5-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            ${icon('webcam', 16, 'shrink-0')}
             Webcam
         </button>
         <select id="video-camera-select" class="hidden h-11 rounded-md border border-gray-400 bg-background-100 px-3 text-sm text-gray-1000 outline-none">
@@ -60,9 +56,7 @@ const template = `
                         <option value="brightness">Brightness</option>
                         <option value="shape">Shape-Aware</option>
                     </select>
-                    <svg class="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-gray-900" viewBox="0 0 16 16" fill="none">
-                        <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    ${icon('chevronDown', 16, 'pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900')}
                 </div>
             </div>
             <div class="flex flex-col gap-1.5">
@@ -76,9 +70,7 @@ const template = `
                         <option value="simple">Simple</option>
                         <option value="extended">Extended</option>
                     </select>
-                    <svg class="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-gray-900" viewBox="0 0 16 16" fill="none">
-                        <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    ${icon('chevronDown', 16, 'pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900')}
                 </div>
             </div>
             <div class="flex flex-col gap-1.5">
@@ -90,9 +82,7 @@ const template = `
                         <option value="256">ANSI 256</option>
                         <option value="24bit">24-bit</option>
                     </select>
-                    <svg class="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-gray-900" viewBox="0 0 16 16" fill="none">
-                        <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    ${icon('chevronDown', 16, 'pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900')}
                 </div>
             </div>
         </div>
@@ -130,7 +120,7 @@ const template = `
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
             <button class="flex h-9 cursor-pointer items-center gap-1.5 rounded-sm border border-gray-400 bg-transparent px-4 text-xs text-gray-1000 transition-colors hover:bg-gray-100 disabled:cursor-default disabled:opacity-40" id="video-play-pause" disabled>
-                <span id="video-play-icon">▶</span> <span id="video-play-label">Play</span>
+                <span id="video-play-icon">${icon('playFill', 14)}</span> <span id="video-play-label">Play</span>
             </button>
             <button class="flex h-9 cursor-pointer items-center rounded-sm border border-gray-400 bg-transparent px-3 text-xs text-gray-1000 transition-colors hover:bg-gray-100 disabled:cursor-default disabled:opacity-40" id="video-stop" disabled>
                 Stop
@@ -211,7 +201,7 @@ export function init(container) {
         videoStopBtn.disabled = true;
         container.querySelector('#video-copy-text').disabled = true;
         container.querySelector('#video-copy-ansi').disabled = true;
-        videoPlayIcon.textContent = '▶';
+        videoPlayIcon.innerHTML = icon('playFill', 14);
         videoPlayLabel.textContent = 'Play';
         videoFpsDisplay.textContent = '0 fps';
         videoReduceWarning.classList.add('hidden');
@@ -231,7 +221,7 @@ export function init(container) {
             container.querySelector('#video-placeholder').style.display = 'none';
             enableVideoControls();
             ctrl.play();
-            videoPlayIcon.textContent = '⏸';
+            videoPlayIcon.innerHTML = icon('pauseFill', 14);
             videoPlayLabel.textContent = 'Pause';
         } catch (err) {
             console.error('Video load error:', err);
@@ -255,7 +245,7 @@ export function init(container) {
             container.querySelector('#video-placeholder').style.display = 'none';
             enableVideoControls();
             ctrl.play();
-            videoPlayIcon.textContent = '⏸';
+            videoPlayIcon.innerHTML = icon('pauseFill', 14);
             videoPlayLabel.textContent = 'Pause';
 
             const cameras = await ctrl.listCameras();
@@ -291,11 +281,11 @@ export function init(container) {
         if (!videoCtrl) return;
         if (videoCtrl.isRunning()) {
             videoCtrl.pause();
-            videoPlayIcon.textContent = '▶';
+            videoPlayIcon.innerHTML = icon('playFill', 14);
             videoPlayLabel.textContent = 'Play';
         } else {
             videoCtrl.play();
-            videoPlayIcon.textContent = '⏸';
+            videoPlayIcon.innerHTML = icon('pauseFill', 14);
             videoPlayLabel.textContent = 'Pause';
         }
     });

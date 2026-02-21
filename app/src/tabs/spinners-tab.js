@@ -8,6 +8,7 @@
 
 import { getSpinnersByCategory, getCategories, getCategoryOrder } from '../engines/spinners.js';
 import { showToast, copyToClipboard, escapeForPrintf, noteHTML } from '../utils.js';
+import { icon } from '../icons.js';
 
 const template = `
 <div class="mx-auto max-w-[900px]">
@@ -17,10 +18,7 @@ const template = `
     <!-- Filter row -->
     <div class="mb-6 flex items-center gap-3">
         <div class="relative flex-1">
-            <svg class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-600" viewBox="0 0 16 16" fill="none">
-                <circle cx="7" cy="7" r="5.25" stroke="currentColor" stroke-width="1.5"/>
-                <path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
+            ${icon('magnifyingGlass', 16, 'pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-600')}
             <input type="text" id="spinner-search" placeholder="Search spinners…"
                 class="h-10 w-full rounded-sm border border-gray-400 bg-background-100 pl-9 pr-3 font-sans text-sm text-gray-1000 outline-none transition-[border-color,box-shadow] placeholder:text-gray-600 focus:border-blue-700 focus:shadow-focus-ring">
         </div>
@@ -29,9 +27,7 @@ const template = `
                 class="h-10 cursor-pointer appearance-none rounded-sm border border-gray-400 bg-background-100 px-3 pr-8 font-sans text-sm text-gray-1000 outline-none transition-[border-color,box-shadow] focus:border-blue-700 focus:shadow-focus-ring">
                 <option value="all">All Categories</option>
             </select>
-            <svg class="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-gray-900" viewBox="0 0 16 16" fill="none">
-                <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            ${icon('chevronDown', 16, 'pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900')}
         </div>
         <div class="flex items-center gap-2.5">
             <label for="spinner-speed" class="text-sm text-gray-900 whitespace-nowrap">Speed</label>

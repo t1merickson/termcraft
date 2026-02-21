@@ -12,6 +12,12 @@ import * as AsciiEditorTab from './tabs/ascii-editor-tab.js';
 import * as VideoToAsciiTab from './tabs/video-to-ascii-tab.js';
 import * as PixelFontTab from './tabs/pixel-font-tab.js';
 import * as SpinnersTab from './tabs/spinners-tab.js';
+import { icon } from './icons.js';
+
+// Hydrate sidebar nav icons from the centralized icon registry
+document.querySelectorAll('.nav-icon[data-icon]').forEach(el => {
+    el.innerHTML = icon(el.dataset.icon, 16);
+});
 
 // Tab registry: maps data-tab attribute to { module, container id, lazy }
 const tabs = {

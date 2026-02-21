@@ -5,6 +5,7 @@
 import * as ImageToAnsi from '../engines/image-to-ansi.js';
 import { showToast, copyToClipboard, loadImage, readFileAsDataURL, toggleHTML } from '../utils.js';
 import { terminalControlsHTML, initTerminalControls } from '../terminal-controls.js';
+import { icon } from '../icons.js';
 
 const template = `
 <div class="mx-auto max-w-[1400px]">
@@ -14,14 +15,10 @@ const template = `
     <!-- Upload Area -->
     <div class="upload-area mb-5 cursor-pointer rounded-md border-2 border-dashed border-gray-400 bg-background-200 p-12 text-center transition-colors hover:border-gray-600 hover:bg-gray-100" id="upload-area">
         <div class="upload-prompt" id="upload-prompt">
-            <div class="mb-4 text-5xl opacity-50">▣</div>
+            <div class="mb-4 flex justify-center opacity-50">${icon('arrowCircleUp', 48)}</div>
             <p class="mb-2 text-gray-900">Drop an image here or click to upload</p>
             <p class="inline-flex items-center gap-1.5 text-xs text-gray-600">
-                <svg class="size-4 shrink-0 text-gray-900" viewBox="0 0 16 16" fill="none">
-                    <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
-                    <path d="M8 7v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                    <circle cx="8" cy="5" r="0.75" fill="currentColor"/>
-                </svg>
+                ${icon('informationFill', 16, 'shrink-0 text-gray-900')}
                 <span>Supports PNG, JPG, GIF, WebP</span>
             </p>
         </div>
@@ -72,9 +69,7 @@ const template = `
                         <option value="full">██ Spaces (bg only)</option>
                         <option value="binary">Binary (no color)</option>
                     </select>
-                    <svg class="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-gray-900" viewBox="0 0 16 16" fill="none">
-                        <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    ${icon('chevronDown', 16, 'pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900')}
                 </div>
             </div>
             <div class="flex flex-col gap-1.5">
@@ -85,9 +80,7 @@ const template = `
                         <option value="24bit">24-bit True Color</option>
                         <option value="256">256 Color</option>
                     </select>
-                    <svg class="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-gray-900" viewBox="0 0 16 16" fill="none">
-                        <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    ${icon('chevronDown', 16, 'pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900')}
                 </div>
             </div>
         </div>

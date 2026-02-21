@@ -5,6 +5,7 @@
 import * as PixelFont from '../engines/pixel-font.js';
 import { showToast, copyToClipboard, escapeForPrintf } from '../utils.js';
 import { terminalControlsHTML, initTerminalControls } from '../terminal-controls.js';
+import { icon } from '../icons.js';
 
 const template = `
 <div class="mx-auto max-w-[900px]">
@@ -14,12 +15,7 @@ const template = `
     <!-- Font Preview -->
     <div class="mb-5">
         <button class="flex h-8 cursor-pointer items-center gap-1.5 rounded-sm border border-gray-400 bg-transparent px-3 text-[13px] text-gray-900 transition-colors hover:bg-background-200 hover:text-gray-1000" id="toggle-glyph-preview">
-            <svg class="size-4 shrink-0" viewBox="0 0 16 16" fill="none">
-                <rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
-                <rect x="10" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
-                <rect x="1" y="10" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
-                <rect x="10" y="10" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
-            </svg>
+            ${icon('gridSquare', 16, 'shrink-0')}
             <span>Show All Glyphs</span>
         </button>
     </div>
@@ -42,9 +38,7 @@ const template = `
                     <select id="font-select"
                         class="h-10 w-full cursor-pointer appearance-none rounded-sm border border-gray-400 bg-background-100 px-3 pr-8 font-sans text-sm text-gray-1000 outline-none transition-[border-color,box-shadow] focus:border-blue-700 focus:shadow-focus-ring">
                     </select>
-                    <svg class="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-gray-900" viewBox="0 0 16 16" fill="none">
-                        <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    ${icon('chevronDown', 16, 'pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900')}
                 </div>
             </div>
             <div class="flex flex-col gap-2">
@@ -64,9 +58,7 @@ const template = `
                             <option value="⏹">⏹ Stop</option>
                             <option value="custom">Custom…</option>
                         </select>
-                        <svg class="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-gray-900" viewBox="0 0 16 16" fill="none">
-                            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
+                        ${icon('chevronDown', 16, 'pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900')}
                     </div>
                     <input type="text" id="font-dot-custom" placeholder="Character" maxlength="2" style="display:none; width: 80px;"
                         class="h-10 rounded-sm border border-gray-400 bg-background-100 px-3 font-sans text-sm text-gray-1000 outline-none transition-[border-color,box-shadow] focus:border-blue-700 focus:shadow-focus-ring">
@@ -87,9 +79,7 @@ const template = `
                         <option value="tl">Top Left ↖</option>
                         <option value="tr">Top Right ↗</option>
                     </select>
-                    <svg class="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-gray-900" viewBox="0 0 16 16" fill="none">
-                        <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    ${icon('chevronDown', 16, 'pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900')}
                 </div>
                 <div class="relative flex-1">
                     <select id="font-shadow-intensity"
@@ -98,9 +88,7 @@ const template = `
                         <option value="2" selected>▒ Medium</option>
                         <option value="3">▓ Dense</option>
                     </select>
-                    <svg class="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-gray-900" viewBox="0 0 16 16" fill="none">
-                        <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    ${icon('chevronDown', 16, 'pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900')}
                 </div>
             </div>
         </div>
