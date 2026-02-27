@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,116 +9,7 @@
     <link rel="stylesheet" href="src/styles.css">
 </head>
 <body>
-    <!-- Page wrapper -->
-    <div class="mx-auto flex min-h-screen max-w-[1220px] flex-col border-x border-gray-alpha-400">
-
-        <!-- Header -->
-        <header class="sticky top-0 z-100 h-16 shrink-0 border-b border-gray-alpha-400 bg-background-200/80 backdrop-blur-xl">
-            <div class="flex h-full items-center px-6">
-                <div class="flex items-center gap-2.5">
-                    <svg class="text-gray-1000 shrink-0" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <rect width="20" height="20" rx="4" fill="currentColor"/>
-                        <rect x="3" y="3" width="6" height="6" rx="1" fill="#0a0a0a"/>
-                        <rect x="11" y="3" width="6" height="6" rx="1" fill="#0a0a0a"/>
-                        <rect x="3" y="11" width="6" height="6" rx="1" fill="#0a0a0a"/>
-                        <rect x="11" y="11" width="6" height="6" rx="1" fill="#0a0a0a" opacity="0.4"/>
-                    </svg>
-                    <span class="text-sm font-semibold text-gray-1000">Termcraft</span>
-                    <span class="text-xl font-light text-gray-500">/</span>
-                    <span class="text-sm text-gray-900">Terminal Art Toolkit</span>
-                </div>
-            </div>
-        </header>
-
-        <!-- Body: Sidebar + Main -->
-        <div class="flex flex-1">
-
-            <!-- Sidebar -->
-            <div class="sticky top-16 z-100 flex h-[calc(100vh-64px)] w-[260px] shrink-0 flex-col overflow-y-auto border-r border-gray-alpha-400 bg-background-200">
-                <nav class="flex-1 py-2">
-                    <div class="px-5 pb-2 pt-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Tools</div>
-
-                    <div class="nav-item relative mx-3 flex h-10 cursor-pointer items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-gray-900 transition-colors hover:bg-gray-100 active" data-tab="wheel">
-                        <span class="nav-icon size-4 shrink-0" data-icon="prismColor"></span>
-                        <span>Color Wheel</span>
-                    </div>
-                    <div class="nav-item relative mx-3 flex h-10 cursor-pointer items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-gray-900 transition-colors hover:bg-gray-100" data-tab="lookup">
-                        <span class="nav-icon size-4 shrink-0" data-icon="magnifyingGlass"></span>
-                        <span>Lookup &amp; Convert</span>
-                    </div>
-                    <div class="nav-item relative mx-3 flex h-10 cursor-pointer items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-gray-900 transition-colors hover:bg-gray-100" data-tab="image">
-                        <span class="nav-icon size-4 shrink-0" data-icon="image"></span>
-                        <span>Image to ANSI</span>
-                    </div>
-                    <div class="nav-item relative mx-3 flex h-10 cursor-pointer items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-gray-900 transition-colors hover:bg-gray-100" data-tab="ascii">
-                        <span class="nav-icon size-4 shrink-0" data-icon="textTitle"></span>
-                        <span>Image to ASCII</span>
-                    </div>
-                    <div class="nav-item relative mx-3 flex h-10 cursor-pointer items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-gray-900 transition-colors hover:bg-gray-100" data-tab="editor">
-                        <span class="nav-icon size-4 shrink-0" data-icon="pencilEdit"></span>
-                        <span>ASCII Editor</span>
-                    </div>
-                    <div class="nav-item relative mx-3 flex h-10 cursor-pointer items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-gray-900 transition-colors hover:bg-gray-100" data-tab="video">
-                        <span class="nav-icon size-4 shrink-0" data-icon="video"></span>
-                        <span>Video to ASCII</span>
-                    </div>
-                    <div class="nav-item relative mx-3 flex h-10 cursor-pointer items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-gray-900 transition-colors hover:bg-gray-100" data-tab="font">
-                        <span class="nav-icon size-4 shrink-0" data-icon="gridSquare"></span>
-                        <span>Pixel Font</span>
-                    </div>
-                    <div class="nav-item relative mx-3 flex h-10 cursor-pointer items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-gray-900 transition-colors hover:bg-gray-100" data-tab="spinners">
-                        <span class="nav-icon size-4 shrink-0" data-icon="loaderCircle"></span>
-                        <span>CLI Spinners</span>
-                    </div>
-                </nav>
-            </div>
-
-            <!-- Main Content -->
-            <div class="flex-1 overflow-y-auto px-12 py-10" style="max-width: 960px;">
-                <div class="tab-content active" id="tab-wheel"></div>
-                <div class="tab-content" id="tab-lookup"></div>
-                <div class="tab-content" id="tab-image"></div>
-                <div class="tab-content" id="tab-ascii"></div>
-                <div class="tab-content" id="tab-editor"></div>
-                <div class="tab-content" id="tab-video"></div>
-                <div class="tab-content" id="tab-font"></div>
-                <div class="tab-content" id="tab-spinners"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tooltip -->
-    <div class="tooltip" id="tooltip">
-        <div class="mb-2.5 h-10 w-full rounded-sm" id="tooltip-color"></div>
-        <div class="flex justify-between py-1">
-            <span class="text-gray-900">ANSI Code:</span>
-            <span class="font-mono text-gray-1000" id="tooltip-ansi"></span>
-        </div>
-        <div class="flex justify-between py-1">
-            <span class="text-gray-900">Name:</span>
-            <span class="font-mono text-gray-1000" id="tooltip-name"></span>
-        </div>
-        <div class="flex justify-between py-1">
-            <span class="text-gray-900">Hex:</span>
-            <span class="font-mono text-gray-1000" id="tooltip-hex"></span>
-        </div>
-        <div class="flex justify-between py-1">
-            <span class="text-gray-900">RGB:</span>
-            <span class="font-mono text-gray-1000" id="tooltip-rgb"></span>
-        </div>
-        <div class="flex justify-between py-1">
-            <span class="text-gray-900">HSL:</span>
-            <span class="font-mono text-gray-1000" id="tooltip-hsl"></span>
-        </div>
-        <div class="flex justify-between py-1">
-            <span class="text-gray-900">Escape:</span>
-            <span class="font-mono text-gray-1000" id="tooltip-escape"></span>
-        </div>
-    </div>
-
-    <!-- Toast -->
-    <div class="toast" id="toast">Copied to clipboard!</div>
-
-    <script type="module" src="src/app.js"></script>
+    <div id="root"></div>
+    <script type="module" src="src/main.tsx"></script>
 </body>
 </html>
