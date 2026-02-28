@@ -4,7 +4,7 @@ import { useClipboard } from "@/hooks/use-clipboard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { TerminalControls } from "@/components/shared/TerminalControls";
-import { LayoutGrid } from "lucide-react";
+import { LayoutGrid, ChevronDown } from "lucide-react";
 
 interface FontEntry {
   id: string;
@@ -230,15 +230,7 @@ export function PixelFontTab() {
                   </option>
                 ))}
               </select>
-              <svg
-                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900"
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="currentColor"
-              >
-                <path d="M4.5 5.75L8 9.25L11.5 5.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-              </svg>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900" size={16} />
             </div>
           </div>
           <div className="flex flex-col gap-2">
@@ -256,15 +248,7 @@ export function PixelFontTab() {
                     </option>
                   ))}
                 </select>
-                <svg
-                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="currentColor"
-                >
-                  <path d="M4.5 5.75L8 9.25L11.5 5.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                </svg>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900" size={16} />
               </div>
               {dotStyle === "custom" && (
                 <Input
@@ -295,9 +279,7 @@ export function PixelFontTab() {
                   </option>
                 ))}
               </select>
-              <svg className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                <path d="M4.5 5.75L8 9.25L11.5 5.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-              </svg>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900" size={16} />
             </div>
             {shadowDir !== "none" && (
               <div className="relative flex-1">
@@ -312,9 +294,7 @@ export function PixelFontTab() {
                     </option>
                   ))}
                 </select>
-                <svg className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                  <path d="M4.5 5.75L8 9.25L11.5 5.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                </svg>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900" size={16} />
               </div>
             )}
           </div>

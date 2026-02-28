@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, type RefObject } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { ChevronDown } from "lucide-react";
 
 const MONO_FONTS = [
   { value: "'Geist Mono', monospace", label: "Geist Mono" },
@@ -59,9 +60,7 @@ export function TerminalControls({
               </option>
             ))}
           </select>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M4.5 5.75L8 9.25L11.5 5.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-          </svg>
+          <ChevronDown className="pointer-events-none text-gray-900" size={16} />
         </div>
       </div>
       <div className="flex flex-col gap-2">

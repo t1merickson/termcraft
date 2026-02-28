@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
-import { Upload, Camera, Play, Pause, Square } from "lucide-react";
+import { Upload, Camera, Play, Pause, Square, ChevronDown } from "lucide-react";
 
 const CHARSETS = [
   { value: "standard", label: "Standard" },
@@ -172,9 +172,7 @@ export function VideoToAsciiTab() {
   };
 
   const chevronSvg = (
-    <svg className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-      <path d="M4.5 5.75L8 9.25L11.5 5.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-    </svg>
+    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900" size={16} />
   );
 
   return (

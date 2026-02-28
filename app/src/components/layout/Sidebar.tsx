@@ -1,12 +1,13 @@
 import {
+  Palette,
   Search,
   Image,
   Type,
   PencilLine,
   Video,
   Grid2x2,
+  LoaderCircle,
 } from "lucide-react";
-import { PrismColorIcon, LoaderCircleIcon } from "@/components/icons/geist-icons";
 import { cn } from "@/lib/utils";
 
 export type TabId =
@@ -26,14 +27,14 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { id: "wheel", label: "Color Wheel", icon: <PrismColorIcon size={16} /> },
+  { id: "wheel", label: "Color Wheel", icon: <Palette size={16} /> },
   { id: "lookup", label: "Lookup & Convert", icon: <Search size={16} /> },
   { id: "image", label: "Image to ANSI", icon: <Image size={16} /> },
   { id: "ascii", label: "Image to ASCII", icon: <Type size={16} /> },
   { id: "editor", label: "ASCII Editor", icon: <PencilLine size={16} /> },
   { id: "video", label: "Video to ASCII", icon: <Video size={16} /> },
   { id: "font", label: "Pixel Font", icon: <Grid2x2 size={16} /> },
-  { id: "spinners", label: "CLI Spinners", icon: <LoaderCircleIcon size={16} /> },
+  { id: "spinners", label: "CLI Spinners", icon: <LoaderCircle size={16} /> },
 ];
 
 interface SidebarProps {
