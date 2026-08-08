@@ -190,13 +190,6 @@ export function VideoToAsciiTab() {
 
   return (
     <div className="mx-auto max-w-[900px]">
-      <h1 className="mb-3 text-[40px] font-semibold leading-[48px] text-gray-1000">
-        Video to ASCII
-      </h1>
-      <p className="mb-8 text-xl leading-[30px] text-gray-900">
-        Convert video or webcam to real-time ASCII art
-      </p>
-
       {/* Source selection */}
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <div

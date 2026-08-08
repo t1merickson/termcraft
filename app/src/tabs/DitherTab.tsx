@@ -10,6 +10,8 @@ import { renderBraille } from "@/engines/braille";
 import { renderBlockChars } from "@/engines/image-to-ansi.js";
 import { RAMPS, rampFor } from "@/engines/ramps";
 import { useImageUpload } from "@/hooks/use-image-upload";
+import { useDefaultSample } from "@/hooks/use-default-sample";
+import { SamplePicker } from "@/components/shared/SamplePicker";
 import { useClipboard } from "@/hooks/use-clipboard";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -67,6 +69,10 @@ function renderRamp(imageData: ImageData, rampId: string) {
 
 export function DitherTab() {
   const upload = useImageUpload();
+  useDefaultSample(upload.loadFromUrl, {
+    id: "portrait-bust",
+    name: "Portrait Bust",
+  });
   const { copy } = useClipboard();
   const terminalRef = useRef<HTMLDivElement>(null);
   const [algorithm, setAlgorithm] = useState<DitherName>("floyd-steinberg");
@@ -188,14 +194,6 @@ export function DitherTab() {
 
   return (
     <div className="mx-auto max-w-[1400px]">
-      <h1 className="mb-3 text-[40px] font-semibold leading-[48px] text-gray-1000">
-        Dither Lab
-      </h1>
-      <p className="mb-8 text-xl leading-[30px] text-gray-900">
-        Reduce images to terminal and retro palettes with ordered or
-        error-diffusion dithering
-      </p>
-
       <div
         className={`upload-area mb-5 cursor-pointer rounded-md border-2 border-dashed border-gray-400 bg-background-200 p-12 text-center transition-colors hover:border-gray-600 hover:bg-gray-100${upload.isDragging ? " drag-over" : ""}${upload.image ? " has-image" : ""}`}
         onClick={upload.openFilePicker}
@@ -212,6 +210,7 @@ export function DitherTab() {
             <div className="mb-4 flex justify-center opacity-50">
               <Upload size={48} />
             </div>
+
             <p className="mb-2 text-gray-900">
               Drop an image here or click to upload
             </p>
@@ -247,6 +246,14 @@ export function DitherTab() {
           }}
         />
       </div>
+
+      <SamplePicker
+        tool="dither"
+        className="mb-5"
+        onPick={(src, name) => {
+          upload.loadFromUrl(src, name).catch(() => {});
+        }}
+      />
 
       <Card className="mb-5 gap-4 rounded-md border-gray-400 bg-background-200 p-5 py-5 shadow-none">
         <h3 className="text-[13px] font-medium text-gray-900">Options</h3>

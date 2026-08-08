@@ -178,13 +178,6 @@ export function PixelFontTab() {
 
   return (
     <div className="mx-auto max-w-[900px]">
-      <h1 className="mb-3 text-[40px] font-semibold leading-[48px] text-gray-1000">
-        Pixel Font
-      </h1>
-      <p className="mb-8 text-xl leading-[30px] text-gray-900">
-        Render text using block-character pixel art
-      </p>
-
       {/* Font Preview Toggle */}
       <div className="mb-5">
         <Button

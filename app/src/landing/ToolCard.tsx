@@ -9,14 +9,14 @@ export function ToolCard({ tool }: { tool: Tool }) {
       href={toolHref(tool.id)}
       className="group flex flex-col overflow-hidden rounded-lg border border-gray-alpha-400 bg-background-200 transition-colors hover:border-gray-alpha-500 focus-visible:shadow-focus-ring focus-visible:outline-none"
     >
-      <div className="relative h-[132px] overflow-hidden border-b border-gray-alpha-400 bg-background-100">
+      <div className="relative flex h-[140px] items-center justify-center overflow-hidden border-b border-gray-alpha-400 bg-background-100">
         <pre
           aria-hidden="true"
-          className="absolute left-4 top-4 m-0 select-none whitespace-pre font-mono text-[10px] leading-[1.15] text-gray-700 transition-colors group-hover:text-gray-900"
+          className="m-0 select-none whitespace-pre font-mono text-[11px] leading-[1.15] text-gray-700 transition-colors group-hover:text-gray-900"
         >
           {tool.preview.join("\n")}
         </pre>
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-background-100 via-transparent to-background-100/60" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,var(--color-background-100)_100%)]" />
       </div>
 
       <div className="flex flex-1 flex-col p-5">

@@ -97,12 +97,6 @@ export function ProgressTab() {
     setReadouts((x) => (x.includes(r) ? x.filter((v) => v !== r) : [...x, r]));
   return (
     <div className="mx-auto max-w-[900px]">
-      <h1 className="mb-3 text-[40px] font-semibold leading-[48px] text-gray-1000">
-        Progress Bars
-      </h1>
-      <p className="mb-8 text-xl leading-[30px] text-gray-900">
-        Design smooth, readable progress output
-      </p>
       <Card className="mb-5 gap-4 rounded-md border-gray-400 bg-background-200 py-5">
         <CardContent className="grid gap-4 px-5">
           <div className="grid grid-cols-3 gap-4">

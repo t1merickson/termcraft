@@ -82,12 +82,6 @@ export function GradientsTab() {
     setStops((s) => s.map((v, j) => (j === i ? { ...v, ...p } : v)));
   return (
     <div className="mx-auto max-w-[900px]">
-      <h1 className="mb-3 text-[40px] font-semibold leading-[48px] text-gray-1000">
-        Gradients
-      </h1>
-      <p className="mb-8 text-xl leading-[30px] text-gray-900">
-        Build perceptual colour ramps for terminal output
-      </p>
       <Card className="mb-5 gap-4 rounded-md border-gray-400 bg-background-200 py-5">
         <CardContent className="grid gap-4 px-5">
           <div className="text-sm font-medium text-gray-1000">Colour stops</div>

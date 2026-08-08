@@ -98,12 +98,6 @@ export function ChartsTab() {
   );
   return (
     <div className="mx-auto max-w-[900px]">
-      <h1 className="mb-3 text-[40px] font-semibold leading-[48px] text-gray-1000">
-        Charts
-      </h1>
-      <p className="mb-8 text-xl leading-[30px] text-gray-900">
-        Turn numeric data into compact terminal charts
-      </p>
       <ToggleGroup
         type="single"
         value={mode}

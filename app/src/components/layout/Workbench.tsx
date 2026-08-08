@@ -31,11 +31,11 @@ export function Workbench({ tool }: WorkbenchProps) {
       <div className="flex flex-1">
         <Sidebar activeTool={tool} />
         <main className="min-w-0 flex-1 px-8 py-10 lg:px-12">
-          <div className="mb-8 border-b border-gray-alpha-400 pb-6">
-            <h1 className="text-2xl font-semibold tracking-tight text-gray-1000">
+          <div className="mb-9">
+            <h1 className="text-[40px] font-semibold leading-[48px] tracking-tight text-gray-1000">
               {active?.name}
             </h1>
-            <p className="mt-1.5 max-w-2xl text-sm text-gray-900">
+            <p className="mt-3 max-w-2xl text-xl leading-[30px] text-gray-900">
               {active?.tagline}
             </p>
           </div>

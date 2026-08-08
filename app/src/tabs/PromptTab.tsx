@@ -100,12 +100,6 @@ export function PromptTab() {
   );
   return (
     <div className="mx-auto max-w-[900px]">
-      <h1 className="mb-3 text-[40px] font-semibold leading-[48px] text-gray-1000">
-        Prompt Builder
-      </h1>
-      <p className="mb-8 text-xl leading-[30px] text-gray-900">
-        Compose a shell prompt and export working configuration
-      </p>
       <Card className="mb-5 gap-4 rounded-md border-gray-400 bg-background-200 py-5">
         <CardContent className="grid gap-3 px-5">
           <div className="text-sm font-medium text-gray-1000">

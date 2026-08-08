@@ -84,13 +84,6 @@ export function ColorWheelTab() {
 
   return (
     <div>
-      <h1 className="mb-3 text-[40px] font-semibold leading-[48px] text-gray-1000">
-        Color Wheel
-      </h1>
-      <p className="mb-8 text-xl leading-[30px] text-gray-900">
-        Explore the full ANSI 256 color palette
-      </p>
-
       {/* Mode Selector */}
       <div className="mb-5 flex justify-center gap-2">
         {(["ansi16", "ansi256"] as const).map((m) => (

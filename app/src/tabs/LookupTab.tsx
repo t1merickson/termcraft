@@ -138,13 +138,6 @@ export function LookupTab() {
 
   return (
     <div className="max-w-[600px]">
-      <h1 className="mb-3 text-[40px] font-semibold leading-[48px] text-gray-1000">
-        Color Lookup &amp; Convert
-      </h1>
-      <p className="mb-8 text-xl leading-[30px] text-gray-900">
-        Find the nearest ANSI 256 color from HEX, RGB, or HSL
-      </p>
-
       {/* HEX Input */}
       <div className="mb-5 rounded-md border border-gray-400 bg-background-200 p-5">
         <h3 className="mb-4 text-sm font-medium text-gray-900">HEX Color</h3>
