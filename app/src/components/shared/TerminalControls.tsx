@@ -50,17 +50,17 @@ export function TerminalControls({
       <div className="flex flex-col gap-2">
         <label className="text-xs text-gray-900">Terminal Font</label>
         <div className="geist-select-sm">
-          <select
-            value={font}
-            onChange={(e) => setFont(e.target.value)}
-          >
+          <select value={font} onChange={(e) => setFont(e.target.value)}>
             {MONO_FONTS.map((f) => (
               <option key={f.value} value={f.value}>
                 {f.label}
               </option>
             ))}
           </select>
-          <ChevronDown className="pointer-events-none text-gray-900" size={16} />
+          <ChevronDown
+            className="pointer-events-none text-gray-900"
+            size={16}
+          />
         </div>
       </div>
       <div className="flex flex-col gap-2">

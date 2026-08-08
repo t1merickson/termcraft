@@ -59,6 +59,7 @@ Both of these were initially worked around without touching `app.js` — a hidde
 Unicode block/symbol characters have inconsistent advance widths even in monospace fonts. Full Block (█) is typically exactly one character cell wide, but Square (■), Circle (●), Diamond (◆), Large Circle (⬤), and others are narrower or wider depending on the font. In the pixel font renderer, each character occupies one position in a text grid — if the character is narrower than 1ch, subsequent characters shift left, and rows of different content misalign.
 
 The fix splits the render output into two paths:
+
 - `ansi` — plain text for clipboard/terminal (unchanged)
 - `html` — each non-space character wrapped in `<span class="pc">` where `.pc { display: inline-block; width: 1ch; text-align: center }`
 
@@ -86,10 +87,10 @@ Most of these were layout decisions that looked fine in the old CSS but needed r
 
 ## Summary
 
-| Area | What went wrong | Fix |
-|------|----------------|-----|
-| Color tokens | `--color-*: initial` kills white/black | Re-declare them in `@theme` |
-| Dev server | Old process lingering on port 8000 | Kill it, start Vite |
-| Dot styles | Unicode chars ≠ 1ch wide in monospace | CSS `display: inline-block; width: 1ch` |
-| Layout | Flex-wrap fragile at different widths | Explicit grid rows |
+| Area               | What went wrong                                     | Fix                                                 |
+| ------------------ | --------------------------------------------------- | --------------------------------------------------- |
+| Color tokens       | `--color-*: initial` kills white/black              | Re-declare them in `@theme`                         |
+| Dev server         | Old process lingering on port 8000                  | Kill it, start Vite                                 |
+| Dot styles         | Unicode chars ≠ 1ch wide in monospace               | CSS `display: inline-block; width: 1ch`             |
+| Layout             | Flex-wrap fragile at different widths               | Explicit grid rows                                  |
 | Phantom constraint | Workarounds avoided touching `app.js` unnecessarily | Question inherited constraints, make the direct fix |

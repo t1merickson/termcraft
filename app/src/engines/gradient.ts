@@ -1,0 +1,185 @@
+import { findNearest, STANDARD_16 } from "./ansi256.js";
+export type RGB = [number, number, number];
+export type OKLab = [number, number, number];
+export type OKLCH = [number, number, number];
+export interface ColorStop {
+  color: string | RGB;
+  position: number;
+}
+export type ColorSpace = "rgb" | "hsl" | "oklch";
+export type Easing = "linear" | "ease-in" | "ease-out" | "ease-in-out";
+const clamp = (x: number) => Math.max(0, Math.min(1, x));
+export function hexToRgb(hex: string): RGB {
+  const s = hex.replace("#", "");
+  const v = s.length === 3 ? [...s].map((x) => x + x).join("") : s;
+  const n = parseInt(v, 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+export function rgbToHex([r, g, b]: RGB): string {
+  return `#${[r, g, b]
+    .map((x) =>
+      Math.round(clamp(x / 255) * 255)
+        .toString(16)
+        .padStart(2, "0"),
+    )
+    .join("")}`;
+}
+const linear = (x: number) =>
+  x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
+const gamma = (x: number) =>
+  255 *
+  (x <= 0.0031308 ? 12.92 * x : 1.055 * Math.max(0, x) ** (1 / 2.4) - 0.055);
+export function rgbToOklab(rgb: RGB): OKLab {
+  const [r, g, b] = rgb.map((x) => linear(x / 255));
+  const l = 0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b,
+    m = 0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b,
+    s = 0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b;
+  const L = Math.cbrt(l),
+    M = Math.cbrt(m),
+    S = Math.cbrt(s);
+  return [
+    0.2104542553 * L + 0.793617785 * M - 0.0040720468 * S,
+    1.9779984951 * L - 2.428592205 * M + 0.4505937099 * S,
+    0.0259040371 * L + 0.7827717662 * M - 0.808675766 * S,
+  ];
+}
+export function oklabToRgb([L, a, b]: OKLab): RGB {
+  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3,
+    m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3,
+    s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3;
+  return [
+    gamma(4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s),
+    gamma(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s),
+    gamma(-0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s),
+  ].map((x) => Math.max(0, Math.min(255, x))) as RGB;
+}
+export function oklabToOklch([L, a, b]: OKLab): OKLCH {
+  return [
+    L,
+    Math.hypot(a, b),
+    ((Math.atan2(b, a) * 180) / Math.PI + 360) % 360,
+  ];
+}
+export function oklchToOklab([L, C, h]: OKLCH): OKLab {
+  const r = (h * Math.PI) / 180;
+  return [L, C * Math.cos(r), C * Math.sin(r)];
+}
+function rgbToHsl([r0, g0, b0]: RGB): [number, number, number] {
+  const r = r0 / 255,
+    g = g0 / 255,
+    b = b0 / 255,
+    max = Math.max(r, g, b),
+    min = Math.min(r, g, b),
+    d = max - min,
+    l = (max + min) / 2;
+  if (!d) return [0, 0, l];
+  const s = d / (1 - Math.abs(2 * l - 1));
+  const h =
+    max === r
+      ? 60 * (((g - b) / d) % 6)
+      : max === g
+        ? 60 * ((b - r) / d + 2)
+        : 60 * ((r - g) / d + 4);
+  return [(h + 360) % 360, s, l];
+}
+function hslToRgb([h, s, l]: [number, number, number]): RGB {
+  const c = (1 - Math.abs(2 * l - 1)) * s,
+    x = c * (1 - Math.abs(((h / 60) % 2) - 1)),
+    m = l - c / 2;
+  let p: [number, number, number] =
+    h < 60
+      ? [c, x, 0]
+      : h < 120
+        ? [x, c, 0]
+        : h < 180
+          ? [0, c, x]
+          : h < 240
+            ? [0, x, c]
+            : h < 300
+              ? [x, 0, c]
+              : [c, 0, x];
+  return p.map((v) => 255 * (v + m)) as RGB;
+}
+const ease = (t: number, e: Easing) =>
+  e === "ease-in"
+    ? t * t
+    : e === "ease-out"
+      ? 1 - (1 - t) ** 2
+      : e === "ease-in-out"
+        ? t < 0.5
+          ? 2 * t * t
+          : 1 - (-2 * t + 2) ** 2 / 2
+        : t;
+const hue = (a: number, b: number, t: number) =>
+  a + (((b - a + 540) % 360) - 180) * t;
+export function interpolate(
+  stops: ColorStop[],
+  t: number,
+  space: ColorSpace = "oklch",
+  easing: Easing = "linear",
+): RGB {
+  const sorted = [...stops].sort((a, b) => a.position - b.position);
+  if (!sorted.length) return [255, 255, 255];
+  if (t <= sorted[0].position)
+    return typeof sorted[0].color === "string"
+      ? hexToRgb(sorted[0].color)
+      : sorted[0].color;
+  const last = sorted[sorted.length - 1];
+  if (t >= last.position)
+    return typeof last.color === "string" ? hexToRgb(last.color) : last.color;
+  const i = sorted.findIndex((s) => s.position >= t),
+    a = sorted[i - 1],
+    b = sorted[i],
+    u = ease((t - a.position) / (b.position - a.position), easing),
+    ca = typeof a.color === "string" ? hexToRgb(a.color) : a.color,
+    cb = typeof b.color === "string" ? hexToRgb(b.color) : b.color;
+  if (space === "rgb") return ca.map((v, j) => v + (cb[j] - v) * u) as RGB;
+  if (space === "hsl") {
+    const x = rgbToHsl(ca),
+      y = rgbToHsl(cb);
+    return hslToRgb([
+      hue(x[0], y[0], u),
+      x[1] + (y[1] - x[1]) * u,
+      x[2] + (y[2] - x[2]) * u,
+    ]);
+  }
+  const x = oklabToOklch(rgbToOklab(ca)),
+    y = oklabToOklch(rgbToOklab(cb));
+  return oklabToRgb(
+    oklchToOklab([
+      x[0] + (y[0] - x[0]) * u,
+      x[1] + (y[1] - x[1]) * u,
+      hue(x[2], y[2], u),
+    ]),
+  );
+}
+export function sample(
+  stops: ColorStop[],
+  n: number,
+  space: ColorSpace = "oklch",
+  easing: Easing = "linear",
+): RGB[] {
+  return Array.from({ length: Math.max(1, n) }, (_, i) =>
+    interpolate(stops, n <= 1 ? 0 : i / (n - 1), space, easing),
+  );
+}
+export function quantize(
+  rgb: RGB,
+  mode: "24" | "256" | "16",
+): { rgb: RGB; index?: number } {
+  if (mode === "24") return { rgb };
+  if (mode === "256") {
+    const c = findNearest(...rgb).color;
+    return { rgb: [c.r, c.g, c.b], index: c.id };
+  }
+  let best = STANDARD_16[0],
+    d = Infinity;
+  for (const c of STANDARD_16) {
+    const n = (c.r - rgb[0]) ** 2 + (c.g - rgb[1]) ** 2 + (c.b - rgb[2]) ** 2;
+    if (n < d) {
+      d = n;
+      best = c;
+    }
+  }
+  return { rgb: [best.r, best.g, best.b], index: best.id };
+}

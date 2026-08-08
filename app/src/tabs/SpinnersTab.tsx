@@ -66,7 +66,11 @@ function DetailPanel({
 
   const copyFramesJson = () => {
     const json = JSON.stringify(
-      { name: spinner.name, interval: spinner.interval, frames: spinner.frames },
+      {
+        name: spinner.name,
+        interval: spinner.interval,
+        frames: spinner.frames,
+      },
       null,
       2,
     );
@@ -166,7 +170,10 @@ export function SpinnersTab() {
   const [selected, setSelected] = useState<Spinner | null>(null);
   const { copy } = useClipboard();
 
-  const categories = useMemo(() => getCategories() as Record<string, string>, []);
+  const categories = useMemo(
+    () => getCategories() as Record<string, string>,
+    [],
+  );
   const categoryOrder = useMemo(() => getCategoryOrder() as string[], []);
   const grouped = useMemo(
     () => getSpinnersByCategory() as Record<string, Spinner[]>,
@@ -199,13 +206,6 @@ export function SpinnersTab() {
 
   return (
     <div className="mx-auto max-w-[900px]">
-      <h1 className="mb-3 text-[40px] font-semibold leading-[48px] text-gray-1000">
-        CLI Spinners
-      </h1>
-      <p className="mb-8 text-xl leading-[30px] text-gray-900">
-        Browse and copy animated terminal spinners
-      </p>
-
       {/* Filter row */}
       <div className="mb-6 flex items-center gap-3">
         <div className="relative flex-1">
@@ -230,7 +230,10 @@ export function SpinnersTab() {
               </option>
             ))}
           </select>
-          <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900" size={16} />
+          <ChevronDown
+            className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900"
+            size={16}
+          />
         </div>
         <div className="flex items-center gap-2.5">
           <label className="whitespace-nowrap text-sm text-gray-900">

@@ -1,15 +1,51 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" class="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Termcraft</title>
-    <link rel="preload" href="../assets/geist/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="../assets/geist/GeistMono-Variable.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="src/styles.css">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Termcraft — terminal art toolkit</title>
+    <meta
+      name="description"
+      content="Fourteen browser tools for making things out of characters: images and video into ASCII, ANSI and braille, dithering, box drawing, terminal charts, spinners, progress bars, shell prompts and the ANSI 256 palette. Free, no upload, open source."
+    />
+    <meta name="theme-color" content="#000000" />
+    <link rel="canonical" href="https://t1merickson.github.io/termcraft/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Termcraft" />
+    <meta property="og:title" content="Termcraft — terminal art toolkit" />
+    <meta
+      property="og:description"
+      content="Everything you can make out of characters. ASCII, ANSI, braille, dithering, charts, spinners, prompts. Runs entirely in your browser."
+    />
+    <meta
+      property="og:url"
+      content="https://t1merickson.github.io/termcraft/"
+    />
+    <meta property="og:image" content="./og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+
+    <link
+      rel="preload"
+      href="../assets/geist/Geist-Variable.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="../assets/geist/GeistMono-Variable.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="src/styles.css" />
+  </head>
+  <body>
     <div id="root"></div>
     <script type="module" src="src/main.tsx"></script>
-</body>
+  </body>
 </html>

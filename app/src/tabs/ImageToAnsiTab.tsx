@@ -2,6 +2,8 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import * as ImageToAnsi from "@/engines/image-to-ansi.js";
 import { useClipboard } from "@/hooks/use-clipboard";
 import { useImageUpload } from "@/hooks/use-image-upload";
+import { useDefaultSample } from "@/hooks/use-default-sample";
+import { SamplePicker } from "@/components/shared/SamplePicker";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -12,6 +14,8 @@ const RENDER_MODES = [
   { value: "half", label: "▀▄ Half Blocks (fg+bg)" },
   { value: "halffg", label: "▀▄ Half Blocks (fg only)" },
   { value: "quad", label: "▚ Quadrant (fg only)" },
+  { value: "sextant", label: "🬔 Sextant (2×3)" },
+  { value: "octant", label: "𜴀 Octant (2×4, Unicode 16)" },
   { value: "block", label: "█ Full Block (fg only)" },
   { value: "full", label: "██ Spaces (bg only)" },
   { value: "binary", label: "Binary (no color)" },
@@ -25,6 +29,7 @@ const COLOR_DEPTHS = [
 export function ImageToAnsiTab() {
   const { copy } = useClipboard();
   const upload = useImageUpload();
+  useDefaultSample(upload.loadFromUrl, { id: "nebula", name: "Nebula" });
   const terminalRef = useRef<HTMLDivElement>(null);
 
   const [maxWidth, setMaxWidth] = useState(80);
@@ -74,12 +79,22 @@ export function ImageToAnsiTab() {
     [upload, processImage],
   );
 
-  // Reprocess when options change
+  // Reprocess when the image or any option changes. `upload.image` matters:
+  // samples load asynchronously, so without it a sample never gets converted.
   useEffect(() => {
     if (upload.image) {
       processImage(upload.image);
     }
-  }, [maxWidth, maxHeight, renderMode, colorDepth, invert, greyscale, is1to1]);
+  }, [
+    upload.image,
+    maxWidth,
+    maxHeight,
+    renderMode,
+    colorDepth,
+    invert,
+    greyscale,
+    is1to1,
+  ]);
 
   const setScale = (factor: number) => {
     if (!upload.image) return;
@@ -89,18 +104,14 @@ export function ImageToAnsiTab() {
   };
 
   const chevronSvg = (
-    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900" size={16} />
+    <ChevronDown
+      className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900"
+      size={16}
+    />
   );
 
   return (
     <div className="mx-auto max-w-[1400px]">
-      <h1 className="mb-3 text-[40px] font-semibold leading-[48px] text-gray-1000">
-        Image to ANSI
-      </h1>
-      <p className="mb-8 text-xl leading-[30px] text-gray-900">
-        Convert images to ANSI 256 color terminal art
-      </p>
-
       {/* Upload Area */}
       <div
         className={`upload-area mb-5 cursor-pointer rounded-md border-2 border-dashed border-gray-400 bg-background-200 p-12 text-center transition-colors hover:border-gray-600 hover:bg-gray-100${upload.isDragging ? " drag-over" : ""}${upload.image ? " has-image" : ""}`}
@@ -118,6 +129,7 @@ export function ImageToAnsiTab() {
             <div className="mb-4 flex justify-center opacity-50">
               <Upload size={48} />
             </div>
+
             <p className="mb-2 text-gray-900">
               Drop an image here or click to upload
             </p>
@@ -153,6 +165,14 @@ export function ImageToAnsiTab() {
           }}
         />
       </div>
+
+      <SamplePicker
+        tool="image-to-ansi"
+        className="mb-5"
+        onPick={(src, name) => {
+          upload.loadFromUrl(src, name).catch(() => {});
+        }}
+      />
 
       {/* Options Panel */}
       <div className="mb-5 flex flex-col gap-4 rounded-md border border-gray-400 bg-background-200 p-5">
@@ -265,7 +285,9 @@ export function ImageToAnsiTab() {
       {processing && (
         <div className="processing visible">
           <div className="geist-loading-dots">
-            <span /><span /><span />
+            <span />
+            <span />
+            <span />
           </div>
           <p>Processing image...</p>
         </div>

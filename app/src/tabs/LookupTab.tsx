@@ -12,13 +12,7 @@ interface LookupResult {
   escapeCode: string;
 }
 
-function ColorSwatch({
-  color,
-  label,
-}: {
-  color: string;
-  label: string;
-}) {
+function ColorSwatch({ color, label }: { color: string; label: string }) {
   return (
     <div
       className="flex size-20 flex-col items-center justify-end rounded-md border border-gray-500 pb-2"
@@ -61,9 +55,7 @@ function ResultGrid({ result }: { result: LookupResult }) {
         {items.map((item) => (
           <div key={item.label} className="rounded-sm bg-gray-100 p-3">
             <div className="mb-1 text-xs text-gray-600">{item.label}</div>
-            <div className="font-mono text-sm text-gray-1000">
-              {item.value}
-            </div>
+            <div className="font-mono text-sm text-gray-1000">{item.value}</div>
           </div>
         ))}
         <div className="col-span-2 rounded-sm bg-gray-100 p-3">
@@ -146,13 +138,6 @@ export function LookupTab() {
 
   return (
     <div className="max-w-[600px]">
-      <h1 className="mb-3 text-[40px] font-semibold leading-[48px] text-gray-1000">
-        Color Lookup &amp; Convert
-      </h1>
-      <p className="mb-8 text-xl leading-[30px] text-gray-900">
-        Find the nearest ANSI 256 color from HEX, RGB, or HSL
-      </p>
-
       {/* HEX Input */}
       <div className="mb-5 rounded-md border border-gray-400 bg-background-200 p-5">
         <h3 className="mb-4 text-sm font-medium text-gray-900">HEX Color</h3>

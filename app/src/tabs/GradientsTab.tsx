@@ -1,0 +1,296 @@
+import { useMemo, useRef, useState } from "react";
+import {
+  quantize,
+  rgbToHex,
+  sample,
+  type ColorSpace,
+  type ColorStop,
+  type Easing,
+  type RGB,
+} from "@/engines/gradient";
+import { useClipboard } from "@/hooks/use-clipboard";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { TerminalControls } from "@/components/shared/TerminalControls";
+import { Plus, Trash2 } from "lucide-react";
+type Mode = "text" | "block" | "bar" | "ramp";
+type Quant = "24" | "256" | "16";
+const selectClass =
+  "h-9 rounded-md border border-gray-400 bg-background-100 px-3 text-sm text-gray-1000";
+const valid = (s: string) => /^#[0-9a-f]{6}$/i.test(s);
+const fg = (rgb: RGB, q: Quant) => {
+  const x = quantize(rgb, q);
+  if (q === "24") return `\x1b[38;2;${x.rgb.map(Math.round).join(";")}m`;
+  if (q === "16") {
+    const i = x.index ?? 7;
+    return `\x1b[${i < 8 ? 30 + i : 82 + i}m`;
+  }
+  return `\x1b[38;5;${x.index}m`;
+};
+export function GradientsTab() {
+  const { copy } = useClipboard(),
+    terminalRef = useRef<HTMLDivElement>(null);
+  const [stops, setStops] = useState<ColorStop[]>([
+      { color: "#0000ff", position: 0 },
+      { color: "#ffff00", position: 1 },
+    ]),
+    [space, setSpace] = useState<ColorSpace>("oklch"),
+    [easing, setEasing] = useState<Easing>("linear"),
+    [quant, setQuant] = useState<Quant>("256"),
+    [mode, setMode] = useState<Mode>("text"),
+    [text, setText] = useState("TERMCRAFT"),
+    [width, setWidth] = useState(32),
+    [percent, setPercent] = useState(68),
+    [steps, setSteps] = useState(8);
+  const count =
+    mode === "text"
+      ? Math.max(1, [...text].length)
+      : mode === "bar"
+        ? Math.max(1, Math.round((width * percent) / 100))
+        : mode === "ramp"
+          ? steps
+          : width;
+  const raw = useMemo(
+    () => sample(stops, count, space, easing),
+    [stops, count, space, easing],
+  );
+  const snapped = raw.map((c) => quantize(c, quant));
+  const chars = mode === "text" ? [...text] : Array(count).fill("█");
+  const ansi =
+    mode === "ramp"
+      ? snapped
+          .map(
+            (c, i) =>
+              `${fg(c.rgb, quant)}██\x1b[0m ${String(c.index ?? "24-bit").padStart(6)} ${rgbToHex(c.rgb)}`,
+          )
+          .join("\n")
+      : chars.map((c, i) => `${fg(snapped[i].rgb, quant)}${c}`).join("") +
+        "\x1b[0m" +
+        (mode === "bar" ? "░".repeat(width - count) : "");
+  const plain = ansi.replace(/\x1b\[[0-9;]+m/g, "");
+  const css = `linear-gradient(90deg, ${[...stops]
+    .sort((a, b) => a.position - b.position)
+    .map(
+      (s) =>
+        `${typeof s.color === "string" ? s.color : rgbToHex(s.color)} ${s.position * 100}%`,
+    )
+    .join(", ")})`;
+  const update = (i: number, p: Partial<ColorStop>) =>
+    setStops((s) => s.map((v, j) => (j === i ? { ...v, ...p } : v)));
+  return (
+    <div className="mx-auto max-w-[900px]">
+      <Card className="mb-5 gap-4 rounded-md border-gray-400 bg-background-200 py-5">
+        <CardContent className="grid gap-4 px-5">
+          <div className="text-sm font-medium text-gray-1000">Colour stops</div>
+          {stops.map((s, i) => (
+            <div
+              key={i}
+              className="grid grid-cols-[40px_150px_1fr_36px] items-center gap-3"
+            >
+              <input
+                type="color"
+                aria-label={`Stop ${i + 1} colour`}
+                value={
+                  typeof s.color === "string" && valid(s.color)
+                    ? s.color
+                    : "#ffffff"
+                }
+                onChange={(e) => update(i, { color: e.target.value })}
+                className="size-9 cursor-pointer rounded-sm border border-gray-400 bg-transparent"
+              />
+              <Input
+                aria-label={`Stop ${i + 1} hex`}
+                value={
+                  typeof s.color === "string" ? s.color : rgbToHex(s.color)
+                }
+                onChange={(e) =>
+                  valid(e.target.value) && update(i, { color: e.target.value })
+                }
+                className="border-gray-400 bg-background-100 font-mono"
+              />
+              <div className="flex items-center gap-2">
+                <Slider
+                  value={[s.position * 100]}
+                  onValueChange={([v]) => update(i, { position: v / 100 })}
+                  min={0}
+                  max={100}
+                />
+                <span className="w-10 text-xs text-gray-700">
+                  {Math.round(s.position * 100)}%
+                </span>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label={`Remove stop ${i + 1}`}
+                disabled={stops.length <= 2}
+                onClick={() => setStops((x) => x.filter((_, j) => j !== i))}
+              >
+                <Trash2 />
+              </Button>
+            </div>
+          ))}
+          <Button
+            variant="outline"
+            onClick={() =>
+              setStops((s) => [...s, { color: "#ff00ff", position: 0.5 }])
+            }
+          >
+            <Plus />
+            Add stop
+          </Button>
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="mb-2 block text-xs text-gray-900">
+                Interpolation
+              </label>
+              <ToggleGroup
+                type="single"
+                value={space}
+                onValueChange={(v) => v && setSpace(v as ColorSpace)}
+                variant="outline"
+              >
+                {["rgb", "hsl", "oklch"].map((v) => (
+                  <ToggleGroupItem key={v} value={v}>
+                    {v.toUpperCase()}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </div>
+            <div>
+              <label className="mb-2 block text-xs text-gray-900">Easing</label>
+              <select
+                value={easing}
+                onChange={(e) => setEasing(e.target.value as Easing)}
+                className={selectClass}
+              >
+                {["linear", "ease-in", "ease-out", "ease-in-out"].map((v) => (
+                  <option key={v}>{v}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-2 block text-xs text-gray-900">
+                Quantisation
+              </label>
+              <select
+                value={quant}
+                onChange={(e) => setQuant(e.target.value as Quant)}
+                className={selectClass}
+              >
+                <option value="24">24-bit</option>
+                <option value="256">ANSI 256</option>
+                <option value="16">ANSI 16</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="mb-2 block text-xs text-gray-900">
+              Apply mode
+            </label>
+            <ToggleGroup
+              type="single"
+              value={mode}
+              onValueChange={(v) => v && setMode(v as Mode)}
+              variant="outline"
+            >
+              {["text", "block", "bar", "ramp"].map((v) => (
+                <ToggleGroupItem key={v} value={v} className="capitalize">
+                  {v}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          </div>
+          {mode === "text" ? (
+            <Input
+              value={text}
+              onChange={(e) => setText(e.target.value || " ")}
+              className="border-gray-400 bg-background-100"
+            />
+          ) : mode === "ramp" ? (
+            <div>
+              <label className="text-xs text-gray-900">Steps: {steps}</label>
+              <Slider
+                value={[steps]}
+                onValueChange={([v]) => setSteps(v)}
+                min={2}
+                max={24}
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs text-gray-900">Width: {width}</label>
+                <Slider
+                  value={[width]}
+                  onValueChange={([v]) => setWidth(v)}
+                  min={4}
+                  max={80}
+                />
+              </div>
+              {mode === "bar" && (
+                <div>
+                  <label className="text-xs text-gray-900">
+                    Fill: {percent}%
+                  </label>
+                  <Slider
+                    value={[percent]}
+                    onValueChange={([v]) => setPercent(v)}
+                    min={0}
+                    max={100}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      <div
+        className="mb-3 h-10 rounded-md border border-gray-400"
+        style={{ backgroundImage: css }}
+        aria-label="Full-colour CSS gradient"
+      />
+      <div className="mb-5 overflow-hidden rounded-md border border-gray-400 bg-background-200">
+        <TerminalControls terminalRef={terminalRef} noWrap />
+        <div ref={terminalRef} className="ansi-terminal overflow-x-auto p-5">
+          <pre className="m-0 font-mono">
+            {mode === "ramp" ? (
+              snapped.map((c, i) => (
+                <div key={i}>
+                  <span style={{ color: rgbToHex(c.rgb) }}>██</span>{" "}
+                  {String(c.index ?? "24-bit").padStart(6)} {rgbToHex(c.rgb)}
+                </div>
+              ))
+            ) : (
+              <>
+                {chars.map((c, i) => (
+                  <span key={i} style={{ color: rgbToHex(snapped[i].rgb) }}>
+                    {c}
+                  </span>
+                ))}
+                {mode === "bar" && <span>{"░".repeat(width - count)}</span>}
+              </>
+            )}
+          </pre>
+        </div>
+        <div className="flex gap-2 border-t border-gray-400 p-3">
+          <Button
+            variant="outline"
+            onClick={() => copy(plain, "Plain gradient copied!")}
+          >
+            Copy plain text
+          </Button>
+          <Button
+            onClick={() => copy(ansi, "ANSI gradient copied!")}
+            className="bg-gray-1000 text-background-200"
+          >
+            Copy ANSI
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}

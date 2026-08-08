@@ -3,14 +3,7 @@ import * as AsciiEditor from "@/engines/ascii-editor.js";
 import { useClipboard } from "@/hooks/use-clipboard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Type,
-  PenLine,
-  Minus,
-  Maximize,
-  Undo2,
-  Redo2,
-} from "lucide-react";
+import { Type, PenLine, Minus, Maximize, Undo2, Redo2 } from "lucide-react";
 
 const TOOLS = [
   { id: "type", label: "Type", icon: Type, shortcut: "T" },
@@ -62,13 +55,6 @@ export function AsciiEditorTab() {
 
   return (
     <div className="mx-auto max-w-[1400px]">
-      <h1 className="mb-3 text-[40px] font-semibold leading-[48px] text-gray-1000">
-        ASCII Editor
-      </h1>
-      <p className="mb-8 text-xl leading-[30px] text-gray-900">
-        Draw and compose ASCII art on a character grid
-      </p>
-
       {/* Toolbar Row 1: Tools + Undo/Redo */}
       <div className="mb-2 flex flex-wrap items-center gap-3">
         <div className="flex gap-1">
