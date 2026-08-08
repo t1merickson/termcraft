@@ -7,6 +7,8 @@
 
 import { rgbToAnsi256 } from './ansi256.js';
 import * as ShapeVectors from './shape-vectors.js';
+import { renderBraille } from './braille';
+import { rampFor, RAMPS } from './ramps';
 
 // Preset character sets ordered from dark to light
 const CHARSETS = {
@@ -96,16 +98,18 @@ export function processImage(img, options = {}) {
         directionalContrast = false
     } = options;
 
-    const charsetStr = CHARSETS[charset] || charset || CHARSETS.standard;
+    const ramp = RAMPS.find((candidate) => candidate.id === charset);
+    const charsetStr = ramp ? ramp.chars : (CHARSETS[charset] || charset || CHARSETS.standard);
     const { width, height } = calcOutputDimensions(img.width, img.height, maxWidth, maxHeight);
 
     const useColor = colorMode !== 'none';
     const useTrue24bit = colorMode === '24bit';
 
     const useShape = mode === 'shape';
+    const useBraille = mode === 'braille';
 
-    const cellW = useShape ? 12 : 1;
-    const cellH = useShape ? 18 : 1;
+    const cellW = useShape ? 12 : (useBraille ? 2 : 1);
+    const cellH = useShape ? 18 : (useBraille ? 4 : 1);
 
     const canvasW = width * cellW;
     const canvasH = height * cellH;
@@ -126,6 +130,15 @@ export function processImage(img, options = {}) {
             const lum = Math.round(0.299 * pixels[i] + 0.587 * pixels[i + 1] + 0.114 * pixels[i + 2]);
             pixels[i] = pixels[i + 1] = pixels[i + 2] = lum;
         }
+    }
+
+    if (useBraille) {
+        return renderBraille(imageData, width, height, {
+            threshold: options.threshold,
+            invert,
+            dither: options.dither,
+            color: colorMode
+        });
     }
 
     let shapeData = null;
@@ -234,5 +247,5 @@ export function escapeForPrintf(ansi) {
  * Get available charset presets
  */
 export function getCharsets() {
-    return { ...CHARSETS };
+    return Object.fromEntries(RAMPS.map(({ id, chars }) => [id, chars]));
 }

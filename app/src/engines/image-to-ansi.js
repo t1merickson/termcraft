@@ -74,6 +74,8 @@ export function calcDimensions(imgW, imgH, maxWidth, maxHeight, renderMode) {
     const useHalfBlocks = renderMode.startsWith('half-');
     const useHalfFgOnly = renderMode.startsWith('halffg-');
     const useQuadrant = renderMode.startsWith('quad-');
+    const useSextant = renderMode.startsWith('sextant-');
+    const useOctant = renderMode.startsWith('octant-');
     const useBlockChars = renderMode.startsWith('block-');
     const isBinary = renderMode === 'binary';
     const is1to1 = renderMode.endsWith('-1x');
@@ -84,9 +86,10 @@ export function calcDimensions(imgW, imgH, maxWidth, maxHeight, renderMode) {
     if (is1to1 && (useHalfBlocks || useHalfFgOnly)) {
         width = imgW;
         height = imgH % 2 === 0 ? imgH : imgH + 1;
-    } else if (is1to1 && useQuadrant) {
+    } else if (is1to1 && (useQuadrant || useSextant || useOctant)) {
         width = imgW % 2 === 0 ? imgW : imgW + 1;
-        height = imgH % 2 === 0 ? imgH : imgH + 1;
+        const cellH = useSextant ? 3 : (useOctant ? 4 : 2);
+        height = Math.ceil(imgH / cellH) * cellH;
     } else if (is1to1) {
         width = imgW;
         height = imgH;
@@ -100,7 +103,7 @@ export function calcDimensions(imgW, imgH, maxWidth, maxHeight, renderMode) {
             width = Math.round(maxPixH * aspectRatio / 2);
         }
         height = Math.max(2, Math.floor(height / 2) * 2);
-    } else if (useQuadrant) {
+    } else if (useQuadrant || useSextant || useOctant) {
         if (aspectRatio > maxWidth / maxHeight) {
             width = maxWidth;
             height = Math.round(maxWidth / aspectRatio);
@@ -109,7 +112,8 @@ export function calcDimensions(imgW, imgH, maxWidth, maxHeight, renderMode) {
             width = Math.round(maxHeight * aspectRatio);
         }
         width = Math.max(2, Math.floor(width / 2) * 2);
-        height = Math.max(2, Math.floor(height / 2) * 2);
+        const cellH = useSextant ? 3 : (useOctant ? 4 : 2);
+        height = Math.max(cellH, Math.floor(height / cellH) * cellH);
     } else if (useBlockChars) {
         if (aspectRatio > maxWidth / maxHeight) {
             width = maxWidth;
@@ -151,6 +155,8 @@ export function processImage(img, options = {}) {
     const useHalfBlocks = renderMode.startsWith('half-');
     const useHalfFgOnly = renderMode.startsWith('halffg-');
     const useQuadrant = renderMode.startsWith('quad-');
+    const useSextant = renderMode.startsWith('sextant-');
+    const useOctant = renderMode.startsWith('octant-');
     const useBlockChars = renderMode.startsWith('block-');
     const useTrue24bit = renderMode.includes('-24bit');
     const isBinary = renderMode === 'binary';
@@ -196,6 +202,10 @@ export function processImage(img, options = {}) {
         result = renderHalfBlocks(pixels, width, height, useTrue24bit);
     } else if (useQuadrant) {
         result = renderQuadrant(pixels, width, height, useTrue24bit);
+    } else if (useSextant) {
+        result = renderSextant(pixels, width, height, useTrue24bit);
+    } else if (useOctant) {
+        result = renderOctant(pixels, width, height, useTrue24bit);
     } else if (useBlockChars) {
         result = renderBlockChars(pixels, width, height, useTrue24bit);
     } else {
@@ -206,7 +216,7 @@ export function processImage(img, options = {}) {
         ansi: result.ansi,
         html: result.html,
         width: width,
-        height: useHalfBlocks || useHalfFgOnly || isBinary ? height / 2 : (useQuadrant ? height / 2 : height)
+        height: useHalfBlocks || useHalfFgOnly || isBinary ? height / 2 : (useQuadrant ? height / 2 : (useSextant ? height / 3 : (useOctant ? height / 4 : height)))
     };
 }
 
@@ -475,6 +485,130 @@ export function renderQuadrant(pixels, width, height, useTrue24bit) {
     }
 
     return { ansi, html, cells };
+}
+
+export const SEXTANT_CHARS = (() => {
+    const chars = new Array(64);
+    chars[0] = ' ';
+    let codePoint = 0x1FB00;
+    for (let mask = 1; mask < 63; mask++) {
+        if (mask === 21) chars[mask] = '▌';
+        else if (mask === 42) chars[mask] = '▐';
+        else chars[mask] = String.fromCodePoint(codePoint++);
+    }
+    chars[63] = '█';
+    return Object.freeze(chars);
+})();
+
+const OCTANT_EXISTING = new Map([
+    [0, ' '], [3, '🮂'], [5, '▘'], [10, '▝'], [15, '▀'],
+    [63, '🮅'], [80, '▖'], [85, '▌'], [90, '▞'], [95, '▛'],
+    [160, '▗'], [165, '▚'], [170, '▐'], [175, '▜'], [192, '▂'],
+    [240, '▄'], [245, '▙'], [250, '▟'], [252, '▆'], [255, '█']
+]);
+const OCTANT_REVERSE_ONLY = new Set([1, 2, 20, 40, 64, 128]);
+
+/**
+ * Octants need a very new Unicode 16 font and fall back to tofu in most
+ * terminals. The table also records masks represented by an inverted glyph.
+ */
+export const OCTANT_GLYPHS = (() => {
+    const glyphs = new Array(256);
+    const omitted = new Set([...OCTANT_EXISTING.keys(), ...OCTANT_REVERSE_ONLY]);
+    let codePoint = 0x1CD00;
+    for (let mask = 0; mask < 256; mask++) {
+        if (OCTANT_EXISTING.has(mask)) glyphs[mask] = { char: OCTANT_EXISTING.get(mask), inverted: false };
+        else if (!omitted.has(mask)) glyphs[mask] = { char: String.fromCodePoint(codePoint++), inverted: false };
+    }
+    for (const mask of OCTANT_REVERSE_ONLY) {
+        const reverse = glyphs[255 - mask];
+        glyphs[mask] = { char: reverse.char, inverted: true };
+    }
+    return Object.freeze(glyphs);
+})();
+
+export const OCTANT_CHARS = Object.freeze(OCTANT_GLYPHS.map(({ char }) => char));
+
+function renderMosaic(pixels, width, height, cellHeight, glyphForMask, useTrue24bit) {
+    let ansi = '';
+    let html = '';
+    const cells = [];
+    for (let y = 0; y < height; y += cellHeight) {
+        let lineAnsi = '', lineHtml = '';
+        let lastFg = null, lastBg = null;
+        const row = [];
+        for (let x = 0; x < width; x += 2) {
+            const points = [];
+            for (let dy = 0; dy < cellHeight; dy++) for (let dx = 0; dx < 2; dx++) {
+                const px = x + dx, py = y + dy;
+                if (px >= width || py >= height) { points.push({ r: 0, g: 0, b: 0, a: 0 }); continue; }
+                const p = (py * width + px) * 4;
+                points.push({ r: pixels[p], g: pixels[p + 1], b: pixels[p + 2], a: pixels[p + 3] });
+            }
+            const opaque = points.filter((point) => point.a >= 32);
+            if (!opaque.length) {
+                row.push({ char: ' ', fg: null, bg: null });
+                if (lastFg !== null || lastBg !== null) { lineAnsi += '\x1b[0m'; lastFg = lastBg = null; }
+                lineAnsi += ' '; lineHtml += ' ';
+                continue;
+            }
+            let first = opaque[0], second = opaque[0], farthest = -1;
+            for (const a of opaque) for (const b of opaque) {
+                const d = (a.r - b.r) ** 2 + (a.g - b.g) ** 2 + (a.b - b.b) ** 2;
+                if (d > farthest) { farthest = d; first = a; second = b; }
+            }
+            let fg = { r: first.r, g: first.g, b: first.b };
+            let bg = { r: second.r, g: second.g, b: second.b };
+            for (let iteration = 0; iteration < 3; iteration++) {
+                const sums = [[0, 0, 0, 0], [0, 0, 0, 0]];
+                for (const point of opaque) {
+                    const df = (point.r - fg.r) ** 2 + (point.g - fg.g) ** 2 + (point.b - fg.b) ** 2;
+                    const db = (point.r - bg.r) ** 2 + (point.g - bg.g) ** 2 + (point.b - bg.b) ** 2;
+                    const sum = sums[df <= db ? 0 : 1];
+                    sum[0] += point.r; sum[1] += point.g; sum[2] += point.b; sum[3]++;
+                }
+                if (sums[0][3]) fg = { r: Math.round(sums[0][0] / sums[0][3]), g: Math.round(sums[0][1] / sums[0][3]), b: Math.round(sums[0][2] / sums[0][3]) };
+                if (sums[1][3]) bg = { r: Math.round(sums[1][0] / sums[1][3]), g: Math.round(sums[1][1] / sums[1][3]), b: Math.round(sums[1][2] / sums[1][3]) };
+            }
+            let mask = 0;
+            points.forEach((point, index) => {
+                if (point.a < 32) return;
+                const df = (point.r - fg.r) ** 2 + (point.g - fg.g) ** 2 + (point.b - fg.b) ** 2;
+                const db = (point.r - bg.r) ** 2 + (point.g - bg.g) ** 2 + (point.b - bg.b) ** 2;
+                if (df <= db) mask |= 1 << index;
+            });
+            let glyph = glyphForMask(mask);
+            if (typeof glyph === 'string') glyph = { char: glyph, inverted: false };
+            if (glyph.inverted) [fg, bg] = [bg, fg];
+            const fgCode = rgbaToFgAnsi(fg.r, fg.g, fg.b, 255, useTrue24bit);
+            const bgCode = farthest > 0 ? rgbaToBgAnsi(bg.r, bg.g, bg.b, 255, useTrue24bit) : null;
+            const fgColor = `rgb(${fg.r},${fg.g},${fg.b})`;
+            const bgColor = farthest > 0 ? `rgb(${bg.r},${bg.g},${bg.b})` : null;
+            const cellFg = cellColor(fg.r, fg.g, fg.b, useTrue24bit);
+            const cellBg = farthest > 0 ? cellColor(bg.r, bg.g, bg.b, useTrue24bit) : null;
+            row.push({ char: glyph.char, fg: cellFg, bg: cellBg });
+            if (fgCode !== lastFg || bgCode !== lastBg) {
+                const codes = [fgCode, bgCode].filter(Boolean);
+                lineAnsi += codes.length ? `\x1b[${codes.join(';')}m` : '\x1b[0m';
+                lastFg = fgCode; lastBg = bgCode;
+            }
+            lineAnsi += glyph.char;
+            const style = `color:${fgColor};${bgColor ? `background:${bgColor};` : ''}`;
+            lineHtml += `<span style="${style}">${glyph.char}</span>`;
+        }
+        cells.push(row);
+        ansi += lineAnsi + '\x1b[0m\n';
+        html += lineHtml + '\n';
+    }
+    return { ansi, html, cells };
+}
+
+export function renderSextant(pixels, width, height, useTrue24bit) {
+    return renderMosaic(pixels, width, height, 3, (mask) => SEXTANT_CHARS[mask], useTrue24bit);
+}
+
+export function renderOctant(pixels, width, height, useTrue24bit) {
+    return renderMosaic(pixels, width, height, 4, (mask) => OCTANT_GLYPHS[mask], useTrue24bit);
 }
 
 /**

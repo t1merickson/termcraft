@@ -1,21 +1,16 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import * as ImageToAscii from "@/engines/image-to-ascii.js";
+import { DITHER_ALGORITHMS, type DitherName } from "@/engines/dither";
+import { RAMPS, RAMP_GROUPS } from "@/engines/ramps";
 import { useClipboard } from "@/hooks/use-clipboard";
 import { useImageUpload } from "@/hooks/use-image-upload";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TerminalControls } from "@/components/shared/TerminalControls";
 import { Upload, ChevronDown } from "lucide-react";
-
-const CHARSETS = [
-  { value: "standard", label: "Standard ( .:-=+*#%@)" },
-  { value: "detailed", label: "Detailed ( .'`:;-~=+*!?#%@)" },
-  { value: "blocks", label: "Blocks ( ░▒▓█)" },
-  { value: "simple", label: "Simple ( .*#)" },
-  { value: "extended", label: "Extended (70 chars)" },
-];
 
 const COLOR_MODES = [
   { value: "none", label: "None (Plain ASCII)" },
@@ -26,6 +21,7 @@ const COLOR_MODES = [
 const MATCHING_MODES = [
   { value: "brightness", label: "Brightness" },
   { value: "shape", label: "Shape-Aware" },
+  { value: "braille", label: "Braille" },
 ];
 
 export function ImageToAsciiTab() {
@@ -40,6 +36,8 @@ export function ImageToAsciiTab() {
   const [matchingMode, setMatchingMode] = useState("brightness");
   const [contrast, setContrast] = useState(20);
   const [directional, setDirectional] = useState(false);
+  const [threshold, setThreshold] = useState(128);
+  const [brailleDither, setBrailleDither] = useState<DitherName>("none");
   const [invert, setInvert] = useState(false);
   const [greyscale, setGreyscale] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -57,8 +55,10 @@ export function ImageToAsciiTab() {
       mode: matchingMode,
       contrastExponent: contrast / 10,
       directionalContrast: directional,
+      threshold,
+      dither: brailleDither,
     }),
-    [maxWidth, maxHeight, charset, colorMode, invert, greyscale, matchingMode, contrast, directional],
+    [maxWidth, maxHeight, charset, colorMode, invert, greyscale, matchingMode, contrast, directional, threshold, brailleDither],
   );
 
   const processImage = useCallback(
@@ -89,7 +89,7 @@ export function ImageToAsciiTab() {
     if (upload.image) {
       processImage(upload.image);
     }
-  }, [maxWidth, maxHeight, charset, colorMode, invert, greyscale, matchingMode, contrast, directional]);
+  }, [maxWidth, maxHeight, charset, colorMode, invert, greyscale, matchingMode, contrast, directional, threshold, brailleDither]);
 
   const setScale = (factor: number) => {
     if (!upload.image) return;
@@ -200,21 +200,37 @@ export function ImageToAsciiTab() {
           </div>
         </div>
         <div className="grid grid-cols-3 gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs text-gray-900">Character Set</label>
-            <div className="relative">
-              <select
-                value={charset}
-                onChange={(e) => setCharset(e.target.value)}
-                className="h-10 w-full cursor-pointer appearance-none rounded-sm border border-gray-400 bg-background-100 px-3 pr-8 font-sans text-sm text-gray-1000 outline-none transition-[border-color,box-shadow] focus:border-blue-700 focus:shadow-focus-ring"
-              >
-                {CHARSETS.map((c) => (
-                  <option key={c.value} value={c.value}>{c.label}</option>
-                ))}
-              </select>
-              {chevronSvg}
+          {matchingMode !== "braille" ? (
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs text-gray-900">Character Set</label>
+              <Select value={charset} onValueChange={setCharset}>
+                <SelectTrigger className="h-10 w-full border-gray-400 bg-background-100 text-gray-1000">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="max-h-[420px]">
+                  {RAMP_GROUPS.map((group) => (
+                    <SelectGroup key={group.id}>
+                      <SelectLabel>{group.label}</SelectLabel>
+                      {RAMPS.filter((ramp) => ramp.group === group.id).map((ramp) => (
+                        <SelectItem key={ramp.id} value={ramp.id}>
+                          <span>{ramp.label}</span>
+                          <span className="ml-auto max-w-[220px] truncate font-mono text-xs text-gray-600">{ramp.chars}</span>
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-          </div>
+          ) : (
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs text-gray-900">Threshold</label>
+              <div className="flex h-10 items-center gap-2">
+                <Slider value={[threshold]} onValueChange={([v]) => setThreshold(v)} min={0} max={255} step={1} className="flex-1" />
+                <span className="min-w-[30px] text-right text-xs text-gray-700">{threshold}</span>
+              </div>
+            </div>
+          )}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs text-gray-900">Color Mode</label>
             <div className="relative">
@@ -246,6 +262,19 @@ export function ImageToAsciiTab() {
             </div>
           </div>
         </div>
+        {matchingMode === "braille" && (
+          <div className="grid grid-cols-3 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs text-gray-900">Dither</label>
+              <div className="relative">
+                <select value={brailleDither} onChange={(e) => setBrailleDither(e.target.value as DitherName)} className="h-10 w-full cursor-pointer appearance-none rounded-sm border border-gray-400 bg-background-100 px-3 pr-8 text-sm text-gray-1000 outline-none focus:border-blue-700 focus:shadow-focus-ring">
+                  {DITHER_ALGORITHMS.map((algorithm) => <option key={algorithm.id} value={algorithm.id}>{algorithm.label}</option>)}
+                </select>
+                {chevronSvg}
+              </div>
+            </div>
+          </div>
+        )}
         {matchingMode === "shape" && (
           <div className="flex items-center gap-6">
             <div className="flex flex-1 items-center gap-1.5">

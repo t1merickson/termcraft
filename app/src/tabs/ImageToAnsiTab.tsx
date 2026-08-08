@@ -12,6 +12,8 @@ const RENDER_MODES = [
   { value: "half", label: "▀▄ Half Blocks (fg+bg)" },
   { value: "halffg", label: "▀▄ Half Blocks (fg only)" },
   { value: "quad", label: "▚ Quadrant (fg only)" },
+  { value: "sextant", label: "🬔 Sextant (2×3)" },
+  { value: "octant", label: "𜴀 Octant (2×4, Unicode 16)" },
   { value: "block", label: "█ Full Block (fg only)" },
   { value: "full", label: "██ Spaces (bg only)" },
   { value: "binary", label: "Binary (no color)" },
