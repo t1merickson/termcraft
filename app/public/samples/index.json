@@ -1,0 +1,106 @@
+[
+  {
+    "id": "sphere",
+    "name": "Sphere",
+    "note": "Lit sphere on a gradient",
+    "src": "samples/sphere.png",
+    "thumb": "samples/sphere-thumb.png",
+    "width": 960,
+    "height": 640,
+    "best": [
+      "image-to-ascii",
+      "dither"
+    ]
+  },
+  {
+    "id": "portrait-bust",
+    "name": "Portrait Bust",
+    "note": "Studio-lit synthetic portrait",
+    "src": "samples/portrait-bust.png",
+    "thumb": "samples/portrait-bust-thumb.png",
+    "width": 960,
+    "height": 960,
+    "best": [
+      "image-to-ascii",
+      "dither"
+    ]
+  },
+  {
+    "id": "mandelbrot",
+    "name": "Mandelbrot",
+    "note": "Smooth seahorse-valley fractal",
+    "src": "samples/mandelbrot.png",
+    "thumb": "samples/mandelbrot-thumb.png",
+    "width": 960,
+    "height": 640,
+    "best": [
+      "image-to-ansi",
+      "dither"
+    ]
+  },
+  {
+    "id": "landscape",
+    "name": "Landscape",
+    "note": "Layered mountain ridges in haze",
+    "src": "samples/landscape.png",
+    "thumb": "samples/landscape-thumb.png",
+    "width": 960,
+    "height": 640,
+    "best": [
+      "image-to-ascii",
+      "image-to-ansi"
+    ]
+  },
+  {
+    "id": "test-ramp",
+    "name": "Test Ramp",
+    "note": "Tone, colour, and zone-plate chart",
+    "src": "samples/test-ramp.png",
+    "thumb": "samples/test-ramp-thumb.png",
+    "width": 960,
+    "height": 640,
+    "best": [
+      "image-to-ascii",
+      "dither"
+    ]
+  },
+  {
+    "id": "checkers-torus",
+    "name": "Checkers Torus",
+    "note": "Perspective checkerboard torus",
+    "src": "samples/checkers-torus.png",
+    "thumb": "samples/checkers-torus-thumb.png",
+    "width": 960,
+    "height": 640,
+    "best": [
+      "image-to-ansi",
+      "dither"
+    ]
+  },
+  {
+    "id": "text-plate",
+    "name": "Text Plate",
+    "note": "Hard-edged shapes and letterforms",
+    "src": "samples/text-plate.png",
+    "thumb": "samples/text-plate-thumb.png",
+    "width": 960,
+    "height": 640,
+    "best": [
+      "image-to-ascii",
+      "dither"
+    ]
+  },
+  {
+    "id": "nebula",
+    "name": "Nebula",
+    "note": "Wide-gamut clouds and stars",
+    "src": "samples/nebula.png",
+    "thumb": "samples/nebula-thumb.png",
+    "width": 960,
+    "height": 640,
+    "best": [
+      "image-to-ansi",
+      "dither"
+    ]
+  }
+]
