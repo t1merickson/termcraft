@@ -42,6 +42,28 @@ export function useImageUpload() {
     return image;
   }, []);
 
+  const loadFromUrl = useCallback(
+    async (src: string, name?: string) => {
+      const response = await fetch(src);
+      if (!response.ok) {
+        throw new Error(`Failed to load image: ${response.status}`);
+      }
+      const blob = await response.blob();
+      const sourceName = decodeURIComponent(
+        src.split("/").pop()?.split("?")[0] || "sample.png",
+      );
+      const normalizedName = name?.replace(/\s+/g, "-").toLowerCase();
+      const fileName = normalizedName
+        ? /\.[a-z0-9]+$/i.test(normalizedName)
+          ? normalizedName
+          : `${normalizedName}.png`
+        : sourceName;
+      const file = new File([blob], fileName, { type: blob.type || "image/png" });
+      return processFile(file);
+    },
+    [processFile],
+  );
+
   const onDragOver = useCallback((e: DragEvent) => {
     e.preventDefault();
     setState((s) => ({ ...s, isDragging: true }));
@@ -79,6 +101,7 @@ export function useImageUpload() {
     ...state,
     fileInputRef,
     processFile,
+    loadFromUrl,
     openFilePicker,
     onDragOver,
     onDragLeave,
