@@ -25,9 +25,9 @@
  *   --license S     License name
  */
 
-const fs = require('fs');
-const nodePath = require('path');
-const opentype = require('opentype.js');
+const fs = require("fs");
+const nodePath = require("path");
+const opentype = require("opentype.js");
 
 // ── CLI args ──────────────────────────────────────────────────────
 
@@ -35,10 +35,10 @@ function parseArgs(argv) {
   const args = {};
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
-    if (!arg.startsWith('--')) continue;
+    if (!arg.startsWith("--")) continue;
     const key = arg.slice(2);
     const next = argv[i + 1];
-    if (!next || next.startsWith('--')) {
+    if (!next || next.startsWith("--")) {
       args[key] = true;
     } else {
       args[key] = next;
@@ -58,7 +58,9 @@ function requireArg(args, name) {
 
 // ── Grid detection ────────────────────────────────────────────────
 
-function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+function gcd(a, b) {
+  return b === 0 ? a : gcd(b, a % b);
+}
 
 /**
  * Detect pixel grid size from font outlines.
@@ -114,7 +116,10 @@ function detectGridSize(font) {
     for (const d of deltas) {
       const remainder = d % candidate;
       const residual = Math.min(remainder, candidate - remainder);
-      if (residual > 1) { ok = false; break; }
+      if (residual > 1) {
+        ok = false;
+        break;
+      }
     }
     if (ok) {
       console.log(`  (fuzzy GCD: snapped to ${candidate}, exact was 1)`);
@@ -123,7 +128,9 @@ function detectGridSize(font) {
   }
 
   // Last resort: return smallest delta as best guess
-  console.warn(`  Warning: could not find clean grid divisor; using smallest delta ${minDelta}`);
+  console.warn(
+    `  Warning: could not find clean grid divisor; using smallest delta ${minDelta}`,
+  );
   return minDelta;
 }
 
@@ -139,14 +146,24 @@ function windingLine(px, py, x0, y0, x1, y1) {
 function windingCubic(px, py, x0, y0, x1, y1, x2, y2, x3, y3) {
   let w = 0;
   const steps = 16;
-  let prevX = x0, prevY = y0;
+  let prevX = x0,
+    prevY = y0;
   for (let i = 1; i <= steps; i++) {
     const t = i / steps;
     const mt = 1 - t;
-    const nx = mt * mt * mt * x0 + 3 * mt * mt * t * x1 + 3 * mt * t * t * x2 + t * t * t * x3;
-    const ny = mt * mt * mt * y0 + 3 * mt * mt * t * y1 + 3 * mt * t * t * y2 + t * t * t * y3;
+    const nx =
+      mt * mt * mt * x0 +
+      3 * mt * mt * t * x1 +
+      3 * mt * t * t * x2 +
+      t * t * t * x3;
+    const ny =
+      mt * mt * mt * y0 +
+      3 * mt * mt * t * y1 +
+      3 * mt * t * t * y2 +
+      t * t * t * y3;
     w += windingLine(px, py, prevX, prevY, nx, ny);
-    prevX = nx; prevY = ny;
+    prevX = nx;
+    prevY = ny;
   }
   return w;
 }
@@ -154,14 +171,16 @@ function windingCubic(px, py, x0, y0, x1, y1, x2, y2, x3, y3) {
 function windingQuadratic(px, py, x0, y0, x1, y1, x2, y2) {
   let w = 0;
   const steps = 16;
-  let prevX = x0, prevY = y0;
+  let prevX = x0,
+    prevY = y0;
   for (let i = 1; i <= steps; i++) {
     const t = i / steps;
     const mt = 1 - t;
     const nx = mt * mt * x0 + 2 * mt * t * x1 + t * t * x2;
     const ny = mt * mt * y0 + 2 * mt * t * y1 + t * t * y2;
     w += windingLine(px, py, prevX, prevY, nx, ny);
-    prevX = nx; prevY = ny;
+    prevX = nx;
+    prevY = ny;
   }
   return w;
 }
@@ -177,25 +196,51 @@ function isPointInPath(cmds, x, y) {
 
   for (const cmd of cmds) {
     switch (cmd.type) {
-      case 'M':
-        firstX = cmd.x; firstY = cmd.y;
-        curX = cmd.x; curY = cmd.y;
+      case "M":
+        firstX = cmd.x;
+        firstY = cmd.y;
+        curX = cmd.x;
+        curY = cmd.y;
         break;
-      case 'L':
+      case "L":
         winding += windingLine(x, y, curX, curY, cmd.x, cmd.y);
-        curX = cmd.x; curY = cmd.y;
+        curX = cmd.x;
+        curY = cmd.y;
         break;
-      case 'C':
-        winding += windingCubic(x, y, curX, curY, cmd.x1, cmd.y1, cmd.x2, cmd.y2, cmd.x, cmd.y);
-        curX = cmd.x; curY = cmd.y;
+      case "C":
+        winding += windingCubic(
+          x,
+          y,
+          curX,
+          curY,
+          cmd.x1,
+          cmd.y1,
+          cmd.x2,
+          cmd.y2,
+          cmd.x,
+          cmd.y,
+        );
+        curX = cmd.x;
+        curY = cmd.y;
         break;
-      case 'Q':
-        winding += windingQuadratic(x, y, curX, curY, cmd.x1, cmd.y1, cmd.x, cmd.y);
-        curX = cmd.x; curY = cmd.y;
+      case "Q":
+        winding += windingQuadratic(
+          x,
+          y,
+          curX,
+          curY,
+          cmd.x1,
+          cmd.y1,
+          cmd.x,
+          cmd.y,
+        );
+        curX = cmd.x;
+        curY = cmd.y;
         break;
-      case 'Z':
+      case "Z":
         winding += windingLine(x, y, curX, curY, firstX, firstY);
-        curX = firstX; curY = firstY;
+        curX = firstX;
+        curY = firstY;
         break;
     }
   }
@@ -209,22 +254,29 @@ function isPointInPath(cmds, x, y) {
  * Returns { glyphs, topStripped, bottomStripped, leftStripped, rightStripped }.
  */
 function stripPadding(glyphs) {
-  const chars = Object.keys(glyphs).filter(c => c !== ' ');
-  if (chars.length === 0) return { glyphs, topStripped: 0, bottomStripped: 0, leftStripped: 0, rightStripped: 0 };
+  const chars = Object.keys(glyphs).filter((c) => c !== " ");
+  if (chars.length === 0)
+    return {
+      glyphs,
+      topStripped: 0,
+      bottomStripped: 0,
+      leftStripped: 0,
+      rightStripped: 0,
+    };
 
   const h = glyphs[chars[0]].length;
 
   // Count strippable top rows
   let topStrip = 0;
   for (let r = 0; r < h; r++) {
-    if (chars.every(ch => !glyphs[ch][r].includes('1'))) topStrip++;
+    if (chars.every((ch) => !glyphs[ch][r].includes("1"))) topStrip++;
     else break;
   }
 
   // Count strippable bottom rows
   let bottomStrip = 0;
   for (let r = h - 1; r >= topStrip; r--) {
-    if (chars.every(ch => !glyphs[ch][r].includes('1'))) bottomStrip++;
+    if (chars.every((ch) => !glyphs[ch][r].includes("1"))) bottomStrip++;
     else break;
   }
 
@@ -235,7 +287,7 @@ function stripPadding(glyphs) {
     const w = rows[0].length;
     let cols = 0;
     for (let c = 0; c < w; c++) {
-      if (rows.every(row => row[c] === '0')) cols++;
+      if (rows.every((row) => row[c] === "0")) cols++;
       else break;
     }
     if (cols < leftStrip) leftStrip = cols;
@@ -249,42 +301,63 @@ function stripPadding(glyphs) {
     const w = rows[0].length;
     let cols = 0;
     for (let c = w - 1; c >= leftStrip; c--) {
-      if (rows.every(row => row[c] === '0')) cols++;
+      if (rows.every((row) => row[c] === "0")) cols++;
       else break;
     }
     if (cols < rightStrip) rightStrip = cols;
   }
   if (!Number.isFinite(rightStrip)) rightStrip = 0;
 
-  if (topStrip === 0 && bottomStrip === 0 && leftStrip === 0 && rightStrip === 0) {
-    return { glyphs, topStripped: 0, bottomStripped: 0, leftStripped: 0, rightStripped: 0 };
+  if (
+    topStrip === 0 &&
+    bottomStrip === 0 &&
+    leftStrip === 0 &&
+    rightStrip === 0
+  ) {
+    return {
+      glyphs,
+      topStripped: 0,
+      bottomStripped: 0,
+      leftStripped: 0,
+      rightStripped: 0,
+    };
   }
 
   // Apply stripping to all glyphs (including space)
   const stripped = {};
   for (const [ch, rows] of Object.entries(glyphs)) {
     const trimmedRows = rows.slice(topStrip, h - bottomStrip);
-    stripped[ch] = trimmedRows.map(row => row.slice(leftStrip, row.length - rightStrip));
+    stripped[ch] = trimmedRows.map((row) =>
+      row.slice(leftStrip, row.length - rightStrip),
+    );
   }
 
-  return { glyphs: stripped, topStripped: topStrip, bottomStripped: bottomStrip, leftStripped: leftStrip, rightStripped: rightStrip };
+  return {
+    glyphs: stripped,
+    topStripped: topStrip,
+    bottomStripped: bottomStrip,
+    leftStripped: leftStrip,
+    rightStripped: rightStrip,
+  };
 }
 
 // ── Main ──────────────────────────────────────────────────────────
 
 const args = parseArgs(process.argv.slice(2));
-const input = requireArg(args, 'input');
-const output = requireArg(args, 'output');
-const name = requireArg(args, 'name');
-const id = requireArg(args, 'id');
-const fallback = args['fallback'] || '?';
-const authorArg = args['author'] || '';
-const sourceArg = args['source'] || '';
-const licenseArg = args['license'] || '';
+const input = requireArg(args, "input");
+const output = requireArg(args, "output");
+const name = requireArg(args, "name");
+const id = requireArg(args, "id");
+const fallback = args["fallback"] || "?";
+const authorArg = args["author"] || "";
+const sourceArg = args["source"] || "";
+const licenseArg = args["license"] || "";
 
 const font = opentype.loadSync(input);
 
-const gridSize = args['grid-size'] ? Number(args['grid-size']) : detectGridSize(font);
+const gridSize = args["grid-size"]
+  ? Number(args["grid-size"])
+  : detectGridSize(font);
 console.log(`Detected grid size: ${gridSize} units/pixel`);
 
 // Pixel dimensions
@@ -294,8 +367,12 @@ const glyphHeight = ascentPx + descentPx;
 
 // Sanity check — pixel fonts should not exceed ~128px in any dimension
 if (glyphHeight > 128) {
-  console.error(`Glyph height ${glyphHeight}px is unreasonably large (grid=${gridSize}).`);
-  console.error(`Grid detection probably failed. Use --grid-size N to override.`);
+  console.error(
+    `Glyph height ${glyphHeight}px is unreasonably large (grid=${gridSize}).`,
+  );
+  console.error(
+    `Grid detection probably failed. Use --grid-size N to override.`,
+  );
   process.exit(1);
 }
 
@@ -311,7 +388,9 @@ for (let i = 33; i <= 126; i++) {
   if (advPx > maxAdvPx) maxAdvPx = advPx;
 }
 
-console.log(`Height: ${glyphHeight}px (ascent=${ascentPx}, descent=${descentPx})`);
+console.log(
+  `Height: ${glyphHeight}px (ascent=${ascentPx}, descent=${descentPx})`,
+);
 console.log(`Max advance width: ${maxAdvPx}px`);
 
 // Render each glyph at its natural advance width
@@ -320,12 +399,15 @@ const glyphs = {};
 for (const char of charset) {
   const glyph = font.charToGlyph(char);
 
-  if (!glyph || glyph.index === 0 || char === ' ') {
+  if (!glyph || glyph.index === 0 || char === " ") {
     // Empty/space glyph
-    const w = Math.round((glyph ? glyph.advanceWidth : font.unitsPerEm / 4) / gridSize) || 4;
+    const w =
+      Math.round(
+        (glyph ? glyph.advanceWidth : font.unitsPerEm / 4) / gridSize,
+      ) || 4;
     const rows = [];
     for (let y = 0; y < glyphHeight; y++) {
-      rows.push('0'.repeat(w));
+      rows.push("0".repeat(w));
     }
     glyphs[char] = rows;
     continue;
@@ -337,11 +419,11 @@ for (const char of charset) {
   const rows = [];
 
   for (let py = 0; py < glyphHeight; py++) {
-    let line = '';
+    let line = "";
     for (let px = 0; px < advPx; px++) {
       const fx = (px + 0.5) * gridSize;
       const fy = (py + 0.5) * gridSize;
-      line += isPointInPath(cmds, fx, fy) ? '1' : '0';
+      line += isPointInPath(cmds, fx, fy) ? "1" : "0";
     }
     rows.push(line);
   }
@@ -354,21 +436,37 @@ const pad = stripPadding(glyphs);
 const finalGlyphs = pad.glyphs;
 const finalHeight = glyphHeight - pad.topStripped - pad.bottomStripped;
 const finalMaxW = maxAdvPx - pad.leftStripped - pad.rightStripped;
-const finalSpaceW = Math.max(1, Math.round((font.charToGlyph(' ').advanceWidth || font.unitsPerEm / 4) / gridSize) - pad.leftStripped - pad.rightStripped);
+const finalSpaceW = Math.max(
+  1,
+  Math.round(
+    (font.charToGlyph(" ").advanceWidth || font.unitsPerEm / 4) / gridSize,
+  ) -
+    pad.leftStripped -
+    pad.rightStripped,
+);
 
-if (pad.topStripped || pad.bottomStripped || pad.leftStripped || pad.rightStripped) {
-  console.log(`Stripped padding: top=${pad.topStripped} bottom=${pad.bottomStripped} left=${pad.leftStripped} right=${pad.rightStripped}`);
-  console.log(`Effective size: ${finalMaxW}x${finalHeight} (was ${maxAdvPx}x${glyphHeight})`);
+if (
+  pad.topStripped ||
+  pad.bottomStripped ||
+  pad.leftStripped ||
+  pad.rightStripped
+) {
+  console.log(
+    `Stripped padding: top=${pad.topStripped} bottom=${pad.bottomStripped} left=${pad.leftStripped} right=${pad.rightStripped}`,
+  );
+  console.log(
+    `Effective size: ${finalMaxW}x${finalHeight} (was ${maxAdvPx}x${glyphHeight})`,
+  );
 }
 
 // Preview
-for (const ch of ['.', 'A', 'H', 'g', 'W', 'i', '0', '@']) {
+for (const ch of [".", "A", "H", "g", "W", "i", "0", "@"]) {
   if (finalGlyphs[ch]) {
     const w = finalGlyphs[ch][0].length;
     console.log(`\n[${ch}] ${w}px wide:`);
     for (const row of finalGlyphs[ch]) {
-      const display = row.replace(/1/g, '█').replace(/0/g, ' ');
-      console.log('|' + display + '|');
+      const display = row.replace(/1/g, "█").replace(/0/g, " ");
+      console.log("|" + display + "|");
     }
   }
 }
@@ -389,10 +487,10 @@ const fontJson = {
     author: authorArg,
     source: sourceArg,
     license: licenseArg,
-    charset: charset.join('')
+    charset: charset.join(""),
   },
-  glyphs: finalGlyphs
+  glyphs: finalGlyphs,
 };
 
-fs.writeFileSync(output, JSON.stringify(fontJson, null, 2) + '\n');
+fs.writeFileSync(output, JSON.stringify(fontJson, null, 2) + "\n");
 console.log(`\nWrote ${output} (max ${finalMaxW}x${finalHeight})`);

@@ -1,7 +1,320 @@
-import { useMemo,useRef,useState } from "react"; import { PALETTE } from "@/engines/ansi256.js"; import { SEGMENT_TYPES,renderPreview,toBash,toFish,toStarship,toZsh,type PromptContext,type PromptSegment,type SegmentType,type SeparatorStyle } from "@/engines/prompt"; import { useClipboard } from "@/hooks/use-clipboard"; import { Button } from "@/components/ui/button"; import { Card,CardContent } from "@/components/ui/card"; import { Input } from "@/components/ui/input"; import { Note } from "@/components/shared/Note"; import { TerminalControls } from "@/components/shared/TerminalControls"; import { ArrowDown,ArrowUp,Plus,Trash2 } from "lucide-react";
-const choices=[15,250,45,39,82,118,226,208,196,201,129,236,238,240];const selectClass="h-9 rounded-md border border-gray-400 bg-background-100 px-3 text-sm text-gray-1000";const initial:PromptSegment[]=[{id:"dir",type:"directory",fg:15,bg:27,shorten:3,tilde:true},{id:"branch",type:"gitBranch",fg:16,bg:45},{id:"status",type:"gitStatus",fg:16,bg:226},{id:"exit",type:"exitCode",fg:15,bg:196},{id:"line",type:"newline",fg:15,bg:0},{id:"prompt",type:"literal",fg:45,bg:0,literal:"❯"}];
-function color(index:number){const c=PALETTE[index];return`rgb(${c.r} ${c.g} ${c.b})`};function Preview({segments,context,separator,custom,command}:{segments:PromptSegment[];context:PromptContext;separator:SeparatorStyle;custom:string;command:string}){return <div>{renderPreview(segments,context,{separator,customSeparator:custom}).map((run,i)=><span key={i} style={{color:run.fg===undefined?undefined:color(run.fg),backgroundColor:run.bg===undefined?undefined:color(run.bg)}}>{run.text}</span>)} <span>{command}</span></div>}
-export function PromptTab(){const {copy}=useClipboard(),terminalRef=useRef<HTMLDivElement>(null);const[segments,setSegments]=useState(initial),[addType,setAddType]=useState<SegmentType>("user"),[separator,setSeparator]=useState<SeparatorStyle>("space"),[custom,setCustom]=useState(" | "),[format,setFormat]=useState("bash");const move=(i:number,d:number)=>setSegments(s=>{const n=[...s],j=i+d;if(j<0||j>=n.length)return s;[n[i],n[j]]=[n[j],n[i]];return n});const patch=(i:number,p:Partial<PromptSegment>)=>setSegments(s=>s.map((v,j)=>j===i?{...v,...p}:v));const exported=useMemo(()=>format==="zsh"?toZsh(segments,{separator,customSeparator:custom}):format==="fish"?toFish(segments,{separator,customSeparator:custom}):format==="starship"?toStarship(segments,{separator,customSeparator:custom}):toBash(segments,{separator,customSeparator:custom}),[segments,separator,custom,format]);return <div className="mx-auto max-w-[900px]"><h1 className="mb-3 text-[40px] font-semibold leading-[48px] text-gray-1000">Prompt Builder</h1><p className="mb-8 text-xl leading-[30px] text-gray-900">Compose a shell prompt and export working configuration</p>
-<Card className="mb-5 gap-4 rounded-md border-gray-400 bg-background-200 py-5"><CardContent className="grid gap-3 px-5"><div className="text-sm font-medium text-gray-1000">Prompt segments</div>{segments.map((s,i)=><div key={s.id} className="flex flex-wrap items-center gap-2 rounded-sm border border-gray-400 bg-background-100 p-2"><span className="min-w-32 flex-1 text-sm text-gray-1000">{SEGMENT_TYPES.find(x=>x.id===s.type)?.label}</span><label className="flex items-center gap-1 text-xs text-gray-700">FG<select aria-label={`${s.type} foreground`} value={s.fg} onChange={e=>patch(i,{fg:+e.target.value})} className="size-7 rounded-sm border border-gray-400 p-0" style={{backgroundColor:color(s.fg),color:color(s.fg)}}>{choices.map(c=><option key={c} value={c}>ANSI {c}</option>)}</select></label><label className="flex items-center gap-1 text-xs text-gray-700">BG<select aria-label={`${s.type} background`} value={s.bg} onChange={e=>patch(i,{bg:+e.target.value})} className="size-7 rounded-sm border border-gray-400 p-0" style={{backgroundColor:color(s.bg),color:color(s.bg)}}>{choices.map(c=><option key={c} value={c}>ANSI {c}</option>)}</select></label>{s.type==="literal"&&<Input aria-label="Literal text" value={s.literal} onChange={e=>patch(i,{literal:e.target.value})} className="h-8 w-24 border-gray-400"/>}{s.type==="directory"&&<><Input aria-label="Directory components" type="number" min={1} max={8} value={s.shorten} onChange={e=>patch(i,{shorten:+e.target.value})} className="h-8 w-16 border-gray-400"/><button type="button" onClick={()=>patch(i,{tilde:!s.tilde})} className="rounded-sm border border-gray-400 px-2 py-1 text-xs">~ {s.tilde?"on":"off"}</button></>}<Button variant="ghost" size="icon-sm" aria-label="Move segment up" onClick={()=>move(i,-1)}><ArrowUp/></Button><Button variant="ghost" size="icon-sm" aria-label="Move segment down" onClick={()=>move(i,1)}><ArrowDown/></Button><Button variant="ghost" size="icon-sm" aria-label="Remove segment" onClick={()=>setSegments(x=>x.filter((_,j)=>j!==i))}><Trash2/></Button></div>)}<div className="flex gap-2"><select value={addType} onChange={e=>setAddType(e.target.value as SegmentType)} className={`${selectClass} flex-1`}>{SEGMENT_TYPES.map(s=><option key={s.id} value={s.id}>{s.label}</option>)}</select><Button onClick={()=>setSegments(s=>[...s,{id:`${addType}-${Date.now()}`,type:addType,fg:15,bg:236,literal:addType==="literal"?"text":undefined}])}><Plus/>Add segment</Button></div>
-<div className="grid grid-cols-2 gap-4"><div className="flex flex-col gap-2"><label className="text-xs text-gray-900">Separator style</label><select value={separator} onChange={e=>setSeparator(e.target.value as SeparatorStyle)} className={selectClass}><option value="powerline">Powerline </option><option value="powerline-thin">Powerline thin </option><option value="slant">Slant </option><option value="round">Round </option><option value="space">Plain space</option><option value="custom">Custom</option></select></div>{separator==="custom"&&<div><label className="text-xs text-gray-900">Custom separator</label><Input value={custom} onChange={e=>setCustom(e.target.value)} className="mt-2 border-gray-400 bg-background-100"/></div>}</div><Note size="sm">Powerline separators require a patched font with Powerline glyphs.</Note></CardContent></Card>
-<div className="mb-5 overflow-hidden rounded-md border border-gray-400 bg-background-200"><TerminalControls terminalRef={terminalRef} noWrap/><div ref={terminalRef} className="ansi-terminal overflow-x-auto p-5"><pre className="m-0 space-y-4 font-mono"><Preview segments={segments} context={{}} separator={separator} custom={custom} command="git status"/><Preview segments={segments} context={{dirty:2,ahead:1}} separator={separator} custom={custom} command="npm run build"/><Preview segments={segments} context={{dirty:2,ahead:1,exitCode:1}} separator={separator} custom={custom} command="fix-build"/></pre></div><div className="flex gap-2 border-t border-gray-400 p-3"><select value={format} onChange={e=>setFormat(e.target.value)} className={selectClass}><option value="bash">bash PS1</option><option value="zsh">zsh PROMPT</option><option value="fish">fish_prompt</option><option value="starship">starship.toml</option></select><Button onClick={()=>copy(exported,`${format} prompt copied!`)} className="bg-gray-1000 text-background-200">Copy {format}</Button></div></div></div>}
+import { useMemo, useRef, useState } from "react";
+import { PALETTE } from "@/engines/ansi256.js";
+import {
+  SEGMENT_TYPES,
+  renderPreview,
+  toBash,
+  toFish,
+  toStarship,
+  toZsh,
+  type PromptContext,
+  type PromptSegment,
+  type SegmentType,
+  type SeparatorStyle,
+} from "@/engines/prompt";
+import { useClipboard } from "@/hooks/use-clipboard";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Note } from "@/components/shared/Note";
+import { TerminalControls } from "@/components/shared/TerminalControls";
+import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
+const choices = [
+  15, 250, 45, 39, 82, 118, 226, 208, 196, 201, 129, 236, 238, 240,
+];
+const selectClass =
+  "h-9 rounded-md border border-gray-400 bg-background-100 px-3 text-sm text-gray-1000";
+const initial: PromptSegment[] = [
+  { id: "dir", type: "directory", fg: 15, bg: 27, shorten: 3, tilde: true },
+  { id: "branch", type: "gitBranch", fg: 16, bg: 45 },
+  { id: "status", type: "gitStatus", fg: 16, bg: 226 },
+  { id: "exit", type: "exitCode", fg: 15, bg: 196 },
+  { id: "line", type: "newline", fg: 15, bg: 0 },
+  { id: "prompt", type: "literal", fg: 45, bg: 0, literal: "❯" },
+];
+function color(index: number) {
+  const c = PALETTE[index];
+  return `rgb(${c.r} ${c.g} ${c.b})`;
+}
+function Preview({
+  segments,
+  context,
+  separator,
+  custom,
+  command,
+}: {
+  segments: PromptSegment[];
+  context: PromptContext;
+  separator: SeparatorStyle;
+  custom: string;
+  command: string;
+}) {
+  return (
+    <div>
+      {renderPreview(segments, context, {
+        separator,
+        customSeparator: custom,
+      }).map((run, i) => (
+        <span
+          key={i}
+          style={{
+            color: run.fg === undefined ? undefined : color(run.fg),
+            backgroundColor: run.bg === undefined ? undefined : color(run.bg),
+          }}
+        >
+          {run.text}
+        </span>
+      ))}{" "}
+      <span>{command}</span>
+    </div>
+  );
+}
+export function PromptTab() {
+  const { copy } = useClipboard(),
+    terminalRef = useRef<HTMLDivElement>(null);
+  const [segments, setSegments] = useState(initial),
+    [addType, setAddType] = useState<SegmentType>("user"),
+    [separator, setSeparator] = useState<SeparatorStyle>("space"),
+    [custom, setCustom] = useState(" | "),
+    [format, setFormat] = useState("bash");
+  const move = (i: number, d: number) =>
+    setSegments((s) => {
+      const n = [...s],
+        j = i + d;
+      if (j < 0 || j >= n.length) return s;
+      [n[i], n[j]] = [n[j], n[i]];
+      return n;
+    });
+  const patch = (i: number, p: Partial<PromptSegment>) =>
+    setSegments((s) => s.map((v, j) => (j === i ? { ...v, ...p } : v)));
+  const exported = useMemo(
+    () =>
+      format === "zsh"
+        ? toZsh(segments, { separator, customSeparator: custom })
+        : format === "fish"
+          ? toFish(segments, { separator, customSeparator: custom })
+          : format === "starship"
+            ? toStarship(segments, { separator, customSeparator: custom })
+            : toBash(segments, { separator, customSeparator: custom }),
+    [segments, separator, custom, format],
+  );
+  return (
+    <div className="mx-auto max-w-[900px]">
+      <h1 className="mb-3 text-[40px] font-semibold leading-[48px] text-gray-1000">
+        Prompt Builder
+      </h1>
+      <p className="mb-8 text-xl leading-[30px] text-gray-900">
+        Compose a shell prompt and export working configuration
+      </p>
+      <Card className="mb-5 gap-4 rounded-md border-gray-400 bg-background-200 py-5">
+        <CardContent className="grid gap-3 px-5">
+          <div className="text-sm font-medium text-gray-1000">
+            Prompt segments
+          </div>
+          {segments.map((s, i) => (
+            <div
+              key={s.id}
+              className="flex flex-wrap items-center gap-2 rounded-sm border border-gray-400 bg-background-100 p-2"
+            >
+              <span className="min-w-32 flex-1 text-sm text-gray-1000">
+                {SEGMENT_TYPES.find((x) => x.id === s.type)?.label}
+              </span>
+              <label className="flex items-center gap-1 text-xs text-gray-700">
+                FG
+                <select
+                  aria-label={`${s.type} foreground`}
+                  value={s.fg}
+                  onChange={(e) => patch(i, { fg: +e.target.value })}
+                  className="size-7 rounded-sm border border-gray-400 p-0"
+                  style={{ backgroundColor: color(s.fg), color: color(s.fg) }}
+                >
+                  {choices.map((c) => (
+                    <option key={c} value={c}>
+                      ANSI {c}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="flex items-center gap-1 text-xs text-gray-700">
+                BG
+                <select
+                  aria-label={`${s.type} background`}
+                  value={s.bg}
+                  onChange={(e) => patch(i, { bg: +e.target.value })}
+                  className="size-7 rounded-sm border border-gray-400 p-0"
+                  style={{ backgroundColor: color(s.bg), color: color(s.bg) }}
+                >
+                  {choices.map((c) => (
+                    <option key={c} value={c}>
+                      ANSI {c}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {s.type === "literal" && (
+                <Input
+                  aria-label="Literal text"
+                  value={s.literal}
+                  onChange={(e) => patch(i, { literal: e.target.value })}
+                  className="h-8 w-24 border-gray-400"
+                />
+              )}
+              {s.type === "directory" && (
+                <>
+                  <Input
+                    aria-label="Directory components"
+                    type="number"
+                    min={1}
+                    max={8}
+                    value={s.shorten}
+                    onChange={(e) => patch(i, { shorten: +e.target.value })}
+                    className="h-8 w-16 border-gray-400"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => patch(i, { tilde: !s.tilde })}
+                    className="rounded-sm border border-gray-400 px-2 py-1 text-xs"
+                  >
+                    ~ {s.tilde ? "on" : "off"}
+                  </button>
+                </>
+              )}
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label="Move segment up"
+                onClick={() => move(i, -1)}
+              >
+                <ArrowUp />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label="Move segment down"
+                onClick={() => move(i, 1)}
+              >
+                <ArrowDown />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label="Remove segment"
+                onClick={() => setSegments((x) => x.filter((_, j) => j !== i))}
+              >
+                <Trash2 />
+              </Button>
+            </div>
+          ))}
+          <div className="flex gap-2">
+            <select
+              value={addType}
+              onChange={(e) => setAddType(e.target.value as SegmentType)}
+              className={`${selectClass} flex-1`}
+            >
+              {SEGMENT_TYPES.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+            <Button
+              onClick={() =>
+                setSegments((s) => [
+                  ...s,
+                  {
+                    id: `${addType}-${Date.now()}`,
+                    type: addType,
+                    fg: 15,
+                    bg: 236,
+                    literal: addType === "literal" ? "text" : undefined,
+                  },
+                ])
+              }
+            >
+              <Plus />
+              Add segment
+            </Button>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-2">
+              <label className="text-xs text-gray-900">Separator style</label>
+              <select
+                value={separator}
+                onChange={(e) => setSeparator(e.target.value as SeparatorStyle)}
+                className={selectClass}
+              >
+                <option value="powerline">Powerline </option>
+                <option value="powerline-thin">Powerline thin </option>
+                <option value="slant">Slant </option>
+                <option value="round">Round </option>
+                <option value="space">Plain space</option>
+                <option value="custom">Custom</option>
+              </select>
+            </div>
+            {separator === "custom" && (
+              <div>
+                <label className="text-xs text-gray-900">
+                  Custom separator
+                </label>
+                <Input
+                  value={custom}
+                  onChange={(e) => setCustom(e.target.value)}
+                  className="mt-2 border-gray-400 bg-background-100"
+                />
+              </div>
+            )}
+          </div>
+          <Note size="sm">
+            Powerline separators require a patched font with Powerline glyphs.
+          </Note>
+        </CardContent>
+      </Card>
+      <div className="mb-5 overflow-hidden rounded-md border border-gray-400 bg-background-200">
+        <TerminalControls terminalRef={terminalRef} noWrap />
+        <div ref={terminalRef} className="ansi-terminal overflow-x-auto p-5">
+          <pre className="m-0 space-y-4 font-mono">
+            <Preview
+              segments={segments}
+              context={{}}
+              separator={separator}
+              custom={custom}
+              command="git status"
+            />
+            <Preview
+              segments={segments}
+              context={{ dirty: 2, ahead: 1 }}
+              separator={separator}
+              custom={custom}
+              command="npm run build"
+            />
+            <Preview
+              segments={segments}
+              context={{ dirty: 2, ahead: 1, exitCode: 1 }}
+              separator={separator}
+              custom={custom}
+              command="fix-build"
+            />
+          </pre>
+        </div>
+        <div className="flex gap-2 border-t border-gray-400 p-3">
+          <select
+            value={format}
+            onChange={(e) => setFormat(e.target.value)}
+            className={selectClass}
+          >
+            <option value="bash">bash PS1</option>
+            <option value="zsh">zsh PROMPT</option>
+            <option value="fish">fish_prompt</option>
+            <option value="starship">starship.toml</option>
+          </select>
+          <Button
+            onClick={() => copy(exported, `${format} prompt copied!`)}
+            className="bg-gray-1000 text-background-200"
+          >
+            Copy {format}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}

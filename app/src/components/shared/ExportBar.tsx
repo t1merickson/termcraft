@@ -2,14 +2,26 @@ import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useClipboard } from "@/hooks/use-clipboard";
 import { parseAnsi } from "@/lib/ansi-parse";
 import { toAsciicast } from "@/lib/export/cast";
 import { download, timestampedName } from "@/lib/export/download";
 import { framesToGif } from "@/lib/export/gif";
 import { toPngBlob, type RasterOptions } from "@/lib/export/png";
-import { toMarkdown, toNodeSnippet, toPrintf, toPythonSnippet, toShellScript } from "@/lib/export/shell";
+import {
+  toMarkdown,
+  toNodeSnippet,
+  toPrintf,
+  toPythonSnippet,
+  toShellScript,
+} from "@/lib/export/shell";
 import { toSvg } from "@/lib/export/svg";
 
 export interface ExportBarProps {
@@ -27,12 +39,20 @@ export interface ExportBarProps {
   raster?: RasterOptions;
 }
 
-const stripAnsi = (value: string) => value
-  .replace(/\x1b\][^\x07]*(?:\x07|\x1b\\)/g, "")
-  .replace(/\x1b\[[0-?]*[ -\/]*[@-~]/g, "")
-  .replace(/\x1b[ -\/]*[@-~]/g, "");
+const stripAnsi = (value: string) =>
+  value
+    .replace(/\x1b\][^\x07]*(?:\x07|\x1b\\)/g, "")
+    .replace(/\x1b\[[0-?]*[ -\/]*[@-~]/g, "")
+    .replace(/\x1b[ -\/]*[@-~]/g, "");
 
-export function ExportBar({ ansi, text, filename = "termcraft-art", share, frames, raster }: ExportBarProps) {
+export function ExportBar({
+  ansi,
+  text,
+  filename = "termcraft-art",
+  share,
+  frames,
+  raster,
+}: ExportBarProps) {
   const { copy } = useClipboard();
   const [busy, setBusy] = useState(false);
   const [copySelection, setCopySelection] = useState("");
@@ -56,19 +76,39 @@ export function ExportBar({ ansi, text, filename = "termcraft-art", share, frame
   const runDownload = async (format: string) => {
     setBusy(true);
     try {
-      if (format === "png") download(await toPngBlob(grid, raster), name("png"));
-      else if (format === "svg") download(toSvg(grid, raster), name("svg"), "image/svg+xml");
-      else if (format === "txt") download(plain, name("txt"), "text/plain;charset=utf-8");
-      else if (format === "ans") download(ansi, name("ans"), "text/plain;charset=utf-8");
+      if (format === "png")
+        download(await toPngBlob(grid, raster), name("png"));
+      else if (format === "svg")
+        download(toSvg(grid, raster), name("svg"), "image/svg+xml");
+      else if (format === "txt")
+        download(plain, name("txt"), "text/plain;charset=utf-8");
+      else if (format === "ans")
+        download(ansi, name("ans"), "text/plain;charset=utf-8");
       else if (format === "gif" && frames) {
-        download(await framesToGif(frames.map(parseAnsi), { ...raster }), name("gif"));
+        download(
+          await framesToGif(frames.map(parseAnsi), { ...raster }),
+          name("gif"),
+        );
       } else if (format === "cast" && frames) {
         const first = parseAnsi(frames[0] ?? "");
-        download(toAsciicast(frames, { cols: first.cols, rows: first.rows, delayMs: 100, title: filename }), name("cast"), "application/x-asciicast");
+        download(
+          toAsciicast(frames, {
+            cols: first.cols,
+            rows: first.rows,
+            delayMs: 100,
+            title: filename,
+          }),
+          name("cast"),
+          "application/x-asciicast",
+        );
       }
       toast.success(`${format.toUpperCase()} downloaded`);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : `Could not export ${format.toUpperCase()}`);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : `Could not export ${format.toUpperCase()}`,
+      );
     } finally {
       setBusy(false);
     }
@@ -76,10 +116,31 @@ export function ExportBar({ ansi, text, filename = "termcraft-art", share, frame
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Button variant="outline" size="sm" onClick={() => copy(plain, "Text copied")}>Copy text</Button>
-      <Button variant="outline" size="sm" onClick={() => copy(ansi, "ANSI copied")}>Copy ANSI</Button>
-      <Select value={copySelection} onValueChange={(value) => { setCopySelection(""); void copyAs(value); }} disabled={busy}>
-        <SelectTrigger size="sm" className="border-gray-400 bg-transparent"><SelectValue placeholder="Copy as" /></SelectTrigger>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => copy(plain, "Text copied")}
+      >
+        Copy text
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => copy(ansi, "ANSI copied")}
+      >
+        Copy ANSI
+      </Button>
+      <Select
+        value={copySelection}
+        onValueChange={(value) => {
+          setCopySelection("");
+          void copyAs(value);
+        }}
+        disabled={busy}
+      >
+        <SelectTrigger size="sm" className="border-gray-400 bg-transparent">
+          <SelectValue placeholder="Copy as" />
+        </SelectTrigger>
         <SelectContent>
           <SelectItem value="printf">printf</SelectItem>
           <SelectItem value="shell">Shell script</SelectItem>
@@ -88,9 +149,17 @@ export function ExportBar({ ansi, text, filename = "termcraft-art", share, frame
           <SelectItem value="markdown">Markdown</SelectItem>
         </SelectContent>
       </Select>
-      <Select value={downloadSelection} onValueChange={(value) => { setDownloadSelection(""); void runDownload(value); }} disabled={busy}>
+      <Select
+        value={downloadSelection}
+        onValueChange={(value) => {
+          setDownloadSelection("");
+          void runDownload(value);
+        }}
+        disabled={busy}
+      >
         <SelectTrigger size="sm" className="border-gray-400 bg-transparent">
-          {busy && <LoaderCircle className="animate-spin" />}<SelectValue placeholder={busy ? "Exporting…" : "Download"} />
+          {busy && <LoaderCircle className="animate-spin" />}
+          <SelectValue placeholder={busy ? "Exporting…" : "Download"} />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="png">PNG</SelectItem>
@@ -101,7 +170,15 @@ export function ExportBar({ ansi, text, filename = "termcraft-art", share, frame
           {frames && <SelectItem value="cast">asciinema cast</SelectItem>}
         </SelectContent>
       </Select>
-      {share && <Button variant="outline" size="sm" onClick={() => copy(share.shareUrl, "Share link copied")}>Share</Button>}
+      {share && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => copy(share.shareUrl, "Share link copied")}
+        >
+          Share
+        </Button>
+      )}
     </div>
   );
 }

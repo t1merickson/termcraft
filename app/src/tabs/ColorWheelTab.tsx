@@ -30,18 +30,23 @@ export function ColorWheelTab() {
       ...c,
       hsl: ANSI256.rgbToHsl(c.r, c.g, c.b),
     }));
-    const chromatic = all.filter(
-      (c) => !ANSI256.isGrayscale(c.r, c.g, c.b),
-    );
+    const chromatic = all.filter((c) => !ANSI256.isGrayscale(c.r, c.g, c.b));
     const grayscale = all
       .filter((c) => ANSI256.isGrayscale(c.r, c.g, c.b))
       .sort((a, b) => a.hsl.l - b.hsl.l);
     const map: Record<number, ColorData> = {};
     all.forEach((c) => (map[c.id] = c));
-    return { chromaticColors: chromatic, grayscaleColors: grayscale, colorMap: map };
+    return {
+      chromaticColors: chromatic,
+      grayscaleColors: grayscale,
+      colorMap: map,
+    };
   }, []);
 
-  const ansi16Ids = useMemo(() => new Set(Array.from({ length: 16 }, (_, i) => i)), []);
+  const ansi16Ids = useMemo(
+    () => new Set(Array.from({ length: 16 }, (_, i) => i)),
+    [],
+  );
   const grayscaleIds = useMemo(
     () => new Set(grayscaleColors.map((c) => c.id)),
     [grayscaleColors],
@@ -93,7 +98,9 @@ export function ColorWheelTab() {
             key={m}
             onClick={() => setMode(m)}
             className={`flex h-8 cursor-pointer items-center gap-1.5 rounded-sm border border-gray-400 bg-transparent px-3 text-[13px] transition-colors hover:bg-background-200 hover:text-gray-1000 focus-visible:shadow-focus-ring ${
-              mode === m ? "mode-btn active text-gray-1000" : "mode-btn text-gray-900"
+              mode === m
+                ? "mode-btn active text-gray-1000"
+                : "mode-btn text-gray-900"
             }`}
           >
             <span
@@ -199,9 +206,7 @@ export function ColorWheelTab() {
           />
           <div className="flex justify-between py-1">
             <span className="text-gray-900">ANSI Code:</span>
-            <span className="font-mono text-gray-1000">
-              {hovered.color.id}
-            </span>
+            <span className="font-mono text-gray-1000">{hovered.color.id}</span>
           </div>
           <div className="flex justify-between py-1">
             <span className="text-gray-900">Name:</span>

@@ -16,7 +16,15 @@ export function Mark({ size = 20 }: { size?: number }) {
       <rect x="3" y="3" width="6" height="6" rx="1" fill="#0a0a0a" />
       <rect x="11" y="3" width="6" height="6" rx="1" fill="#0a0a0a" />
       <rect x="3" y="11" width="6" height="6" rx="1" fill="#0a0a0a" />
-      <rect x="11" y="11" width="6" height="6" rx="1" fill="#0a0a0a" opacity="0.4" />
+      <rect
+        x="11"
+        y="11"
+        width="6"
+        height="6"
+        rx="1"
+        fill="#0a0a0a"
+        opacity="0.4"
+      />
     </svg>
   );
 }
@@ -30,7 +38,9 @@ export function Header({ subtitle }: { subtitle?: string }) {
           className="flex items-center gap-2.5 rounded-sm outline-none focus-visible:shadow-focus-ring"
         >
           <Mark />
-          <span className="text-sm font-semibold text-gray-1000">Termcraft</span>
+          <span className="text-sm font-semibold text-gray-1000">
+            Termcraft
+          </span>
         </a>
         {subtitle && (
           <>

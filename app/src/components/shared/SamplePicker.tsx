@@ -24,15 +24,22 @@ let samplesPromise: Promise<Sample[]> | null = null;
 
 function getSamples(): Promise<Sample[]> {
   if (!samplesPromise) {
-    samplesPromise = fetch(`${import.meta.env.BASE_URL}samples/index.json`).then((response) => {
-      if (!response.ok) throw new Error(`Sample list request failed: ${response.status}`);
+    samplesPromise = fetch(
+      `${import.meta.env.BASE_URL}samples/index.json`,
+    ).then((response) => {
+      if (!response.ok)
+        throw new Error(`Sample list request failed: ${response.status}`);
       return response.json() as Promise<Sample[]>;
     });
   }
   return samplesPromise;
 }
 
-export function SamplePicker({ onPick, tool, className }: SamplePickerProps): JSX.Element {
+export function SamplePicker({
+  onPick,
+  tool,
+  className,
+}: SamplePickerProps): JSX.Element {
   const [samples, setSamples] = useState<Sample[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -53,7 +60,8 @@ export function SamplePicker({ onPick, tool, className }: SamplePickerProps): JS
   }, []);
 
   const visibleSamples = useMemo(
-    () => samples?.filter((sample) => !tool || sample.best.includes(tool)) ?? [],
+    () =>
+      samples?.filter((sample) => !tool || sample.best.includes(tool)) ?? [],
     [samples, tool],
   );
 
@@ -73,7 +81,10 @@ export function SamplePicker({ onPick, tool, className }: SamplePickerProps): JS
 
   if (!samples) {
     return (
-      <div className={cn("flex gap-3 overflow-hidden", className)} aria-label="Loading sample images">
+      <div
+        className={cn("flex gap-3 overflow-hidden", className)}
+        aria-label="Loading sample images"
+      >
         {Array.from({ length: 5 }, (_, index) => (
           <div key={index} className="w-24 shrink-0 animate-pulse">
             <div className="aspect-[3/2] rounded-md bg-gray-alpha-100" />
@@ -85,7 +96,9 @@ export function SamplePicker({ onPick, tool, className }: SamplePickerProps): JS
   }
 
   return (
-    <div className={cn("flex items-start gap-3 overflow-x-auto pb-2", className)}>
+    <div
+      className={cn("flex items-start gap-3 overflow-x-auto pb-2", className)}
+    >
       {visibleSamples.map((sample) => (
         <button
           key={sample.id}

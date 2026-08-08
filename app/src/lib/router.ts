@@ -15,8 +15,7 @@ import { useEffect, useState } from "react";
 import { isToolId, type ToolId } from "@/tools/registry";
 
 export type Route =
-  | { name: "home" }
-  | { name: "tool"; tool: ToolId; params: URLSearchParams };
+  { name: "home" } | { name: "tool"; tool: ToolId; params: URLSearchParams };
 
 export function parseHash(hash: string): Route {
   const raw = hash.replace(/^#/, "");

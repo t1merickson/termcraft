@@ -1,5 +1,10 @@
-export function download(blob: Blob | string, filename: string, mime = "application/octet-stream"): void {
-  const value = typeof blob === "string" ? new Blob([blob], { type: mime }) : blob;
+export function download(
+  blob: Blob | string,
+  filename: string,
+  mime = "application/octet-stream",
+): void {
+  const value =
+    typeof blob === "string" ? new Blob([blob], { type: mime }) : blob;
   const url = URL.createObjectURL(value);
   const anchor = document.createElement("a");
   anchor.href = url;

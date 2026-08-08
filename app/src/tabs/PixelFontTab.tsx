@@ -72,7 +72,9 @@ export function PixelFontTab() {
         setFontIndex(fonts);
         if (fonts.length > 0) {
           setSelectedFont(fonts[0].id);
-          return PixelFont.loadFont(`${import.meta.env.BASE_URL}${fonts[0].path}`);
+          return PixelFont.loadFont(
+            `${import.meta.env.BASE_URL}${fonts[0].path}`,
+          );
         }
       })
       .then(() => {
@@ -87,10 +89,9 @@ export function PixelFontTab() {
     const letters = PixelFont.getLetters();
     const meta = PixelFont.getMeta();
     const glyphKeys = Object.keys(PixelFont.getFontData());
-    const charset =
-      meta?.charset
-        ? meta.charset.split("")
-        : glyphKeys.sort((a: string, b: string) => a.localeCompare(b));
+    const charset = meta?.charset
+      ? meta.charset.split("")
+      : glyphKeys.sort((a: string, b: string) => a.localeCompare(b));
 
     let html = '<div class="font-letter-grid">';
     for (const char of charset) {
@@ -163,7 +164,9 @@ export function PixelFontTab() {
   };
 
   const handleGlyphClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const el = (e.target as HTMLElement).closest("[data-letter]") as HTMLElement;
+    const el = (e.target as HTMLElement).closest(
+      "[data-letter]",
+    ) as HTMLElement;
     if (!el) return;
     const char = el.dataset.letter;
     if (!char) return;
@@ -230,7 +233,10 @@ export function PixelFontTab() {
                   </option>
                 ))}
               </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900" size={16} />
+              <ChevronDown
+                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900"
+                size={16}
+              />
             </div>
           </div>
           <div className="flex flex-col gap-2">
@@ -248,7 +254,10 @@ export function PixelFontTab() {
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900" size={16} />
+                <ChevronDown
+                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900"
+                  size={16}
+                />
               </div>
               {dotStyle === "custom" && (
                 <Input
@@ -279,7 +288,10 @@ export function PixelFontTab() {
                   </option>
                 ))}
               </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900" size={16} />
+              <ChevronDown
+                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900"
+                size={16}
+              />
             </div>
             {shadowDir !== "none" && (
               <div className="relative flex-1">
@@ -294,7 +306,10 @@ export function PixelFontTab() {
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900" size={16} />
+                <ChevronDown
+                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900"
+                  size={16}
+                />
               </div>
             )}
           </div>

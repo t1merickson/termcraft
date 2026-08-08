@@ -91,7 +91,10 @@ export function ImageToAnsiTab() {
   };
 
   const chevronSvg = (
-    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900" size={16} />
+    <ChevronDown
+      className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900"
+      size={16}
+    />
   );
 
   return (
@@ -267,7 +270,9 @@ export function ImageToAnsiTab() {
       {processing && (
         <div className="processing visible">
           <div className="geist-loading-dots">
-            <span /><span /><span />
+            <span />
+            <span />
+            <span />
           </div>
           <p>Processing image...</p>
         </div>

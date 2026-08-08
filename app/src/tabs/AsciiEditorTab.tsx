@@ -3,14 +3,7 @@ import * as AsciiEditor from "@/engines/ascii-editor.js";
 import { useClipboard } from "@/hooks/use-clipboard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Type,
-  PenLine,
-  Minus,
-  Maximize,
-  Undo2,
-  Redo2,
-} from "lucide-react";
+import { Type, PenLine, Minus, Maximize, Undo2, Redo2 } from "lucide-react";
 
 const TOOLS = [
   { id: "type", label: "Type", icon: Type, shortcut: "T" },

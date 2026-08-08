@@ -12,13 +12,7 @@ interface LookupResult {
   escapeCode: string;
 }
 
-function ColorSwatch({
-  color,
-  label,
-}: {
-  color: string;
-  label: string;
-}) {
+function ColorSwatch({ color, label }: { color: string; label: string }) {
   return (
     <div
       className="flex size-20 flex-col items-center justify-end rounded-md border border-gray-500 pb-2"
@@ -61,9 +55,7 @@ function ResultGrid({ result }: { result: LookupResult }) {
         {items.map((item) => (
           <div key={item.label} className="rounded-sm bg-gray-100 p-3">
             <div className="mb-1 text-xs text-gray-600">{item.label}</div>
-            <div className="font-mono text-sm text-gray-1000">
-              {item.value}
-            </div>
+            <div className="font-mono text-sm text-gray-1000">{item.value}</div>
           </div>
         ))}
         <div className="col-span-2 rounded-sm bg-gray-100 p-3">

@@ -8,7 +8,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { TerminalControls } from "@/components/shared/TerminalControls";
 import { Upload, ChevronDown } from "lucide-react";
 
@@ -58,7 +66,19 @@ export function ImageToAsciiTab() {
       threshold,
       dither: brailleDither,
     }),
-    [maxWidth, maxHeight, charset, colorMode, invert, greyscale, matchingMode, contrast, directional, threshold, brailleDither],
+    [
+      maxWidth,
+      maxHeight,
+      charset,
+      colorMode,
+      invert,
+      greyscale,
+      matchingMode,
+      contrast,
+      directional,
+      threshold,
+      brailleDither,
+    ],
   );
 
   const processImage = useCallback(
@@ -89,7 +109,19 @@ export function ImageToAsciiTab() {
     if (upload.image) {
       processImage(upload.image);
     }
-  }, [maxWidth, maxHeight, charset, colorMode, invert, greyscale, matchingMode, contrast, directional, threshold, brailleDither]);
+  }, [
+    maxWidth,
+    maxHeight,
+    charset,
+    colorMode,
+    invert,
+    greyscale,
+    matchingMode,
+    contrast,
+    directional,
+    threshold,
+    brailleDither,
+  ]);
 
   const setScale = (factor: number) => {
     if (!upload.image) return;
@@ -98,7 +130,10 @@ export function ImageToAsciiTab() {
   };
 
   const chevronSvg = (
-    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900" size={16} />
+    <ChevronDown
+      className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900"
+      size={16}
+    />
   );
 
   return (
@@ -127,17 +162,27 @@ export function ImageToAsciiTab() {
             <div className="mb-4 flex justify-center opacity-50">
               <Upload size={48} />
             </div>
-            <p className="mb-2 text-gray-900">Drop an image here or click to upload</p>
-            <p className="text-xs text-gray-600">Supports PNG, JPG, GIF, WebP</p>
+            <p className="mb-2 text-gray-900">
+              Drop an image here or click to upload
+            </p>
+            <p className="text-xs text-gray-600">
+              Supports PNG, JPG, GIF, WebP
+            </p>
           </div>
         ) : (
           <div className="flex items-center gap-4">
-            <img src={upload.dataUrl!} alt="Source" className="max-h-20 max-w-[120px] rounded-sm object-contain" />
+            <img
+              src={upload.dataUrl!}
+              alt="Source"
+              className="max-h-20 max-w-[120px] rounded-sm object-contain"
+            />
             <div className="flex flex-col gap-1">
               <div className="text-[13px] text-gray-900">
                 {upload.image.width} &times; {upload.image.height} pixels
               </div>
-              <p className="text-xs text-gray-600">Click or drop to change image</p>
+              <p className="text-xs text-gray-600">
+                Click or drop to change image
+              </p>
             </div>
           </div>
         )}
@@ -163,7 +208,8 @@ export function ImageToAsciiTab() {
               type="number"
               value={maxWidth}
               onChange={(e) => setMaxWidth(parseInt(e.target.value) || 80)}
-              min={10} max={300}
+              min={10}
+              max={300}
               className="h-10 border-gray-400 bg-background-100 text-sm text-gray-1000 focus:border-blue-700 focus:shadow-focus-ring"
             />
           </div>
@@ -173,7 +219,8 @@ export function ImageToAsciiTab() {
               type="number"
               value={maxHeight}
               onChange={(e) => setMaxHeight(parseInt(e.target.value) || 40)}
-              min={10} max={150}
+              min={10}
+              max={150}
               className="h-10 border-gray-400 bg-background-100 text-sm text-gray-1000 focus:border-blue-700 focus:shadow-focus-ring"
             />
           </div>
@@ -211,12 +258,16 @@ export function ImageToAsciiTab() {
                   {RAMP_GROUPS.map((group) => (
                     <SelectGroup key={group.id}>
                       <SelectLabel>{group.label}</SelectLabel>
-                      {RAMPS.filter((ramp) => ramp.group === group.id).map((ramp) => (
-                        <SelectItem key={ramp.id} value={ramp.id}>
-                          <span>{ramp.label}</span>
-                          <span className="ml-auto max-w-[220px] truncate font-mono text-xs text-gray-600">{ramp.chars}</span>
-                        </SelectItem>
-                      ))}
+                      {RAMPS.filter((ramp) => ramp.group === group.id).map(
+                        (ramp) => (
+                          <SelectItem key={ramp.id} value={ramp.id}>
+                            <span>{ramp.label}</span>
+                            <span className="ml-auto max-w-[220px] truncate font-mono text-xs text-gray-600">
+                              {ramp.chars}
+                            </span>
+                          </SelectItem>
+                        ),
+                      )}
                     </SelectGroup>
                   ))}
                 </SelectContent>
@@ -226,8 +277,17 @@ export function ImageToAsciiTab() {
             <div className="flex flex-col gap-1.5">
               <label className="text-xs text-gray-900">Threshold</label>
               <div className="flex h-10 items-center gap-2">
-                <Slider value={[threshold]} onValueChange={([v]) => setThreshold(v)} min={0} max={255} step={1} className="flex-1" />
-                <span className="min-w-[30px] text-right text-xs text-gray-700">{threshold}</span>
+                <Slider
+                  value={[threshold]}
+                  onValueChange={([v]) => setThreshold(v)}
+                  min={0}
+                  max={255}
+                  step={1}
+                  className="flex-1"
+                />
+                <span className="min-w-[30px] text-right text-xs text-gray-700">
+                  {threshold}
+                </span>
               </div>
             </div>
           )}
@@ -240,7 +300,9 @@ export function ImageToAsciiTab() {
                 className="h-10 w-full cursor-pointer appearance-none rounded-sm border border-gray-400 bg-background-100 px-3 pr-8 font-sans text-sm text-gray-1000 outline-none transition-[border-color,box-shadow] focus:border-blue-700 focus:shadow-focus-ring"
               >
                 {COLOR_MODES.map((c) => (
-                  <option key={c.value} value={c.value}>{c.label}</option>
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
                 ))}
               </select>
               {chevronSvg}
@@ -255,7 +317,9 @@ export function ImageToAsciiTab() {
                 className="h-10 w-full cursor-pointer appearance-none rounded-sm border border-gray-400 bg-background-100 px-3 pr-8 font-sans text-sm text-gray-1000 outline-none transition-[border-color,box-shadow] focus:border-blue-700 focus:shadow-focus-ring"
               >
                 {MATCHING_MODES.map((m) => (
-                  <option key={m.value} value={m.value}>{m.label}</option>
+                  <option key={m.value} value={m.value}>
+                    {m.label}
+                  </option>
                 ))}
               </select>
               {chevronSvg}
@@ -267,8 +331,18 @@ export function ImageToAsciiTab() {
             <div className="flex flex-col gap-1.5">
               <label className="text-xs text-gray-900">Dither</label>
               <div className="relative">
-                <select value={brailleDither} onChange={(e) => setBrailleDither(e.target.value as DitherName)} className="h-10 w-full cursor-pointer appearance-none rounded-sm border border-gray-400 bg-background-100 px-3 pr-8 text-sm text-gray-1000 outline-none focus:border-blue-700 focus:shadow-focus-ring">
-                  {DITHER_ALGORITHMS.map((algorithm) => <option key={algorithm.id} value={algorithm.id}>{algorithm.label}</option>)}
+                <select
+                  value={brailleDither}
+                  onChange={(e) =>
+                    setBrailleDither(e.target.value as DitherName)
+                  }
+                  className="h-10 w-full cursor-pointer appearance-none rounded-sm border border-gray-400 bg-background-100 px-3 pr-8 text-sm text-gray-1000 outline-none focus:border-blue-700 focus:shadow-focus-ring"
+                >
+                  {DITHER_ALGORITHMS.map((algorithm) => (
+                    <option key={algorithm.id} value={algorithm.id}>
+                      {algorithm.label}
+                    </option>
+                  ))}
                 </select>
                 {chevronSvg}
               </div>
@@ -278,11 +352,15 @@ export function ImageToAsciiTab() {
         {matchingMode === "shape" && (
           <div className="flex items-center gap-6">
             <div className="flex flex-1 items-center gap-1.5">
-              <label className="whitespace-nowrap text-xs text-gray-900">Contrast</label>
+              <label className="whitespace-nowrap text-xs text-gray-900">
+                Contrast
+              </label>
               <Slider
                 value={[contrast]}
                 onValueChange={([v]) => setContrast(v)}
-                min={10} max={40} step={1}
+                min={10}
+                max={40}
+                step={1}
                 className="flex-1"
               />
               <span className="min-w-[35px] text-xs text-gray-700">
@@ -291,7 +369,9 @@ export function ImageToAsciiTab() {
             </div>
             <div className="flex items-center gap-2.5">
               <Switch checked={directional} onCheckedChange={setDirectional} />
-              <span className="text-xs text-gray-1000">Directional Contrast</span>
+              <span className="text-xs text-gray-1000">
+                Directional Contrast
+              </span>
             </div>
           </div>
         )}
@@ -310,7 +390,11 @@ export function ImageToAsciiTab() {
       {/* Processing */}
       {processing && (
         <div className="processing visible">
-          <div className="geist-loading-dots"><span /><span /><span /></div>
+          <div className="geist-loading-dots">
+            <span />
+            <span />
+            <span />
+          </div>
           <p>Processing image...</p>
         </div>
       )}
@@ -320,14 +404,19 @@ export function ImageToAsciiTab() {
         <div className="mb-5">
           <div className="overflow-hidden rounded-md border border-gray-400 bg-background-200">
             <div className="flex items-center justify-between border-b border-gray-400 bg-gray-100 px-4 py-3">
-              <h4 className="text-[13px] font-medium text-gray-900">ASCII Output</h4>
+              <h4 className="text-[13px] font-medium text-gray-900">
+                ASCII Output
+              </h4>
               <div className="flex gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   className="h-8 border-gray-400 bg-transparent text-xs text-gray-1000 hover:bg-gray-200 hover:border-gray-500"
                   onClick={() =>
-                    copy(`printf "${ImageToAscii.escapeForPrintf(currentAnsi)}"`, "printf command copied!")
+                    copy(
+                      `printf "${ImageToAscii.escapeForPrintf(currentAnsi)}"`,
+                      "printf command copied!",
+                    )
                   }
                 >
                   Copy printf

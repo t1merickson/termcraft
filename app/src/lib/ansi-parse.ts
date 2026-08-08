@@ -55,7 +55,10 @@ function applySgr(params: number[], state: Omit<Cell, "ch">) {
       i += 2;
     } else if ((code === 38 || code === 48) && params[i + 1] === 2) {
       const rgb = params.slice(i + 2, i + 5);
-      if (rgb.length === 3 && rgb.every((part) => Number.isFinite(part) && part >= 0 && part <= 255)) {
+      if (
+        rgb.length === 3 &&
+        rgb.every((part) => Number.isFinite(part) && part >= 0 && part <= 255)
+      ) {
         state[code === 38 ? "fg" : "bg"] = rgb as RGB;
       }
       i += 4;
@@ -72,7 +75,10 @@ export function parseAnsi(input: string): Grid {
     if (input[i] === "\x1b") {
       if (input[i + 1] === "]") {
         const end = input.slice(i + 2).search(/\x07|\x1b\\/);
-        i = end < 0 ? input.length : i + 2 + end + (input[i + 2 + end] === "\x07" ? 1 : 2);
+        i =
+          end < 0
+            ? input.length
+            : i + 2 + end + (input[i + 2 + end] === "\x07" ? 1 : 2);
         continue;
       }
       if (["P", "X", "^", "_"].includes(input[i + 1])) {
@@ -83,7 +89,10 @@ export function parseAnsi(input: string): Grid {
       if (input[i + 1] === "[") {
         const match = /^\x1b\[([0-9;]*)m/.exec(input.slice(i));
         if (match) {
-          applySgr(match[1] === "" ? [0] : match[1].split(";").map(Number), state);
+          applySgr(
+            match[1] === "" ? [0] : match[1].split(";").map(Number),
+            state,
+          );
           i += match[0].length;
           continue;
         }
@@ -102,7 +111,12 @@ export function parseAnsi(input: string): Grid {
     if (point === "\n") {
       lines.push([]);
     } else if (point !== "\r") {
-      lines[lines.length - 1].push({ ch: point, ...state, fg: state.fg && [...state.fg], bg: state.bg && [...state.bg] });
+      lines[lines.length - 1].push({
+        ch: point,
+        ...state,
+        fg: state.fg && [...state.fg],
+        bg: state.bg && [...state.bg],
+      });
     }
   }
 
@@ -114,7 +128,9 @@ export function parseAnsi(input: string): Grid {
 }
 
 function sameRgb(a?: RGB, b?: RGB) {
-  return a === b || (!!a && !!b && a[0] === b[0] && a[1] === b[1] && a[2] === b[2]);
+  return (
+    a === b || (!!a && !!b && a[0] === b[0] && a[1] === b[1] && a[2] === b[2])
+  );
 }
 
 function styleSequence(cell: Cell): string {
@@ -127,21 +143,26 @@ function styleSequence(cell: Cell): string {
 
 /** Convert a grid back to true-colour ANSI while suppressing unchanged runs. */
 export function gridToAnsi(grid: Grid): string {
-  return grid.cells.map((row) => {
-    let active: Omit<Cell, "ch"> = {};
-    let styled = false;
-    let output = "";
-    for (const cell of row) {
-      const changed = active.bold !== cell.bold || !sameRgb(active.fg, cell.fg) || !sameRgb(active.bg, cell.bg);
-      if (changed) {
-        if (active.bold || active.fg || active.bg) output += "\x1b[0m";
-        output += styleSequence(cell);
-        active = { bold: cell.bold, fg: cell.fg, bg: cell.bg };
+  return grid.cells
+    .map((row) => {
+      let active: Omit<Cell, "ch"> = {};
+      let styled = false;
+      let output = "";
+      for (const cell of row) {
+        const changed =
+          active.bold !== cell.bold ||
+          !sameRgb(active.fg, cell.fg) ||
+          !sameRgb(active.bg, cell.bg);
+        if (changed) {
+          if (active.bold || active.fg || active.bg) output += "\x1b[0m";
+          output += styleSequence(cell);
+          active = { bold: cell.bold, fg: cell.fg, bg: cell.bg };
+        }
+        styled ||= !!(cell.bold || cell.fg || cell.bg);
+        output += cell.ch;
       }
-      styled ||= !!(cell.bold || cell.fg || cell.bg);
-      output += cell.ch;
-    }
-    if (styled) output += "\x1b[0m";
-    return output;
-  }).join("\n");
+      if (styled) output += "\x1b[0m";
+      return output;
+    })
+    .join("\n");
 }

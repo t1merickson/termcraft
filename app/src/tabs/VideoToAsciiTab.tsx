@@ -64,7 +64,17 @@ export function VideoToAsciiTab() {
       contrastExponent: contrast / 10,
       directionalContrast: directional,
     }),
-    [maxWidth, maxHeight, charset, colorMode, invert, greyscale, mode, contrast, directional],
+    [
+      maxWidth,
+      maxHeight,
+      charset,
+      colorMode,
+      invert,
+      greyscale,
+      mode,
+      contrast,
+      directional,
+    ],
   );
 
   const ensureCtrl = useCallback(() => {
@@ -172,7 +182,10 @@ export function VideoToAsciiTab() {
   };
 
   const chevronSvg = (
-    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900" size={16} />
+    <ChevronDown
+      className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-900"
+      size={16}
+    />
   );
 
   return (
@@ -235,7 +248,8 @@ export function VideoToAsciiTab() {
               type="number"
               value={maxWidth}
               onChange={(e) => setMaxWidth(parseInt(e.target.value) || 80)}
-              min={20} max={300}
+              min={20}
+              max={300}
               className="h-10 border-gray-400 bg-background-100 text-sm text-gray-1000 focus:border-blue-700 focus:shadow-focus-ring"
             />
           </div>
@@ -245,7 +259,8 @@ export function VideoToAsciiTab() {
               type="number"
               value={maxHeight}
               onChange={(e) => setMaxHeight(parseInt(e.target.value) || 40)}
-              min={10} max={150}
+              min={10}
+              max={150}
               className="h-10 border-gray-400 bg-background-100 text-sm text-gray-1000 focus:border-blue-700 focus:shadow-focus-ring"
             />
           </div>
@@ -255,7 +270,9 @@ export function VideoToAsciiTab() {
               <Slider
                 value={[fps]}
                 onValueChange={([v]) => handleFpsChange(v)}
-                min={5} max={30} step={1}
+                min={5}
+                max={30}
+                step={1}
                 className="flex-1"
               />
               <span className="w-6 text-center font-mono text-xs text-gray-900">
@@ -274,7 +291,9 @@ export function VideoToAsciiTab() {
                 className="h-10 w-full cursor-pointer appearance-none rounded-sm border border-gray-400 bg-background-100 px-3 pr-8 font-sans text-sm text-gray-1000 outline-none transition-[border-color,box-shadow] focus:border-blue-700 focus:shadow-focus-ring"
               >
                 {MODES.map((m) => (
-                  <option key={m.value} value={m.value}>{m.label}</option>
+                  <option key={m.value} value={m.value}>
+                    {m.label}
+                  </option>
                 ))}
               </select>
               {chevronSvg}
@@ -289,7 +308,9 @@ export function VideoToAsciiTab() {
                 className="h-10 w-full cursor-pointer appearance-none rounded-sm border border-gray-400 bg-background-100 px-3 pr-8 font-sans text-sm text-gray-1000 outline-none transition-[border-color,box-shadow] focus:border-blue-700 focus:shadow-focus-ring"
               >
                 {CHARSETS.map((c) => (
-                  <option key={c.value} value={c.value}>{c.label}</option>
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
                 ))}
               </select>
               {chevronSvg}
@@ -304,7 +325,9 @@ export function VideoToAsciiTab() {
                 className="h-10 w-full cursor-pointer appearance-none rounded-sm border border-gray-400 bg-background-100 px-3 pr-8 font-sans text-sm text-gray-1000 outline-none transition-[border-color,box-shadow] focus:border-blue-700 focus:shadow-focus-ring"
               >
                 {COLOR_MODES.map((c) => (
-                  <option key={c.value} value={c.value}>{c.label}</option>
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
                 ))}
               </select>
               {chevronSvg}
@@ -329,7 +352,9 @@ export function VideoToAsciiTab() {
                 <Slider
                   value={[contrast]}
                   onValueChange={([v]) => setContrast(v)}
-                  min={10} max={40} step={1}
+                  min={10}
+                  max={40}
+                  step={1}
                   className="flex-1"
                 />
                 <span className="w-8 text-center font-mono text-xs text-gray-900">
@@ -339,8 +364,13 @@ export function VideoToAsciiTab() {
             </div>
             <div className="flex h-10 items-center self-end">
               <div className="flex items-center gap-2.5">
-                <Switch checked={directional} onCheckedChange={setDirectional} />
-                <span className="text-xs text-gray-1000">Directional Contrast</span>
+                <Switch
+                  checked={directional}
+                  onCheckedChange={setDirectional}
+                />
+                <span className="text-xs text-gray-1000">
+                  Directional Contrast
+                </span>
               </div>
             </div>
           </div>
@@ -354,12 +384,14 @@ export function VideoToAsciiTab() {
       <div
         ref={terminalRef}
         className="ansi-terminal mb-4 overflow-auto rounded-md border border-gray-400 bg-[#0a0a0a] p-4 font-mono text-[10px] leading-none text-gray-300 no-wrap"
-        style={{
-          minHeight: 200,
-          "--preview-font-size": "10px",
-          "--preview-line-height": "1.0",
-          "--preview-letter-spacing": "0px",
-        } as React.CSSProperties}
+        style={
+          {
+            minHeight: 200,
+            "--preview-font-size": "10px",
+            "--preview-line-height": "1.0",
+            "--preview-letter-spacing": "0px",
+          } as React.CSSProperties
+        }
       >
         {!hasSource && (
           <div className="flex h-[200px] items-center justify-center text-sm text-gray-600">

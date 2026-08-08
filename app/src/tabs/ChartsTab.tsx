@@ -1,11 +1,268 @@
 import { useMemo, useRef, useState } from "react";
 import { bars, columns, heatmap, parseData, sparkline } from "@/engines/charts";
 import { PALETTE } from "@/engines/ansi256.js";
-import { useClipboard } from "@/hooks/use-clipboard"; import { Button } from "@/components/ui/button"; import { Card,CardContent } from "@/components/ui/card"; import { Input } from "@/components/ui/input"; import { Slider } from "@/components/ui/slider"; import { Switch } from "@/components/ui/switch"; import { ToggleGroup,ToggleGroupItem } from "@/components/ui/toggle-group"; import { Alert,AlertDescription } from "@/components/ui/alert"; import { TerminalControls } from "@/components/shared/TerminalControls";
-type Mode="bars"|"columns"|"sparkline"|"heatmap"; const selectClass="h-9 rounded-md border border-gray-400 bg-background-100 px-3 text-sm text-gray-1000"; const Label=({children}:{children:React.ReactNode})=><label className="text-xs text-gray-900">{children}</label>;
-function Ansi({value}:{value:string}){const parts=value.split(/(\x1b\[[0-9;]+m)/),style:{color?:string;backgroundColor?:string}={};return <>{parts.map((p,i)=>{const m=p.match(/\x1b\[(?:38;5;(\d+)|48;5;(\d+)|0)m/);if(m){if(p==="\x1b[0m"){delete style.color;delete style.backgroundColor;}else{const index=Number(m[1]??m[2]),c=PALETTE[index],css=`rgb(${c.r} ${c.g} ${c.b})`;if(m[1])style.color=css;else style.backgroundColor=css;}return null;}return <span key={i} style={{...style}}>{p}</span>;})}</>}
-export function ChartsTab(){const {copy}=useClipboard(),terminalRef=useRef<HTMLDivElement>(null);const[mode,setMode]=useState<Mode>("bars"),[input,setInput]=useState("mon,62\ntue,33\nwed,78\nthu,47\nfri,74"),[width,setWidth]=useState(20),[height,setHeight]=useState(8),[labels,setLabels]=useState(true),[values,setValues]=useState(true),[labelAlign,setLabelAlign]=useState<"left"|"right">("left"),[color,setColor]=useState<"none"|"256">("256"),[braille,setBraille]=useState(false),[palette,setPalette]=useState("ocean"),[cell,setCell]=useState("█"),[min,setMin]=useState(""),[max,setMax]=useState("");const data=useMemo(()=>parseData(input),[input]);const output=useMemo(()=>mode==="bars"?bars(data,{width,labels,values,labelAlign,color,min:min===""?undefined:Number(min),max:max===""?undefined:Number(max)}):mode==="columns"?columns(data,height,color):mode==="sparkline"?sparkline(data,braille,color):heatmap(input,palette,cell),[mode,data,input,width,labels,values,labelAlign,color,min,max,height,braille,palette,cell]);return <div className="mx-auto max-w-[900px]"><h1 className="mb-3 text-[40px] font-semibold leading-[48px] text-gray-1000">Charts</h1><p className="mb-8 text-xl leading-[30px] text-gray-900">Turn numeric data into compact terminal charts</p><ToggleGroup type="single" value={mode} onValueChange={v=>v&&setMode(v as Mode)} variant="outline" className="mb-5">{["bars","columns","sparkline","heatmap"].map(v=><ToggleGroupItem key={v} value={v} className="capitalize">{v}</ToggleGroupItem>)}</ToggleGroup>
-<Card className="mb-5 gap-4 rounded-md border-gray-400 bg-background-200 py-5"><CardContent className="grid gap-4 px-5"><div className="flex flex-col gap-2"><Label>{mode==="heatmap"?"Numeric grid":"Numbers or label,value rows"}</Label><textarea value={input} onChange={e=>setInput(e.target.value)} rows={6} className="rounded-md border border-gray-400 bg-background-100 p-3 font-mono text-sm text-gray-1000 outline-none focus:border-blue-700"/></div>{!data.length&&<Alert variant="destructive"><AlertDescription>No numeric values could be parsed.</AlertDescription></Alert>}
-{mode==="bars"&&<><div className="grid grid-cols-3 gap-4"><div><Label>Width: {width}</Label><Slider value={[width]} onValueChange={([v])=>setWidth(v)} min={4} max={60}/></div><div className="flex items-center gap-2"><Switch checked={labels} onCheckedChange={setLabels}/><Label>Show labels</Label></div><div className="flex items-center gap-2"><Switch checked={values} onCheckedChange={setValues}/><Label>Show values</Label></div></div><div className="grid grid-cols-3 gap-3"><select value={labelAlign} onChange={e=>setLabelAlign(e.target.value as typeof labelAlign)} className={selectClass}><option value="left">Labels left</option><option value="right">Labels right</option></select><Input value={min} onChange={e=>setMin(e.target.value)} type="number" placeholder="Auto min" className="border-gray-400 bg-background-100"/><Input value={max} onChange={e=>setMax(e.target.value)} type="number" placeholder="Auto max" className="border-gray-400 bg-background-100"/></div></>}
-{mode==="columns"&&<div><Label>Height: {height} rows</Label><Slider value={[height]} onValueChange={([v])=>setHeight(v)} min={2} max={20}/></div>}{mode==="sparkline"&&<div className="flex items-center gap-2"><Switch checked={braille} onCheckedChange={setBraille}/><Label>Braille 2× resolution</Label></div>}{mode==="heatmap"&&<div className="flex gap-3"><select value={palette} onChange={e=>setPalette(e.target.value)} className={selectClass}><option value="grayscale">Grayscale</option><option value="ocean">Ocean ANSI</option><option value="fire">Fire ANSI</option></select><select value={cell} onChange={e=>setCell(e.target.value)} className={selectClass}><option value="█">Full block</option><option value="  ">Two spaces</option></select></div>}{mode!=="heatmap"&&<div className="flex items-center gap-3"><Label>Colour mode</Label><select value={color} onChange={e=>setColor(e.target.value as typeof color)} className={selectClass}><option value="none">None</option><option value="256">ANSI 256 by value</option></select></div>}</CardContent></Card>
-<div className="mb-5 overflow-hidden rounded-md border border-gray-400 bg-background-200"><TerminalControls terminalRef={terminalRef} noWrap/><div ref={terminalRef} className="ansi-terminal overflow-x-auto p-5"><pre className="m-0 font-mono"><Ansi value={output.ansi}/></pre></div><div className="flex gap-2 border-t border-gray-400 p-3"><Button onClick={()=>copy(output.text,"Plain chart copied!")} variant="outline">Copy plain text</Button><Button onClick={()=>copy(output.ansi,"ANSI chart copied!")} className="bg-gray-1000 text-background-200">Copy ANSI</Button></div></div></div>}
+import { useClipboard } from "@/hooks/use-clipboard";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { TerminalControls } from "@/components/shared/TerminalControls";
+type Mode = "bars" | "columns" | "sparkline" | "heatmap";
+const selectClass =
+  "h-9 rounded-md border border-gray-400 bg-background-100 px-3 text-sm text-gray-1000";
+const Label = ({ children }: { children: React.ReactNode }) => (
+  <label className="text-xs text-gray-900">{children}</label>
+);
+function Ansi({ value }: { value: string }) {
+  const parts = value.split(/(\x1b\[[0-9;]+m)/),
+    style: { color?: string; backgroundColor?: string } = {};
+  return (
+    <>
+      {parts.map((p, i) => {
+        const m = p.match(/\x1b\[(?:38;5;(\d+)|48;5;(\d+)|0)m/);
+        if (m) {
+          if (p === "\x1b[0m") {
+            delete style.color;
+            delete style.backgroundColor;
+          } else {
+            const index = Number(m[1] ?? m[2]),
+              c = PALETTE[index],
+              css = `rgb(${c.r} ${c.g} ${c.b})`;
+            if (m[1]) style.color = css;
+            else style.backgroundColor = css;
+          }
+          return null;
+        }
+        return (
+          <span key={i} style={{ ...style }}>
+            {p}
+          </span>
+        );
+      })}
+    </>
+  );
+}
+export function ChartsTab() {
+  const { copy } = useClipboard(),
+    terminalRef = useRef<HTMLDivElement>(null);
+  const [mode, setMode] = useState<Mode>("bars"),
+    [input, setInput] = useState("mon,62\ntue,33\nwed,78\nthu,47\nfri,74"),
+    [width, setWidth] = useState(20),
+    [height, setHeight] = useState(8),
+    [labels, setLabels] = useState(true),
+    [values, setValues] = useState(true),
+    [labelAlign, setLabelAlign] = useState<"left" | "right">("left"),
+    [color, setColor] = useState<"none" | "256">("256"),
+    [braille, setBraille] = useState(false),
+    [palette, setPalette] = useState("ocean"),
+    [cell, setCell] = useState("█"),
+    [min, setMin] = useState(""),
+    [max, setMax] = useState("");
+  const data = useMemo(() => parseData(input), [input]);
+  const output = useMemo(
+    () =>
+      mode === "bars"
+        ? bars(data, {
+            width,
+            labels,
+            values,
+            labelAlign,
+            color,
+            min: min === "" ? undefined : Number(min),
+            max: max === "" ? undefined : Number(max),
+          })
+        : mode === "columns"
+          ? columns(data, height, color)
+          : mode === "sparkline"
+            ? sparkline(data, braille, color)
+            : heatmap(input, palette, cell),
+    [
+      mode,
+      data,
+      input,
+      width,
+      labels,
+      values,
+      labelAlign,
+      color,
+      min,
+      max,
+      height,
+      braille,
+      palette,
+      cell,
+    ],
+  );
+  return (
+    <div className="mx-auto max-w-[900px]">
+      <h1 className="mb-3 text-[40px] font-semibold leading-[48px] text-gray-1000">
+        Charts
+      </h1>
+      <p className="mb-8 text-xl leading-[30px] text-gray-900">
+        Turn numeric data into compact terminal charts
+      </p>
+      <ToggleGroup
+        type="single"
+        value={mode}
+        onValueChange={(v) => v && setMode(v as Mode)}
+        variant="outline"
+        className="mb-5"
+      >
+        {["bars", "columns", "sparkline", "heatmap"].map((v) => (
+          <ToggleGroupItem key={v} value={v} className="capitalize">
+            {v}
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
+      <Card className="mb-5 gap-4 rounded-md border-gray-400 bg-background-200 py-5">
+        <CardContent className="grid gap-4 px-5">
+          <div className="flex flex-col gap-2">
+            <Label>
+              {mode === "heatmap"
+                ? "Numeric grid"
+                : "Numbers or label,value rows"}
+            </Label>
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              rows={6}
+              className="rounded-md border border-gray-400 bg-background-100 p-3 font-mono text-sm text-gray-1000 outline-none focus:border-blue-700"
+            />
+          </div>
+          {!data.length && (
+            <Alert variant="destructive">
+              <AlertDescription>
+                No numeric values could be parsed.
+              </AlertDescription>
+            </Alert>
+          )}
+          {mode === "bars" && (
+            <>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label>Width: {width}</Label>
+                  <Slider
+                    value={[width]}
+                    onValueChange={([v]) => setWidth(v)}
+                    min={4}
+                    max={60}
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch checked={labels} onCheckedChange={setLabels} />
+                  <Label>Show labels</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch checked={values} onCheckedChange={setValues} />
+                  <Label>Show values</Label>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <select
+                  value={labelAlign}
+                  onChange={(e) =>
+                    setLabelAlign(e.target.value as typeof labelAlign)
+                  }
+                  className={selectClass}
+                >
+                  <option value="left">Labels left</option>
+                  <option value="right">Labels right</option>
+                </select>
+                <Input
+                  value={min}
+                  onChange={(e) => setMin(e.target.value)}
+                  type="number"
+                  placeholder="Auto min"
+                  className="border-gray-400 bg-background-100"
+                />
+                <Input
+                  value={max}
+                  onChange={(e) => setMax(e.target.value)}
+                  type="number"
+                  placeholder="Auto max"
+                  className="border-gray-400 bg-background-100"
+                />
+              </div>
+            </>
+          )}
+          {mode === "columns" && (
+            <div>
+              <Label>Height: {height} rows</Label>
+              <Slider
+                value={[height]}
+                onValueChange={([v]) => setHeight(v)}
+                min={2}
+                max={20}
+              />
+            </div>
+          )}
+          {mode === "sparkline" && (
+            <div className="flex items-center gap-2">
+              <Switch checked={braille} onCheckedChange={setBraille} />
+              <Label>Braille 2× resolution</Label>
+            </div>
+          )}
+          {mode === "heatmap" && (
+            <div className="flex gap-3">
+              <select
+                value={palette}
+                onChange={(e) => setPalette(e.target.value)}
+                className={selectClass}
+              >
+                <option value="grayscale">Grayscale</option>
+                <option value="ocean">Ocean ANSI</option>
+                <option value="fire">Fire ANSI</option>
+              </select>
+              <select
+                value={cell}
+                onChange={(e) => setCell(e.target.value)}
+                className={selectClass}
+              >
+                <option value="█">Full block</option>
+                <option value="  ">Two spaces</option>
+              </select>
+            </div>
+          )}
+          {mode !== "heatmap" && (
+            <div className="flex items-center gap-3">
+              <Label>Colour mode</Label>
+              <select
+                value={color}
+                onChange={(e) => setColor(e.target.value as typeof color)}
+                className={selectClass}
+              >
+                <option value="none">None</option>
+                <option value="256">ANSI 256 by value</option>
+              </select>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      <div className="mb-5 overflow-hidden rounded-md border border-gray-400 bg-background-200">
+        <TerminalControls terminalRef={terminalRef} noWrap />
+        <div ref={terminalRef} className="ansi-terminal overflow-x-auto p-5">
+          <pre className="m-0 font-mono">
+            <Ansi value={output.ansi} />
+          </pre>
+        </div>
+        <div className="flex gap-2 border-t border-gray-400 p-3">
+          <Button
+            onClick={() => copy(output.text, "Plain chart copied!")}
+            variant="outline"
+          >
+            Copy plain text
+          </Button>
+          <Button
+            onClick={() => copy(output.ansi, "ANSI chart copied!")}
+            className="bg-gray-1000 text-background-200"
+          >
+            Copy ANSI
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}

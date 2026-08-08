@@ -79,8 +79,8 @@
   },
   {
     "id": "text-plate",
-    "name": "Text Plate",
-    "note": "Hard-edged shapes and letterforms",
+    "name": "Bitmap Plate",
+    "note": "Hard-edged rings, wedge, checkers, shapes",
     "src": "samples/text-plate.png",
     "thumb": "samples/text-plate-thumb.png",
     "width": 960,

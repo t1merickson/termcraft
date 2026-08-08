@@ -1,4 +1,10 @@
-import { useState, useCallback, useRef, type DragEvent, type ChangeEvent } from "react";
+import {
+  useState,
+  useCallback,
+  useRef,
+  type DragEvent,
+  type ChangeEvent,
+} from "react";
 
 interface UploadState {
   file: File | null;
@@ -58,7 +64,9 @@ export function useImageUpload() {
           ? normalizedName
           : `${normalizedName}.png`
         : sourceName;
-      const file = new File([blob], fileName, { type: blob.type || "image/png" });
+      const file = new File([blob], fileName, {
+        type: blob.type || "image/png",
+      });
       return processFile(file);
     },
     [processFile],
