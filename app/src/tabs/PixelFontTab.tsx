@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import * as PixelFont from "@/engines/pixel-font.js";
 import { useClipboard } from "@/hooks/use-clipboard";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { BlockCanvas, type BlockCell } from "@/components/shared/BlockCanvas";
 import { Button } from "@/components/ui/button";
 import { TerminalControls } from "@/components/shared/TerminalControls";
 import { LayoutGrid, ChevronDown } from "lucide-react";
@@ -53,8 +55,18 @@ export function PixelFontTab() {
 
   const [fontIndex, setFontIndex] = useState<FontEntry[]>([]);
   const [selectedFont, setSelectedFont] = useState("");
+  // Which characters the loaded font actually has a glyph for. Several of the
+  // bundled fonts are partial — Pixel Alpha is 26 uppercase letters — and a
+  // missing glyph renders as a gap, which otherwise just looks like a space.
+  const [available, setAvailable] = useState<Set<string>>(new Set());
   const [text, setText] = useState("");
   const [dotStyle, setDotStyle] = useState("█");
+  // Half blocks pack two glyph rows into one character cell. That doubles the
+  // vertical detail and fixes the proportions: one cell per pixel comes out
+  // twice as tall as the font was drawn, because cells are twice as tall as
+  // they are wide.
+  const [halfBlocks, setHalfBlocks] = useState(true);
+  const [cells, setCells] = useState<BlockCell[][]>([]);
   const [customDot, setCustomDot] = useState("");
   const [shadowDir, setShadowDir] = useState("none");
   const [shadowIntensity, setShadowIntensity] = useState("2");
@@ -89,6 +101,7 @@ export function PixelFontTab() {
     const letters = PixelFont.getLetters();
     const meta = PixelFont.getMeta();
     const glyphKeys = Object.keys(PixelFont.getFontData());
+    setAvailable(new Set(glyphKeys));
     const charset = meta?.charset
       ? meta.charset.split("")
       : glyphKeys.sort((a: string, b: string) => a.localeCompare(b));
@@ -116,10 +129,12 @@ export function PixelFontTab() {
         direction: shadowDir,
         intensity: parseInt(shadowIntensity, 10),
       },
+      resolution: halfBlocks ? "half" : "full",
     });
     setOutputHtml(`<code>${result.html}</code>`);
     setCurrentAnsi(result.ansi);
-  }, [text, shadowDir, shadowIntensity]);
+    setCells(result.cells || []);
+  }, [text, shadowDir, shadowIntensity, halfBlocks]);
 
   // Re-render when settings change
   useEffect(() => {
@@ -176,6 +191,20 @@ export function PixelFontTab() {
     }
   };
 
+  // A character counts as covered if the font has it in either case, the way
+  // the renderer looks it up.
+  const missing = Array.from(
+    new Set(
+      Array.from(text).filter(
+        (ch) =>
+          ch !== " " &&
+          !available.has(ch) &&
+          !available.has(ch.toUpperCase()) &&
+          !available.has(ch.toLowerCase()),
+      ),
+    ),
+  );
+
   return (
     <div className="mx-auto max-w-[900px]">
       {/* Font Preview Toggle */}
@@ -209,6 +238,15 @@ export function PixelFontTab() {
             maxLength={50}
             className="h-10 border-gray-400 bg-background-100 text-base text-gray-1000 placeholder:text-gray-600 focus:border-blue-700 focus:shadow-focus-ring"
           />
+          {missing.length > 0 && (
+            <p className="text-xs text-gray-600">
+              This font has no glyph for{" "}
+              <span className="font-mono text-gray-900">
+                {missing.join(" ")}
+              </span>
+              . Those render as a gap.
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -233,13 +271,32 @@ export function PixelFontTab() {
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-sm text-gray-1000">Dot Style</label>
+            <label className="text-sm text-gray-1000">Resolution</label>
+            <div className="flex h-10 items-center gap-2.5">
+              <Switch checked={halfBlocks} onCheckedChange={setHalfBlocks} />
+              <span className="text-sm text-gray-900">
+                {halfBlocks
+                  ? "Half blocks — 2\u00d7 detail, true proportions"
+                  : "One cell per pixel"}
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="text-sm text-gray-1000">
+              Dot Style
+              {halfBlocks && (
+                <span className="ml-1.5 text-xs text-gray-600">
+                  (one cell per pixel only)
+                </span>
+              )}
+            </label>
             <div className="flex items-center gap-2.5">
               <div className="relative flex-1">
                 <select
                   value={dotStyle}
+                  disabled={halfBlocks}
                   onChange={(e) => handleDotStyleChange(e.target.value)}
-                  className="h-10 w-full cursor-pointer appearance-none rounded-sm border border-gray-400 bg-background-100 px-3 pr-8 font-sans text-sm text-gray-1000 outline-none transition-[border-color,box-shadow] focus:border-blue-700 focus:shadow-focus-ring"
+                  className="h-10 w-full cursor-pointer appearance-none rounded-sm border border-gray-400 bg-background-100 px-3 pr-8 font-sans text-sm text-gray-1000 outline-none transition-[border-color,box-shadow] focus:border-blue-700 focus:shadow-focus-ring disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {DOT_STYLES.map((d) => (
                     <option key={d.value} value={d.value}>
@@ -338,12 +395,23 @@ export function PixelFontTab() {
               </Button>
             </div>
           </div>
-          <TerminalControls terminalRef={terminalRef} />
-          <div
-            ref={terminalRef}
-            className="ansi-terminal overflow-x-auto p-5"
-            dangerouslySetInnerHTML={{ __html: outputHtml }}
-          />
+          {halfBlocks && cells.length > 0 ? (
+            // Painted as rectangles rather than glyphs: no font draws a half
+            // block at exactly half the cell height, and the mismatch shows up
+            // as seams running through the letters.
+            <div className="overflow-x-auto p-5">
+              <BlockCanvas cells={cells} cellWidth={7} />
+            </div>
+          ) : (
+            <>
+              <TerminalControls terminalRef={terminalRef} />
+              <div
+                ref={terminalRef}
+                className="ansi-terminal overflow-x-auto p-5"
+                dangerouslySetInnerHTML={{ __html: outputHtml }}
+              />
+            </>
+          )}
         </div>
       )}
     </div>

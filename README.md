@@ -168,8 +168,8 @@ The Termcraft source is MIT — see [LICENSE](LICENSE).
 **The MIT licence does not cover the bundled fonts.** Each one is a third-party
 work under its own terms, listed in Thanks below, with the full text kept
 alongside the font in `app/public/fonts/<name>/LICENSE`. Three of them are
-CC BY-NC-ND, which restricts commercial use and derivative works, and one has
-no licence on file at all. If you fork this, read that table before you ship.
+CC BY-NC-ND, which restricts commercial use and derivative works. If you fork
+this, read that table before you ship.
 
 ## Thanks
 
@@ -185,23 +185,27 @@ formats as first-class rather than afterthoughts came straight from using it.
 
 Fifteen pixel fonts ship with the app. Real names, real authors:
 
-| Font                                                                        | By                                        | Licence         |
-| --------------------------------------------------------------------------- | ----------------------------------------- | --------------- |
-| [Geist Pixel](https://github.com/vercel/geist-font)                         | The Geist Project Authors (Vercel)        | SIL OFL 1.1     |
-| [Public-Pixel](https://santiagocrespo.itch.io/public-pixel-for-gbs)         | Santiago Crespo, from GGBotNet's original | CC0 1.0         |
-| [Micro 4x6](https://github.com/luizbills/font4x6)                           | Luiz Bills                                | Public domain   |
-| [Nitram Micro Mono 5x5](https://github.com/nitram509/nitram-micro-font)     | Martin W. Kirst                           | MIT             |
-| [Five Pixel Font](https://github.com/ChrisG0x20/five-pixel-font)            | Chris Gassib                              | Unlicense       |
-| [VGA 8x8](https://github.com/dhepper/font8x8)                               | Daniel Hepper, Marcel Sondaar, IBM        | Public domain   |
-| [Square 6x6](https://frostyfreeze.itch.io/pixel-bitmap-fonts-png-xml)       | frostyfreeze                              | CC0 1.0         |
-| [Round 6x6](https://frostyfreeze.itch.io/pixel-bitmap-fonts-png-xml)        | frostyfreeze                              | CC0 1.0         |
-| [Thick 8x8](https://frostyfreeze.itch.io/pixel-bitmap-fonts-png-xml)        | frostyfreeze                              | CC0 1.0         |
-| [Minogram 6x10](https://frostyfreeze.itch.io/pixel-bitmap-fonts-png-xml)    | frostyfreeze                              | CC0 1.0         |
-| [Elektron Pixel Font](https://fontstruct.com/fontstructions/show/70152)     | savingaurora                              | CC BY-SA 3.0    |
-| [STF_ELEKTRON AR-LCD 1](https://fontstruct.com/fontstructions/show/2037857) | Sed4tives                                 | CC BY-NC-ND 3.0 |
-| [STF_ELEKTRON AR-LCD 2](https://fontstruct.com/fontstructions/show/2219240) | Sed4tives                                 | CC BY-NC-ND 3.0 |
-| [STF_ELEKTRON AR-LCD 3](https://fontstruct.com/fontstructions/show/2104440) | Sed4tives, cloned from their LCD 1        | CC BY-NC-ND 3.0 |
-| Pixel Alpha                                                                 | **Unknown — provenance not recorded**     | **Unstated**    |
+| Font                                                                        | By                                                           | Licence         |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------ | --------------- |
+| [Geist Pixel](https://github.com/vercel/geist-font)                         | The Geist Project Authors (Vercel)                           | SIL OFL 1.1     |
+| [Public-Pixel](https://santiagocrespo.itch.io/public-pixel-for-gbs)         | Santiago Crespo, from GGBotNet's original                    | CC0 1.0         |
+| [Micro 4x6](https://github.com/luizbills/font4x6)                           | Luiz Bills                                                   | Public domain   |
+| [Nitram Micro Mono 5x5](https://github.com/nitram509/nitram-micro-font)     | Martin W. Kirst                                              | MIT             |
+| [Five Pixel Font](https://github.com/ChrisG0x20/five-pixel-font)            | Chris Gassib                                                 | Unlicense       |
+| [VGA 8x8](https://github.com/dhepper/font8x8)                               | Daniel Hepper, Marcel Sondaar, IBM                           | Public domain   |
+| [Square 6x6](https://frostyfreeze.itch.io/pixel-bitmap-fonts-png-xml)       | frostyfreeze                                                 | CC0 1.0         |
+| [Round 6x6](https://frostyfreeze.itch.io/pixel-bitmap-fonts-png-xml)        | frostyfreeze                                                 | CC0 1.0         |
+| [Thick 8x8](https://frostyfreeze.itch.io/pixel-bitmap-fonts-png-xml)        | frostyfreeze                                                 | CC0 1.0         |
+| [Minogram 6x10](https://frostyfreeze.itch.io/pixel-bitmap-fonts-png-xml)    | frostyfreeze                                                 | CC0 1.0         |
+| [Elektron Pixel Font](https://fontstruct.com/fontstructions/show/70152)     | savingaurora                                                 | CC BY-SA 3.0    |
+| [STF_ELEKTRON AR-LCD 1](https://fontstruct.com/fontstructions/show/2037857) | Sed4tives                                                    | CC BY-NC-ND 3.0 |
+| [STF_ELEKTRON AR-LCD 2](https://fontstruct.com/fontstructions/show/2219240) | Sed4tives                                                    | CC BY-NC-ND 3.0 |
+| [STF_ELEKTRON AR-LCD 3](https://fontstruct.com/fontstructions/show/2104440) | Sed4tives, cloned from their LCD 1                           | CC BY-NC-ND 3.0 |
+| Pixel Alpha                                                                 | Tim Erickson ([t1merickson](https://github.com/t1merickson)) | see below       |
+
+**Pixel Alpha** is mine. It is an alpha: 26 uppercase letters, no digits or
+punctuation, and a beta with lowercase is in progress. Anything it has no
+glyph for renders as a gap.
 
 [Geist Sans and Geist Mono](https://vercel.com/geist) by Vercel are the
 interface typefaces, and the `--ds-*` design tokens the UI is built on are

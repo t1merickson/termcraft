@@ -5,6 +5,8 @@
  * The fill character is configurable at render time.
  */
 
+import { PALETTE } from "./ansi256.js";
+
 export const DEFAULT_META = Object.freeze({
   glyphWidth: 8,
   glyphHeight: 12,
@@ -94,6 +96,117 @@ function binaryToHtml(row) {
   return out;
 }
 
+// ── Half-block output ──────────────────────────────────────────────────────
+//
+// A pixel font drawn one glyph pixel per character cell comes out twice as
+// tall as it should, because a terminal cell is about twice as tall as it is
+// wide. Packing two glyph rows into one cell with the half-block characters
+// fixes the shape and doubles the vertical detail at the same time.
+//
+// Fill and shadow have to stay distinguishable, and a half block only has two
+// regions, so the two are told apart by colour rather than by character.
+
+const HALF_FILL_ANSI = 231; // near-white
+// Roughly the ink density of the light, medium and dark shade characters the
+// full-size renderer uses for shadows.
+const HALF_SHADOW_ANSI = [null, 250, 245, 240, 231];
+
+function halfColorFor(state, intensity) {
+  if (state === "F") return HALF_FILL_ANSI;
+  if (state === "S") return HALF_SHADOW_ANSI[intensity] ?? 245;
+  return null;
+}
+
+function ansi256Hex(index) {
+  const c = PALETTE[index];
+  return `rgb(${c.r},${c.g},${c.b})`;
+}
+
+/**
+ * Turn a grid of "F" / "S" / " " cells into half-block rows.
+ *
+ * Returns { ansi, html, cells }. `cells` carries the character plus its
+ * resolved colours so the preview can paint exact rectangles instead of
+ * trusting the font to draw a half block at exactly half the cell height —
+ * Geist Mono draws it at 65%, which shows up as seams across the strokes.
+ */
+function gridToHalfBlocks(grid, intensity) {
+  const width = Math.max(0, ...grid.map((r) => r.length));
+  const ansiLines = [];
+  const htmlLines = [];
+  const cells = [];
+
+  for (let r = 0; r < grid.length; r += 2) {
+    let ansiLine = "";
+    let htmlLine = "";
+    let lastCodes = null;
+    const cellRow = [];
+
+    for (let c = 0; c < width; c++) {
+      const top = grid[r]?.[c] ?? " ";
+      const bottom = grid[r + 1]?.[c] ?? " ";
+      const topColor = halfColorFor(top, intensity);
+      const bottomColor = halfColorFor(bottom, intensity);
+
+      let char = " ";
+      let fg = null;
+      let bg = null;
+
+      if (topColor === null && bottomColor === null) {
+        char = " ";
+      } else if (topColor !== null && bottomColor === null) {
+        char = "▀";
+        fg = topColor;
+      } else if (topColor === null && bottomColor !== null) {
+        char = "▄";
+        fg = bottomColor;
+      } else if (topColor === bottomColor) {
+        char = "█";
+        fg = topColor;
+      } else {
+        char = "▀";
+        fg = topColor;
+        bg = bottomColor;
+      }
+
+      cellRow.push({
+        char,
+        fg: fg === null ? null : { ...PALETTE[fg] },
+        bg: bg === null ? null : { ...PALETTE[bg] },
+      });
+
+      const codes = [];
+      if (fg !== null) codes.push(`38;5;${fg}`);
+      if (bg !== null) codes.push(`48;5;${bg}`);
+      const key = codes.join(";");
+      if (key !== lastCodes) {
+        ansiLine += codes.length ? `\x1b[${key}m` : "\x1b[0m";
+        lastCodes = key;
+      }
+      ansiLine += char;
+
+      if (char === " ") {
+        htmlLine += " ";
+      } else {
+        const style =
+          `color:${ansi256Hex(fg)};` +
+          (bg !== null ? `background:${ansi256Hex(bg)};` : "");
+        htmlLine += `<span class="pc" style="${style}">${char}</span>`;
+      }
+    }
+
+    ansiLines.push(lastCodes ? ansiLine + "\x1b[0m" : ansiLine);
+    htmlLines.push(htmlLine);
+    cells.push(cellRow);
+  }
+
+  return {
+    ansi: ansiLines.join("\n"),
+    html: htmlLines.join("\n"),
+    cells,
+  };
+}
+
 export function renderText(text, options) {
   if (!loaded) return { ansi: "", html: "" };
 
@@ -104,6 +217,7 @@ export function renderText(text, options) {
     ? Math.max(1, Math.min(4, shadow.intensity || 2))
     : 2;
   const shadowChar = shadowChars()[shadowIntensity];
+  const half = options && options.resolution === "half";
 
   const lines = Array(fontMeta.glyphHeight).fill("");
 
@@ -174,6 +288,10 @@ export function renderText(text, options) {
       }
     }
 
+    if (half) {
+      return gridToHalfBlocks(grid, shadowIntensity);
+    }
+
     const ansiLines = [];
     const htmlLines = [];
     for (let r = 0; r < gridH; r++) {
@@ -213,6 +331,13 @@ export function renderText(text, options) {
       html: htmlLines.join("\n"),
     };
   } else {
+    if (half) {
+      const grid = lines.map((row) =>
+        Array.from(row, (bit) => (bit === "1" ? "F" : " ")),
+      );
+      return gridToHalfBlocks(grid, shadowIntensity);
+    }
+
     const ansiLines = [];
     const htmlLines = [];
     for (let i = 0; i < lines.length; i++) {
