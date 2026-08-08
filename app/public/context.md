@@ -87,7 +87,7 @@ _Big block-letter banners from real pixel fonts._
 
 Type a word, get it back as a grid of block characters. Thirteen genuine pixel fonts, each drawn on its own tiny matrix, rendered with whatever dot character you like — solid blocks, circles, diamonds, or your own.
 
-- 13 bundled pixel fonts from 4x5 up to 6x10
+- 15 bundled pixel fonts from 4x5 up to 6x10
 - Nine dot styles plus any custom character
 - Directional drop shadows with adjustable weight
 - Copy as plain text, ANSI, or a ready-to-run printf

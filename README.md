@@ -45,7 +45,7 @@ there is no server to have one on.
 | Tool               | What it does                                                                                           |
 | ------------------ | ------------------------------------------------------------------------------------------------------ |
 | **ASCII Editor**   | A paint program where every pixel is a letter. Type, brush, line, fill, eraser, undo.                  |
-| **Pixel Font**     | Big block-letter banners from 13 real pixel fonts, with nine dot styles and drop shadows.              |
+| **Pixel Font**     | Big block-letter banners from 15 real pixel fonts, with nine dot styles and drop shadows.              |
 | **Boxes & Tables** | Frames, tables and file trees in box-drawing characters, with width-aware padding that survives emoji. |
 | **Charts**         | Bar charts, sparklines and heatmaps made of text, with eighth-block sub-character precision.           |
 
@@ -97,7 +97,7 @@ check that catches a tool which compiles but breaks on mount.
 app/
   index.html            App shell
   public/               Copied verbatim into the build
-    fonts/              13 pixel fonts, each with its own licence
+    fonts/              15 pixel fonts, each with its own licence
     samples/            Built-in sample images (generated, see below)
   src/
     main.tsx            Entry point
@@ -163,12 +163,106 @@ A diff there is a real change in output — look at it before regenerating with
 
 ## Licence
 
-MIT — see [LICENSE](LICENSE).
+The Termcraft source is MIT — see [LICENSE](LICENSE).
 
-The bundled pixel fonts are third-party works under their own licences, kept
-alongside each font in `app/public/fonts/`.
+**The MIT licence does not cover the bundled fonts.** Each one is a third-party
+work under its own terms, listed in Thanks below, with the full text kept
+alongside the font in `app/public/fonts/<name>/LICENSE`. Three of them are
+CC BY-NC-ND, which restricts commercial use and derivative works, and one has
+no licence on file at all. If you fork this, read that table before you ship.
 
 ## Thanks
 
-The scope of this rebuild owes a lot to [ASCII Magic](https://www.ascii-magic.com),
-which is a lovely piece of work and worth your time.
+Termcraft is mostly other people's work rearranged. Here is who.
+
+### The reason this rebuild happened
+
+[**ASCII Magic**](https://www.ascii-magic.com) set the bar for what a browser
+ASCII toolkit could be. The idea of treating glyph ramps, dithering and export
+formats as first-class rather than afterthoughts came straight from using it.
+
+### Fonts
+
+Fifteen pixel fonts ship with the app. Real names, real authors:
+
+| Font                                                                        | By                                        | Licence         |
+| --------------------------------------------------------------------------- | ----------------------------------------- | --------------- |
+| [Geist Pixel](https://github.com/vercel/geist-font)                         | The Geist Project Authors (Vercel)        | SIL OFL 1.1     |
+| [Public-Pixel](https://santiagocrespo.itch.io/public-pixel-for-gbs)         | Santiago Crespo, from GGBotNet's original | CC0 1.0         |
+| [Micro 4x6](https://github.com/luizbills/font4x6)                           | Luiz Bills                                | Public domain   |
+| [Nitram Micro Mono 5x5](https://github.com/nitram509/nitram-micro-font)     | Martin W. Kirst                           | MIT             |
+| [Five Pixel Font](https://github.com/ChrisG0x20/five-pixel-font)            | Chris Gassib                              | Unlicense       |
+| [VGA 8x8](https://github.com/dhepper/font8x8)                               | Daniel Hepper, Marcel Sondaar, IBM        | Public domain   |
+| [Square 6x6](https://frostyfreeze.itch.io/pixel-bitmap-fonts-png-xml)       | frostyfreeze                              | CC0 1.0         |
+| [Round 6x6](https://frostyfreeze.itch.io/pixel-bitmap-fonts-png-xml)        | frostyfreeze                              | CC0 1.0         |
+| [Thick 8x8](https://frostyfreeze.itch.io/pixel-bitmap-fonts-png-xml)        | frostyfreeze                              | CC0 1.0         |
+| [Minogram 6x10](https://frostyfreeze.itch.io/pixel-bitmap-fonts-png-xml)    | frostyfreeze                              | CC0 1.0         |
+| [Elektron Pixel Font](https://fontstruct.com/fontstructions/show/70152)     | savingaurora                              | CC BY-SA 3.0    |
+| [STF_ELEKTRON AR-LCD 1](https://fontstruct.com/fontstructions/show/2037857) | Sed4tives                                 | CC BY-NC-ND 3.0 |
+| [STF_ELEKTRON AR-LCD 2](https://fontstruct.com/fontstructions/show/2219240) | Sed4tives                                 | CC BY-NC-ND 3.0 |
+| [STF_ELEKTRON AR-LCD 3](https://fontstruct.com/fontstructions/show/2104440) | Sed4tives, cloned from their LCD 1        | CC BY-NC-ND 3.0 |
+| Pixel Alpha                                                                 | **Unknown — provenance not recorded**     | **Unstated**    |
+
+[Geist Sans and Geist Mono](https://vercel.com/geist) by Vercel are the
+interface typefaces, and the `--ds-*` design tokens the UI is built on are
+Geist's.
+
+### Algorithms
+
+Nothing in `engines/` was invented here. The dithering kernels are named after
+the people who published them:
+
+- **Floyd–Steinberg** — Robert W. Floyd and Louis Steinberg, 1976
+- **Atkinson** — Bill Atkinson, for the original Macintosh
+- **Stucki** — Peter Stucki
+- **Burkes** — Daniel Burkes
+- **Sierra Lite** — Frankie Sierra
+- **Jarvis–Judice–Ninke** — J. F. Jarvis, C. N. Judice and W. H. Ninke
+- **Ordered / Bayer matrices** — Bryce E. Bayer
+- **Void-and-cluster blue noise** — the approach is Robert Ulichney's; what
+  ships here is a deterministic approximation, not his tile
+
+Elsewhere:
+
+- **Shape-aware ASCII matching** — [Alex Harri](https://alexharri.com)'s
+  six-circle approach. The `AFFECTING_EXTERNALS` table in
+  `app/src/engines/shape-vectors.js` is transcribed from his article rather
+  than re-derived, because getting it right by reasoning about the geometry
+  would have been fragile. See `docs/shape-aware-ascii-postmortem.md`.
+- **OKLab and OKLCH** — [Björn Ottosson](https://bottosson.github.io/posts/oklab/),
+  which is why the gradient tool's midpoints do not go grey.
+- **k-d trees** — Jon Bentley, 1975, used for nearest-glyph search.
+
+### Data
+
+- **Spinners** are curated from [cli-spinners](https://github.com/sindresorhus/cli-spinners)
+  by Sindre Sorhus and [unicode-animations](https://www.npmjs.com/package/unicode-animations)
+  by gunnargray-dev.
+- **Retro palettes** reproduce the colours of the Game Boy, Game Boy Pocket,
+  Commodore 64, [PICO-8](https://www.lexaloffle.com/pico-8.php), CGA and the
+  ZX Spectrum. Those palettes are the work of the people who designed that
+  hardware; the specific values here are the ones in common circulation and no
+  single authoritative source is cited.
+- **Character ramps** are the ones the ASCII art community has passed around
+  for decades. The 70-character extended ramp in particular has no origin we
+  can point to. If you know who first published it, please open an issue.
+
+### The characters themselves
+
+The Unicode Consortium, for encoding this stuff at all: Block Elements and the
+quadrants, Braille Patterns, the sextants added in Unicode 13, and the octants
+added in Unicode 16.
+
+### Libraries
+
+[React](https://react.dev), [Vite](https://vite.dev),
+[TypeScript](https://www.typescriptlang.org), [Tailwind CSS](https://tailwindcss.com),
+[Radix UI](https://www.radix-ui.com), [shadcn/ui](https://ui.shadcn.com),
+[Lucide](https://lucide.dev), [Sonner](https://sonner.emilkowal.ski),
+[opentype.js](https://opentype.js.org), [pngjs](https://github.com/pngjs/pngjs),
+[Playwright](https://playwright.dev) and [Prettier](https://prettier.io).
+
+### Corrections welcome
+
+Several attributions above are best-effort. If something here credits the
+wrong person, or misses one, open an issue and it gets fixed.

@@ -223,6 +223,9 @@ export function processImage(img, options = {}) {
   return {
     ansi: result.ansi,
     html: result.html,
+    // The per-cell character and colours, so a caller can paint the output as
+    // exact rectangles instead of relying on the font's block glyphs.
+    cells: result.cells,
     width: width,
     height:
       useHalfBlocks || useHalfFgOnly || isBinary

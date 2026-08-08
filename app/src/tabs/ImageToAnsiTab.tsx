@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { TerminalControls } from "@/components/shared/TerminalControls";
+import { BlockCanvas, type BlockCell } from "@/components/shared/BlockCanvas";
+import { isBlockGrid } from "@/engines/block-glyphs";
 import { Upload, ChevronDown } from "lucide-react";
 
 const RENDER_MODES = [
@@ -41,6 +43,10 @@ export function ImageToAnsiTab() {
   const [is1to1, setIs1to1] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [outputHtml, setOutputHtml] = useState("");
+  const [cells, setCells] = useState<BlockCell[][]>([]);
+  // "exact" paints real rectangles; "text" shows the characters themselves,
+  // which is what your terminal font will actually have to draw.
+  const [preview, setPreview] = useState<"exact" | "text">("exact");
   const [currentAnsi, setCurrentAnsi] = useState("");
 
   const getRenderMode = useCallback(() => {
@@ -61,6 +67,7 @@ export function ImageToAnsiTab() {
       });
       setCurrentAnsi(result.ansi);
       setOutputHtml(`<code>${result.html}</code>`);
+      setCells(result.cells || []);
     },
     [maxWidth, maxHeight, getRenderMode, invert, greyscale, is1to1],
   );
@@ -109,6 +116,11 @@ export function ImageToAnsiTab() {
       size={16}
     />
   );
+
+  // Only the block modes can be painted as rectangles; Binary and the
+  // character modes are genuinely text.
+  const canPaint = isBlockGrid(cells);
+  const exact = canPaint && preview === "exact";
 
   return (
     <div className="mx-auto max-w-[1400px]">
@@ -298,9 +310,29 @@ export function ImageToAnsiTab() {
         <div className="mb-5">
           <div className="overflow-hidden rounded-md border border-gray-400 bg-background-200">
             <div className="flex items-center justify-between border-b border-gray-400 bg-gray-100 px-4 py-3">
-              <h4 className="text-[13px] font-medium text-gray-900">
-                ANSI Output
-              </h4>
+              <div className="flex items-center gap-3">
+                <h4 className="text-[13px] font-medium text-gray-900">
+                  ANSI Output
+                </h4>
+                {canPaint && (
+                  <div className="flex rounded-md border border-gray-400 p-0.5">
+                    {(["exact", "text"] as const).map((mode) => (
+                      <button
+                        key={mode}
+                        type="button"
+                        onClick={() => setPreview(mode)}
+                        className={`rounded-[4px] px-2 py-0.5 text-[11px] capitalize transition-colors ${
+                          preview === mode
+                            ? "bg-gray-alpha-200 text-gray-1000"
+                            : "text-gray-900 hover:text-gray-1000"
+                        }`}
+                      >
+                        {mode}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               <div className="flex gap-2">
                 <Button
                   variant="outline"
@@ -325,12 +357,20 @@ export function ImageToAnsiTab() {
                 </Button>
               </div>
             </div>
-            <TerminalControls terminalRef={terminalRef} noWrap />
-            <div
-              ref={terminalRef}
-              className="ansi-terminal min-h-[200px] max-h-[700px] overflow-auto p-4 no-wrap"
-              dangerouslySetInnerHTML={{ __html: outputHtml }}
-            />
+            {exact ? (
+              <div className="min-h-[200px] max-h-[700px] overflow-auto p-4">
+                <BlockCanvas cells={cells} cellWidth={6} />
+              </div>
+            ) : (
+              <>
+                <TerminalControls terminalRef={terminalRef} noWrap />
+                <div
+                  ref={terminalRef}
+                  className="ansi-terminal min-h-[200px] max-h-[700px] overflow-auto p-4 no-wrap"
+                  dangerouslySetInnerHTML={{ __html: outputHtml }}
+                />
+              </>
+            )}
           </div>
         </div>
       )}

@@ -22,5 +22,16 @@ SOFTWARE.
 
 ---
 
-The bundled pixel fonts under app/public/fonts/ are third-party works, each
-under its own licence. See the LICENSE file inside each font's directory.
+The bundled pixel fonts under app/public/fonts/ are third-party works and are
+NOT covered by the MIT licence above. Each is under its own terms; the full
+text sits alongside the font in app/public/fonts/<name>/LICENSE, and the README
+lists every font with its author and licence.
+
+Note in particular:
+
+  - Three fonts (STF_ELEKTRON AR-LCD 1, 2 and 3, by Sed4tives) are
+    CC BY-NC-ND 3.0, which restricts commercial use and derivative works.
+  - One font (Pixel Alpha) has no licence on file and its provenance is
+    unrecorded.
+
+If you redistribute or build on this project, check those terms first.
