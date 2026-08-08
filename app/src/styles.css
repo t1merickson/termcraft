@@ -334,16 +334,32 @@
     @apply p-4;
   }
 
-  /* --- ANSI Terminal --- */
-  .ansi-terminal code {
+  /* --- ANSI Terminal ---
+     The preview surface for every tool that outputs characters.
+     TerminalControls writes the --preview-* variables onto the element
+     carrying .ansi-terminal (or its parent; custom properties inherit).
+
+     Match .ansi-terminal itself as well as a code/pre child: some tools put
+     the class on the scrolling container and some put it on the element that
+     holds the text. Missing one of those is what left six tools stuck on the
+     browser's default 16px type and 1.5 line height, with visible gaps
+     between rows and font controls that did nothing. */
+  .ansi-terminal,
+  .ansi-terminal code,
+  .ansi-terminal pre {
     font-family: var(--preview-font-family, var(--font-mono));
     font-size: var(--preview-font-size, 12px);
     line-height: var(--preview-line-height, 1);
     letter-spacing: var(--preview-letter-spacing, 0px);
+  }
+  .ansi-terminal code,
+  .ansi-terminal pre {
     white-space: pre;
     display: block;
+    margin: 0;
   }
-  .ansi-terminal.no-wrap code {
+  .ansi-terminal.no-wrap code,
+  .ansi-terminal.no-wrap pre {
     white-space: pre;
     overflow-x: visible;
   }

@@ -256,7 +256,7 @@ export function GradientsTab() {
       <div className="mb-5 overflow-hidden rounded-md border border-gray-400 bg-background-200">
         <TerminalControls terminalRef={terminalRef} noWrap />
         <div ref={terminalRef} className="ansi-terminal overflow-x-auto p-5">
-          <pre className="m-0 font-mono">
+          <pre>
             {mode === "ramp" ? (
               snapped.map((c, i) => (
                 <div key={i}>

@@ -231,7 +231,7 @@ export function ProgressTab() {
       <div className="mb-5 overflow-hidden rounded-md border border-gray-400 bg-background-200">
         <TerminalControls terminalRef={terminalRef} noWrap />
         <div ref={terminalRef} className="ansi-terminal overflow-x-auto p-5">
-          <pre className="m-0 space-y-3 font-mono">
+          <pre className="space-y-3">
             <div>
               <Ansi value={live.ansi} />
             </div>
