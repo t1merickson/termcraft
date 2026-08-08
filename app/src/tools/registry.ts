@@ -49,7 +49,7 @@ export interface Tool {
    * Rendered in the card preview on the landing page.
    */
   preview: string[];
-  /** True once the tool ships. Unfinished tools are hidden from the shell. */
+  /** Kept for future use. Nothing filters on it yet; every tool ships. */
   ready: boolean;
 }
 
@@ -89,7 +89,7 @@ export const TOOLS: Tool[] = [
     features: [
       "Brightness ramps and shape-aware 6D glyph matching",
       "Braille mode packs 8 dots into every cell for 4x the detail",
-      "A dozen glyph ramps: dots, lines, diagonals, crosses, diamonds, shades",
+      "24 glyph ramps: dots, lines, diagonals, crosses, diamonds, shades",
       "Plain text, 256-color, or 24-bit true color output",
     ],
     preview: [
@@ -113,7 +113,7 @@ export const TOOLS: Tool[] = [
     icon: "Image",
     tagline: "Full-color terminal images out of block characters",
     description:
-      "Block characters have a trick: one text cell can hold two, four, or six independently colored regions. Stack that with 24-bit color escape codes and a terminal renders a real image, not an impression of one.",
+      "Block characters have a trick: one cell can be split into two, four, six or eight regions. A cell only carries two colours, so the renderer sorts those regions into a foreground and a background — which is enough to render a real image, not an impression of one.",
     features: [
       "Half, quadrant, sextant, and octant blocks — up to 8 pixels per cell",
       "256-color or 24-bit true color escape codes",
@@ -141,7 +141,7 @@ export const TOOLS: Tool[] = [
     description:
       "Dithering is how a machine with almost no colors still shows you a gradient. It scatters the error from each rounded-off pixel into its neighbours, so the eye blends what the palette cannot. This is the trick behind Game Boy screens, riso prints, and every good-looking 1-bit image.",
     features: [
-      "11 algorithms: Floyd–Steinberg, Atkinson, Stucki, Burkes, Sierra, Bayer 2/4/8/16, halftone, blue noise",
+      "12 algorithms: Floyd–Steinberg, Atkinson, Stucki, Burkes, Sierra, Jarvis, Bayer 2/4/8/16, halftone, blue noise",
       "Terminal-native palettes: 1-bit, ANSI 16, ANSI 256, grayscale ramp",
       "Retro palettes: Game Boy, Commodore 64, PICO-8, CGA, riso",
       "Output as block characters, braille, or a character ramp",
