@@ -5,6 +5,9 @@ import path from "path";
 
 export default defineConfig({
   root: "app",
+  // Relative base so the build works at any URL: GitHub Pages project sites,
+  // a custom domain, or opened straight off the filesystem.
+  base: "./",
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

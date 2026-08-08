@@ -66,13 +66,13 @@ export function PixelFontTab() {
 
   // Load font index
   useEffect(() => {
-    fetch("fonts/index.json")
+    fetch(`${import.meta.env.BASE_URL}fonts/index.json`)
       .then((r) => r.json())
       .then((fonts: FontEntry[]) => {
         setFontIndex(fonts);
         if (fonts.length > 0) {
           setSelectedFont(fonts[0].id);
-          return PixelFont.loadFont(fonts[0].path);
+          return PixelFont.loadFont(`${import.meta.env.BASE_URL}${fonts[0].path}`);
         }
       })
       .then(() => {
@@ -131,7 +131,7 @@ export function PixelFontTab() {
     const font = fontIndex.find((f) => f.id === fontId);
     if (!font) return;
     try {
-      await PixelFont.loadFont(font.path);
+      await PixelFont.loadFont(`${import.meta.env.BASE_URL}${font.path}`);
       setLoaded(true);
       renderGlyphs();
       renderText();
