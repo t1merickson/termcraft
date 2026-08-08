@@ -1,15 +1,21 @@
 {
   "scripts": {
-    "start": "vite",
-    "dev": "vite",
     "build": "vite build",
+    "dev": "vite",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "gen:context": "node scripts/generate-context.js",
+    "gen:og": "node scripts/generate-og.js",
+    "gen:samples": "node scripts/generate-samples.js",
+    "import:bmfont": "node scripts/import-bmfont-xml.js",
+    "import:otf": "node scripts/import-otf.js",
+    "import:png": "node scripts/import-png-sprite.js",
     "preview": "vite preview",
+    "start": "vite",
     "test": "node scripts/test-render.js",
     "test:update": "node scripts/test-render.js --update",
-    "gen:samples": "node scripts/generate-samples.js",
-    "import:png": "node scripts/import-png-sprite.js",
-    "import:bmfont": "node scripts/import-bmfont-xml.js",
-    "import:otf": "node scripts/import-otf.js"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "verify": "node scripts/verify-pages.js"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.18",
@@ -35,5 +41,27 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
     "typescript": "^5.9.3"
-  }
+  },
+  "name": "termcraft",
+  "version": "1.0.0",
+  "description": "Browser-based terminal art toolkit: images and video into ASCII, ANSI and braille, plus dithering, box drawing, charts, spinners, progress bars, shell prompts and the ANSI 256 palette.",
+  "license": "MIT",
+  "private": false,
+  "homepage": "https://t1merickson.github.io/termcraft/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/t1merickson/termcraft.git"
+  },
+  "keywords": [
+    "ascii-art",
+    "ansi",
+    "terminal",
+    "braille",
+    "dithering",
+    "cli",
+    "tui",
+    "ansi-256",
+    "image-to-ascii",
+    "pixel-font"
+  ]
 }

@@ -20,12 +20,12 @@ Removed all references to `CHAR_ASPECT = 2`. Result: widths became correct, but 
 
 Each render mode maps source pixels to terminal characters differently:
 
-| Mode | Pixel → Char mapping | Effect |
-|------|---------------------|--------|
-| **Half blocks** (▀▄) | 1 char = 1 pixel wide × 2 pixels tall | Pixel grid height must be 2× to fill the character grid correctly |
-| **Quadrant** (▖▗▘▝) | 1 char = 2 pixels wide × 2 pixels tall | Symmetric 2×2 packing — width and height scale equally, no correction needed |
-| **Block chars** (█) | 1 char = 1 pixel | Direct 1:1 mapping, no correction needed |
-| **Full spaces** (two spaces per pixel) | 1 pixel = 2 chars wide × 1 char tall | Pixel grid needs 2× height to compensate for the doubled width |
+| Mode                                   | Pixel → Char mapping                   | Effect                                                                       |
+| -------------------------------------- | -------------------------------------- | ---------------------------------------------------------------------------- |
+| **Half blocks** (▀▄)                   | 1 char = 1 pixel wide × 2 pixels tall  | Pixel grid height must be 2× to fill the character grid correctly            |
+| **Quadrant** (▖▗▘▝)                    | 1 char = 2 pixels wide × 2 pixels tall | Symmetric 2×2 packing — width and height scale equally, no correction needed |
+| **Block chars** (█)                    | 1 char = 1 pixel                       | Direct 1:1 mapping, no correction needed                                     |
+| **Full spaces** (two spaces per pixel) | 1 pixel = 2 chars wide × 1 char tall   | Pixel grid needs 2× height to compensate for the doubled width               |
 
 The original `CHAR_ASPECT = 2` happened to work for half-blocks (where you actually need a 2× height factor) but was wrong for block chars and quadrant (where no factor is needed). Removing it fixed block chars and quadrant but broke half-blocks and full-spaces.
 

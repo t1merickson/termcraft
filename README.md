@@ -1,115 +1,174 @@
 # Termcraft
 
-A browser-based terminal art toolkit. 7 tools for working with ANSI colors, image/video conversion, ASCII editing, and pixel fonts.
+**Everything you can make out of characters.**
 
-Built with Vite, Tailwind CSS v4, and the [Geist](https://vercel.com/geist) design system.
+A browser-based terminal art toolkit. Fourteen tools for turning pictures,
+video, numbers and colour into things a terminal can print — and for designing
+the moving parts of a command line app.
 
-## Tools
+**[Open it →](https://t1merickson.github.io/termcraft/)**
 
-### Color Wheel
+Everything runs in your browser. Nothing uploads, there is no account, and
+there is no server to have one on.
 
-ANSI 16 and 256 color palettes arranged by hue angle, with grayscale strip. Click any color to copy its escape code. Hover for details.
+```
+                             @@@@@@@@@@@@@@@@@@@
+                          @@@@@@@@%@%%%%%%%%%%%%@@@
+                       @@@@@%%%%%################%%%%
+                     %@@%%%#########*************######
+                    %%%%#######*****++++++++++++****####
+                   ########*****++====--------===+++*****
+                  ######****+++==---::::....::----==++****
+                 *###*****+++==---::............::-==+++++
+                 *****++++==--::.....      ......:::-===++
+                 +++++++===--:....          =.:::---======
+                 ===+=======-----=+*#%%@@@@@%##+++++====:
+                  ==============++*#%@@@@@@@@%##**+++=-:
+                    :--======++++**###%%%%%%###**+=-:
+                        .::---==+++++*****++==-:
+                            .::::--------::..
+```
 
-### Lookup & Convert
+## The tools
 
-Find the nearest ANSI 256 color from HEX, RGB, or HSL input. Shows matched color, escape code, and Euclidean distance in RGB space.
+### Convert
 
-### Image to ANSI
+| Tool               | What it does                                                                                                                  |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| **Image to ASCII** | Photos into text, by brightness or by glyph shape. Braille mode packs 8 dots per cell for 4× the detail. A dozen glyph ramps. |
+| **Image to ANSI**  | Full-colour terminal images from block characters — half, quadrant, sextant and octant blocks, up to 8 pixels per cell.       |
+| **Dither Lab**     | 11 dithering algorithms and 15 palettes, from 1-bit and ANSI 256 to Game Boy, C64, PICO-8 and CGA.                            |
+| **Video to ASCII** | Webcam and video files converted frame by frame, in real time.                                                                |
 
-Convert images to terminal art using ANSI escape codes. Render modes: half blocks (fg+bg or fg-only), quadrant blocks, full blocks, spaces (bg-only), binary. 256-color or 24-bit true color. Configurable dimensions with preset scales, invert, and greyscale options.
+### Compose
 
-### Image to ASCII
+| Tool               | What it does                                                                                           |
+| ------------------ | ------------------------------------------------------------------------------------------------------ |
+| **ASCII Editor**   | A paint program where every pixel is a letter. Type, brush, line, fill, eraser, undo.                  |
+| **Pixel Font**     | Big block-letter banners from 13 real pixel fonts, with nine dot styles and drop shadows.              |
+| **Boxes & Tables** | Frames, tables and file trees in box-drawing characters, with width-aware padding that survives emoji. |
+| **Charts**         | Bar charts, sparklines and heatmaps made of text, with eighth-block sub-character precision.           |
 
-Convert images to ASCII art via brightness mapping or shape-aware 6D vector matching. Five character sets (standard, detailed, blocks, simple, extended). Adjustable contrast exponent and directional contrast from neighboring cells. Plain, 256-color, or 24-bit output.
+### Interface
 
-### ASCII Editor
+| Tool               | What it does                                                                   |
+| ------------------ | ------------------------------------------------------------------------------ |
+| **Spinners**       | A catalogue of loading animations playing at their real frame rates.           |
+| **Progress Bars**  | Bars and gauges with sub-character resolution, exportable for five languages.  |
+| **Prompt Builder** | Design a shell prompt and copy out working bash, zsh, fish or starship config. |
 
-Grid-based canvas for composing ASCII art. Tools: type, brush, line, fill, eraser. Quick character palette, configurable grid size, undo/redo. Export as plain text or ANSI codes.
+### Colour
 
-### Video to ASCII
+| Tool            | What it does                                                              |
+| --------------- | ------------------------------------------------------------------------- |
+| **Color Wheel** | All 256 terminal colours arranged by hue instead of by index.             |
+| **Lookup**      | The nearest terminal colour to any hex, RGB or HSL, with the error shown. |
+| **Gradients**   | Colour ramps for text, bars and blocks, blended in RGB, HSL or OKLCH.     |
 
-Real-time video and webcam to ASCII. Upload files or use webcam with camera switching. Brightness or shape-aware matching. Adjustable FPS with auto-reduce for performance.
-
-### Pixel Font
-
-Render text as block-character pixel art with 13 built-in fonts. Dot styles: full block, square, circle, diamond, rectangle, and more. Four directional shadows with adjustable intensity. Copy as ANSI or `printf` command.
-
-## Getting Started
+## Running it
 
 ```bash
 npm install
-npm run dev       # http://localhost:8000
+npm run dev
 ```
+
+Then open <http://localhost:8000>.
 
 ## Scripts
 
-```bash
-npm run build     # Production build (output: app/dist/)
-npm run preview   # Preview production build
-npm test          # 33 headless visual regression tests
-npm run test:update  # Regenerate test baselines
+| Command               | What it does                                             |
+| --------------------- | -------------------------------------------------------- |
+| `npm run dev`         | Dev server on port 8000                                  |
+| `npm run build`       | Production build into `app/dist/`                        |
+| `npm run preview`     | Serve the production build                               |
+| `npm test`            | 33 headless render tests against tracked baselines       |
+| `npm run typecheck`   | TypeScript, no emit                                      |
+| `npm run verify`      | Load every page in a headless browser and fail on errors |
+| `npm run format`      | Prettier over the repo                                   |
+| `npm run gen:samples` | Regenerate the built-in sample images                    |
+| `npm run gen:og`      | Regenerate the social preview card                       |
+
+`npm run verify` needs the dev server running in another terminal. It is the
+check that catches a tool which compiles but breaks on mount.
+
+## How it is put together
+
 ```
-
-Font import (see `app/fonts/README.md` for details):
-
-```bash
-npm run import:png     -- --input <sprite.png> --output <font.json> ...
-npm run import:bmfont  -- --xml <file.xml> --png <file.png> --output <font.json> ...
-npm run import:otf     -- --input <file.otf> --output <font.json> ...
-```
-
-## Project Structure
-
-```
-app/                        Runnable application (Vite root)
-  index.html                App shell
+app/
+  index.html            App shell
+  public/               Copied verbatim into the build
+    fonts/              13 pixel fonts, each with its own licence
+    samples/            Built-in sample images (generated, see below)
   src/
-    app.js                  Entry point, tab navigation
-    utils.js                Shared helpers (toast, clipboard, image loading)
-    styles.css              Tailwind v4 config with Geist design tokens
-    engines/                Core rendering engines
-      ansi256.js            ANSI 256 color computation and lookup
-      image-to-ansi.js      Image-to-ANSI conversion (half/quad/full/binary)
-      image-to-ascii.js     Image-to-ASCII (brightness + shape-aware)
-      shape-vectors.js      6D shape vector matching, k-d tree, cache
-      ascii-editor.js       Grid-based ASCII art editor
-      video-to-ascii.js     Real-time video-to-ASCII converter
-      pixel-font.js         Pixel font loader and renderer
-    tabs/                   Tab UI modules (one per sidebar tool)
-  fonts/                    Runtime font data (13 pixel fonts)
-    index.json              Font registry
-
-assets/                     Static assets
-  geist/                    Geist Sans + Mono woff2 fonts
-  font-sources/             Build-time font source files (PNG sprites, OTFs)
-
-scripts/                    Build and import tooling
-  test-render.js            Headless render test harness
-  import-png-sprite.js      Import font from PNG sprite sheet
-  import-bmfont-xml.js      Import font from BMFont XML + PNG
-  import-otf.js             Import font from OTF/TTF file
-  migrate-fonts-to-binary.js  One-shot glyph format migration
-
-tests/                      Test data and baselines
-  samples/                  Input images (3 PNGs)
-  expected/                 Baseline renders (33 PNGs, git-tracked)
-  output/                   Transient test output (gitignored)
-
-docs/                       Documentation and postmortems
+    main.tsx            Entry point
+    App.tsx             Landing page or workbench, chosen by the route
+    tools/
+      registry.ts       Every tool's id, name, copy and preview art
+      tabs.tsx          Tool id to component
+    landing/            Landing page, including the live hero renderer
+    engines/            The actual work: no React in here
+    tabs/               One file per tool: UI and state only
+    components/         Shared UI, shadcn/ui primitives over Geist tokens
+    hooks/  lib/        Clipboard, uploads, routing, export, recipes
+assets/
+  geist/                Geist Sans and Mono
+  font-sources/         Build-time font sources (not tracked)
+scripts/                Build, import and verification tooling
+tests/                  Sample inputs and tracked render baselines
+docs/                   Postmortems worth reading before changing renderers
 ```
 
-## ANSI 256 Color Specification
+Two rules keep it navigable:
 
-Colors 0-255 are computed from the standard:
+- **`engines/` never imports React.** Every renderer is a pure function from
+  pixels or numbers to strings, which is why they can be tested headlessly and
+  reused between the tools, the landing page and the sample generator.
+- **`registry.ts` is the only place a tool is described.** The sidebar, the
+  router, the landing page and the page headings all read from it.
 
-- **0-15** -- Standard 16 terminal colors (implementation-defined)
-- **16-231** -- 6x6x6 color cube: `16 + 36r + 6g + b` where each channel maps to `[0, 95, 135, 175, 215, 255]`
-- **232-255** -- 24 grayscale steps: `8 + 10i` for i in 0..23
+### Routing
 
-## Design System
+Hash routing (`#/`, `#/t/<tool>`), and the Vite base is relative. That means
+the built site works from a GitHub Pages project path, a custom domain, or a
+`file://` URL, with no rewrite rules anywhere.
 
-The UI uses real `--ds-*` tokens from [Geist](https://vercel.com/geist) (dark theme). Tailwind CSS v4's `@theme` maps these to utility classes like `bg-gray-alpha-100`, `text-gray-900`, `shadow-focus-ring`.
+### Sample images
 
-## License
+Everything under `app/public/samples/` is generated by
+`scripts/generate-samples.js` — a lit sphere, a Mandelbrot detail, fractal
+landscape ridges, a test chart, a checkered torus, a 1-bit bitmap plate and a
+nebula. They are procedural and seeded, so regenerating produces identical
+bytes. No stock photos, no licensing to trace.
 
-MIT
+## ANSI 256, briefly
+
+Colours 0–255 come from the standard:
+
+- **0–15** — the 16 base colours, whose exact values are up to the terminal
+- **16–231** — a 6×6×6 cube: `16 + 36r + 6g + b`, each channel drawn from
+  `[0, 95, 135, 175, 215, 255]`
+- **232–255** — 24 greys: `8 + 10i`
+
+## Contributing
+
+Issues and pull requests are welcome. Before opening one:
+
+```bash
+npm run typecheck && npm test && npm run format:check
+```
+
+If you touch a renderer, `npm test` compares against tracked baseline images.
+A diff there is a real change in output — look at it before regenerating with
+`npm run test:update`.
+
+## Licence
+
+MIT — see [LICENSE](LICENSE).
+
+The bundled pixel fonts are third-party works under their own licences, kept
+alongside each font in `app/public/fonts/`.
+
+## Thanks
+
+The scope of this rebuild owes a lot to [ASCII Magic](https://www.ascii-magic.com),
+which is a lovely piece of work and worth your time.

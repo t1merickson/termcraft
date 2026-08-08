@@ -12,7 +12,7 @@ Total: 4 new files (`shape-vectors.js`, `ascii-editor.js`, `video-to-ascii.js`, 
 
 The core insight from Alex Harri's article, and the motivation for this work: traditional ASCII renderers treat each cell as a single pixel. No matter how many samples you take within a cell, averaging them into one brightness value and picking one character from a luminance ramp throws away all spatial information. A cell containing a diagonal edge and a cell containing uniform gray at the same average brightness produce the same character. The output reads as texture, not structure.
 
-The shape-aware approach fixes this structurally. Six sampling circles (arranged in a 2-column by 3-row staggered grid) measure *where* brightness concentrates within the cell, not just *how much*. A cell with brightness concentrated in the top-left produces a different 6D vector than one with brightness concentrated in the bottom-right, even if the total luminance is identical. The character `\` naturally matches one; `/` matches the other.
+The shape-aware approach fixes this structurally. Six sampling circles (arranged in a 2-column by 3-row staggered grid) measure _where_ brightness concentrates within the cell, not just _how much_. A cell with brightness concentrated in the top-left produces a different 6D vector than one with brightness concentrated in the bottom-right, even if the total luminance is identical. The character `\` naturally matches one; `/` matches the other.
 
 This is why the SDF alternative (Shape B in the planning doc) was appealing but unnecessary. Signed distance fields solve outline matching — a harder problem than what's actually needed. The circle sampling already captures spatial structure at a fraction of the cost.
 
@@ -32,7 +32,7 @@ The result: along a color boundary, you get smooth character progressions rather
 
 Raw circle coverage values cluster toward the low end of their range because most ASCII characters leave most of their cell blank. Only a few dense characters like `@`, `#`, `█` have high coverage across all circles. Without normalization, Euclidean distance calculations are dominated by these dense characters — everything else is clustered near the origin in vector space.
 
-The global contrast enhancement formula (normalize to max component = 1, raise to power, denormalize) is doing two things at once: it enhances contrast between components within a single vector *and* it spreads the character vectors across the full 6D space so that distance calculations produce meaningful distinctions. We implemented this exactly as described in the article — normalize each component by dividing by the maximum, raise to the user-controlled exponent (1.0–4.0), then multiply back by the original maximum.
+The global contrast enhancement formula (normalize to max component = 1, raise to power, denormalize) is doing two things at once: it enhances contrast between components within a single vector _and_ it spreads the character vectors across the full 6D space so that distance calculations produce meaningful distinctions. We implemented this exactly as described in the article — normalize each component by dividing by the maximum, raise to the user-controlled exponent (1.0–4.0), then multiply back by the original maximum.
 
 A useful emergent property: cells with roughly uniform brightness have shape vectors where all 6 components are similar. Raising similar values to a power doesn't change their relative ordering, so contrast enhancement aggressively sharpens edges while leaving smooth areas alone. No special-case logic needed.
 
@@ -50,7 +50,7 @@ Brute force (95 distance calculations per cell) is technically fine for still im
 
 Measured performance: 80×40 shape-aware at 25ms warm, 100ms at 160×80. The 200ms budget had 2–4x headroom. This headroom is what made the video tab feasible without reaching for WebGPU.
 
-**Lesson:** Build the cache before you need it. We added the k-d tree and quantized cache in Slice 3, before starting the video tab in Slice 5. If we'd built the video tab first and *then* discovered it was too slow, we'd have been debugging performance under pressure instead of just plugging in an already-tested optimization.
+**Lesson:** Build the cache before you need it. We added the k-d tree and quantized cache in Slice 3, before starting the video tab in Slice 5. If we'd built the video tab first and _then_ discovered it was too slow, we'd have been debugging performance under pressure instead of just plugging in an already-tested optimization.
 
 ## WebGPU: Spike It, Don't Build It
 
