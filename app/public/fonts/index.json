@@ -73,23 +73,5 @@
     "name": "Elektron 4x5",
     "type": "pixel",
     "path": "fonts/elektron-pixel-font-4x5/font.json"
-  },
-  {
-    "id": "stf-elektron-ar-lcd-1-6x6",
-    "name": "Elektron LCD 1",
-    "type": "pixel",
-    "path": "fonts/stf-elektron-ar-lcd-1-6x6/font.json"
-  },
-  {
-    "id": "stf-elektron-ar-lcd-2-5x8",
-    "name": "Elektron LCD 2",
-    "type": "pixel",
-    "path": "fonts/stf-elektron-ar-lcd-2-5x8/font.json"
-  },
-  {
-    "id": "stf-elektron-ar-lcd-3-6x6",
-    "name": "Elektron LCD 3",
-    "type": "pixel",
-    "path": "fonts/stf-elektron-ar-lcd-3-6x6/font.json"
   }
 ]

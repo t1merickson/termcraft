@@ -27,9 +27,6 @@ NOT covered by the MIT licence above. Each is under its own terms; the full
 text sits alongside the font in app/public/fonts/<name>/LICENSE, and the README
 lists every font with its author and licence.
 
-Note in particular:
-
-  - Three fonts (STF_ELEKTRON AR-LCD 1, 2 and 3, by Sed4tives) are
-    CC BY-NC-ND 3.0, which restricts commercial use and derivative works.
-
-If you redistribute or build on this project, check those terms first.
+All of them permit redistribution. One, the Elektron Pixel Font by
+savingaurora, is CC BY-SA 3.0: you may redistribute and adapt it, but any
+adaptation carries the same share-alike terms.

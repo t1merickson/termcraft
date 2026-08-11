@@ -93,9 +93,11 @@ the gap.
 ## Adding a font
 
 1. **Check the licence first.** Prefer OFL, MIT, Apache-2.0, CC0 or public
-   domain. Termcraft already carries three CC BY-NC-ND fonts, which restrict
-   commercial use and derivative works and are a nuisance for anyone forking
-   the project. Do not add more.
+   domain. Anything NonCommercial or NoDerivatives is out: the import step
+   converts the original into a new bitmap format, which is a derivative work,
+   and the project is MIT so downstream users may well be commercial. Three
+   CC BY-NC-ND fonts were removed for exactly this reason. Share-alike is
+   workable but passes an obligation to anyone who forks, so prefer without.
 2. Import it with whichever script matches your source, below.
 3. Write `app/public/fonts/<id>/LICENSE` with the real author, the licence and
    a URL. This is not optional; it is the only record of where the font came

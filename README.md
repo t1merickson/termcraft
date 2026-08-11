@@ -45,7 +45,7 @@ there is no server to have one on.
 | Tool               | What it does                                                                                           |
 | ------------------ | ------------------------------------------------------------------------------------------------------ |
 | **ASCII Editor**   | A paint program where every pixel is a letter. Type, brush, line, fill, eraser, undo.                  |
-| **Pixel Font**     | Big block-letter banners from 15 real pixel fonts, with nine dot styles and drop shadows.              |
+| **Pixel Font**     | Big block-letter banners from 12 real pixel fonts, with nine dot styles and drop shadows.              |
 | **Boxes & Tables** | Frames, tables and file trees in box-drawing characters, with width-aware padding that survives emoji. |
 | **Charts**         | Bar charts, sparklines and heatmaps made of text, with eighth-block sub-character precision.           |
 
@@ -97,7 +97,7 @@ check that catches a tool which compiles but breaks on mount.
 app/
   index.html            App shell
   public/               Copied verbatim into the build
-    fonts/              15 pixel fonts, each with its own licence
+    fonts/              12 pixel fonts, each with its own licence
     samples/            Built-in sample images (generated, see below)
   src/
     main.tsx            Entry point
@@ -183,9 +183,9 @@ The Termcraft source is MIT — see [LICENSE](LICENSE).
 
 **The MIT licence does not cover the bundled fonts.** Each one is a third-party
 work under its own terms, listed in Thanks below, with the full text kept
-alongside the font in `app/public/fonts/<name>/LICENSE`. Three of them are
-CC BY-NC-ND, which restricts commercial use and derivative works. If you fork
-this, read that table before you ship.
+alongside the font in `app/public/fonts/<name>/LICENSE`. All of them permit
+redistribution. One, the Elektron Pixel Font, is CC BY-SA, so anything derived
+from it carries the same share-alike obligation.
 
 ## Thanks
 
@@ -199,25 +199,22 @@ formats as first-class rather than afterthoughts came straight from using it.
 
 ### Fonts
 
-Fifteen pixel fonts ship with the app. Real names, real authors:
+Twelve pixel fonts ship with the app. Real names, real authors:
 
-| Font                                                                        | By                                                           | Licence         |
-| --------------------------------------------------------------------------- | ------------------------------------------------------------ | --------------- |
-| [Geist Pixel](https://github.com/vercel/geist-font)                         | The Geist Project Authors (Vercel)                           | SIL OFL 1.1     |
-| [Public-Pixel](https://santiagocrespo.itch.io/public-pixel-for-gbs)         | Santiago Crespo, from GGBotNet's original                    | CC0 1.0         |
-| [Micro 4x6](https://github.com/luizbills/font4x6)                           | Luiz Bills                                                   | Public domain   |
-| [Nitram Micro Mono 5x5](https://github.com/nitram509/nitram-micro-font)     | Martin W. Kirst                                              | MIT             |
-| [Five Pixel Font](https://github.com/ChrisG0x20/five-pixel-font)            | Chris Gassib                                                 | Unlicense       |
-| [VGA 8x8](https://github.com/dhepper/font8x8)                               | Daniel Hepper, Marcel Sondaar, IBM                           | Public domain   |
-| [Square 6x6](https://frostyfreeze.itch.io/pixel-bitmap-fonts-png-xml)       | frostyfreeze                                                 | CC0 1.0         |
-| [Round 6x6](https://frostyfreeze.itch.io/pixel-bitmap-fonts-png-xml)        | frostyfreeze                                                 | CC0 1.0         |
-| [Thick 8x8](https://frostyfreeze.itch.io/pixel-bitmap-fonts-png-xml)        | frostyfreeze                                                 | CC0 1.0         |
-| [Minogram 6x10](https://frostyfreeze.itch.io/pixel-bitmap-fonts-png-xml)    | frostyfreeze                                                 | CC0 1.0         |
-| [Elektron Pixel Font](https://fontstruct.com/fontstructions/show/70152)     | savingaurora                                                 | CC BY-SA 3.0    |
-| [STF_ELEKTRON AR-LCD 1](https://fontstruct.com/fontstructions/show/2037857) | Sed4tives                                                    | CC BY-NC-ND 3.0 |
-| [STF_ELEKTRON AR-LCD 2](https://fontstruct.com/fontstructions/show/2219240) | Sed4tives                                                    | CC BY-NC-ND 3.0 |
-| [STF_ELEKTRON AR-LCD 3](https://fontstruct.com/fontstructions/show/2104440) | Sed4tives, cloned from their LCD 1                           | CC BY-NC-ND 3.0 |
-| Pixel Alpha                                                                 | Tim Erickson ([t1merickson](https://github.com/t1merickson)) | see below       |
+| Font                                                                     | By                                                           | Licence       |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------ | ------------- |
+| [Geist Pixel](https://github.com/vercel/geist-font)                      | The Geist Project Authors (Vercel)                           | SIL OFL 1.1   |
+| [Public-Pixel](https://santiagocrespo.itch.io/public-pixel-for-gbs)      | Santiago Crespo, from GGBotNet's original                    | CC0 1.0       |
+| [Micro 4x6](https://github.com/luizbills/font4x6)                        | Luiz Bills                                                   | Public domain |
+| [Nitram Micro Mono 5x5](https://github.com/nitram509/nitram-micro-font)  | Martin W. Kirst                                              | MIT           |
+| [Five Pixel Font](https://github.com/ChrisG0x20/five-pixel-font)         | Chris Gassib                                                 | Unlicense     |
+| [VGA 8x8](https://github.com/dhepper/font8x8)                            | Daniel Hepper, Marcel Sondaar, IBM                           | Public domain |
+| [Square 6x6](https://frostyfreeze.itch.io/pixel-bitmap-fonts-png-xml)    | frostyfreeze                                                 | CC0 1.0       |
+| [Round 6x6](https://frostyfreeze.itch.io/pixel-bitmap-fonts-png-xml)     | frostyfreeze                                                 | CC0 1.0       |
+| [Thick 8x8](https://frostyfreeze.itch.io/pixel-bitmap-fonts-png-xml)     | frostyfreeze                                                 | CC0 1.0       |
+| [Minogram 6x10](https://frostyfreeze.itch.io/pixel-bitmap-fonts-png-xml) | frostyfreeze                                                 | CC0 1.0       |
+| [Elektron Pixel Font](https://fontstruct.com/fontstructions/show/70152)  | savingaurora                                                 | CC BY-SA 3.0  |
+| Pixel Alpha                                                              | Tim Erickson ([t1merickson](https://github.com/t1merickson)) | see below     |
 
 **Pixel Alpha** is mine. It is an alpha: 26 uppercase letters, no digits or
 punctuation, and a beta with lowercase is in progress. Anything it has no
