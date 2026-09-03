@@ -13,3 +13,6 @@ tests/output/
 # The worktrees used during development symlink node_modules; a trailing
 # slash in the pattern above does not match a symlink.
 node_modules
+
+# Session state, local by default
+.checkpoints/
